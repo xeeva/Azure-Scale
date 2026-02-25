@@ -44510,6 +44510,20 @@ body {
 <!-- Licensing Matrix -->
 <section class="section" id="licensing">
     <h2>Licensing &amp; Pricing Matrix</h2>
+
+    <div class="section-intro">
+        <p>Azure's complexity extends beyond technical configuration into <strong>commercial optimisation</strong>. Many services offer multiple pricing levers, each with its own commitment terms, discount structures, and eligibility rules. Choosing incorrectly &mdash; or simply failing to choose &mdash; can mean overspending by 30&ndash;72% on the same workload.</p>
+        <p>The matrix below maps 30 providers to five commercial models that an Azure practitioner must evaluate:</p>
+        <ul>
+            <li><strong>Reserved Instances (RI)</strong> &mdash; 1-year or 3-year capacity commitments for a specific SKU and region, offering up to 72% savings. Requires accurate capacity forecasting; incorrect reservations are exchangeable but not always refundable.</li>
+            <li><strong>Azure Hybrid Benefit (AHUB)</strong> &mdash; bring existing Windows Server or SQL Server licenses (with Software Assurance) to Azure, eliminating the OS/SQL licence cost component. Requires licence inventory tracking and compliance management.</li>
+            <li><strong>Savings Plans</strong> &mdash; flexible compute commitments (1-year or 3-year) at a fixed hourly spend that applies across VM families, regions, and services. Less specific than RIs but broader coverage; requires spend forecasting.</li>
+            <li><strong>Spot Pricing</strong> &mdash; deeply discounted (up to 90%) access to unused Azure capacity, with the caveat that VMs can be evicted with 30 seconds' notice. Requires fault-tolerant architecture and eviction handling.</li>
+            <li><strong>Dev/Test Pricing</strong> &mdash; reduced rates for non-production workloads under Visual Studio subscriptions or Enterprise Dev/Test offers. Requires subscription-level segregation and governance to prevent production workloads running at dev/test rates.</li>
+        </ul>
+        <p>Each of these models interacts differently with each service and must be evaluated independently. A provider marked with multiple options requires a <strong>layered optimisation strategy</strong> &mdash; for example, Compute workloads may combine Reserved Instances for baseline, Savings Plans for flexible growth, Spot for batch processing, AHUB for Windows licensing, and Dev/Test for non-production environments, all simultaneously within the same subscription.</p>
+    </div>
+
     <div class="table-scroll">
     <table class="data-table matrix-table">
         <thead>
@@ -44524,7 +44538,8 @@ body {
 
 <!-- Footer -->
 <footer class="footer">
-    <p>Generated on 2026-02-25 20:45 UTC | Mode: full | Data sources: Azure CLI, Azure REST API, Azure OpenAPI specs (GitHub)</p>
+    <p><a href="graph.html" style="color:var(--neon-cyan);text-decoration:none;text-shadow:0 0 8px rgba(34,211,238,0.3)">View Resource Relationship Graph &rarr;</a></p>
+    <p>Generated on 2026-02-25 21:26 UTC | Mode: full | Data sources: Azure CLI, Azure REST API, Azure OpenAPI specs (GitHub)</p>
     <p>Azure Complexity Measurement Tool &mdash; quantifying the knowledge burden of Azure administration</p>
 </footer>
 
