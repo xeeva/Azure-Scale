@@ -457,7 +457,7 @@ let activeRegions = new Set();
 const allRegions = [...new Set(nodes.flatMap(n => n.regions))].sort();
 allRegions.forEach(r => activeRegions.add(r));
 
-function isNodeVisible(n) {
+function isNodeActive(n) {
     if (!activeCategories.has(n.category)) return false;
     if (activeRegions.size === allRegions.length) return true; // all selected = no filter
     return n.regions.some(r => activeRegions.has(r));
@@ -532,7 +532,7 @@ function updateRegionCount() {
 }
 
 function updateVisibility() {
-    nodes.forEach(n => { n.visible = isNodeVisible(n); });
+    nodes.forEach(n => { n.active = isNodeActive(n); });
     updateCatCount();
     updateRegionCount();
 }
@@ -554,7 +554,7 @@ document.getElementById('regions-none').addEventListener('click', () => {
 
 buildCategoryFilters();
 buildRegionFilters();
-nodes.forEach(n => { n.visible = true; });
+nodes.forEach(n => { n.active = true; });
 
 // ============================================================
 // GRAPH ENGINE
@@ -603,16 +603,15 @@ const edgeData = edges.map(([src, tgt, strength]) => ({
     strength
 }));
 
-// Physics
+// Physics — all nodes always simulated (never hidden)
 function simulate() {
     if (frozen) return;
     const centerX = W / 2, centerY = H / 2;
     const damping = 0.88, dt = 0.6;
-    const visNodes = nodes.filter(n => n.visible);
 
-    for (let i = 0; i < visNodes.length; i++) {
-        for (let j = i + 1; j < visNodes.length; j++) {
-            const a = visNodes[i], b = visNodes[j];
+    for (let i = 0; i < nodes.length; i++) {
+        for (let j = i + 1; j < nodes.length; j++) {
+            const a = nodes[i], b = nodes[j];
             let dx = b.x - a.x, dy = b.y - a.y;
             let dist = Math.sqrt(dx * dx + dy * dy) || 1;
             const force = 32000 / (dist * dist);
@@ -623,7 +622,6 @@ function simulate() {
     }
 
     edgeData.forEach(e => {
-        if (!e.source.visible || !e.target.visible) return;
         const dx = e.target.x - e.source.x, dy = e.target.y - e.source.y;
         const dist = Math.sqrt(dx * dx + dy * dy) || 1;
         const idealDist = 200 + (1 - e.strength) * 120;
@@ -633,7 +631,7 @@ function simulate() {
         e.target.vx -= fx * dt; e.target.vy -= fy * dt;
     });
 
-    visNodes.forEach(n => {
+    nodes.forEach(n => {
         if (n === dragging) return;
         n.vx += (centerX - n.x) * 0.0004 * dt;
         n.vy += (centerY - n.y) * 0.0004 * dt;
@@ -642,18 +640,25 @@ function simulate() {
     });
 }
 
-// Drawing
+// Drawing — all nodes always rendered, inactive ones dimmed
 function draw() {
     ctx.clearRect(0, 0, W, H);
     ctx.save();
     ctx.translate(panX, panY);
     ctx.scale(zoom, zoom);
 
+    const anyFilter = nodes.some(n => !n.active);
+
     // Edges
     edgeData.forEach(e => {
-        if (!e.source.visible || !e.target.visible) return;
+        const bothActive = e.source.active && e.target.active;
         const isHovered = hovering && (e.source === hovering || e.target === hovering);
-        const alpha = isHovered ? 0.6 : (hovering ? 0.05 : 0.12 + e.strength * 0.2);
+        const filterDim = anyFilter && !bothActive;
+        let alpha;
+        if (isHovered) alpha = 0.6;
+        else if (hovering) alpha = 0.05;
+        else if (filterDim) alpha = 0.04;
+        else alpha = 0.12 + e.strength * 0.2;
         const width = 1 + e.strength * 2.5;
         ctx.beginPath();
         ctx.moveTo(e.source.x, e.source.y);
@@ -667,18 +672,26 @@ function draw() {
         }
     });
 
-    // Nodes
-    nodes.forEach(n => {
-        if (!n.visible) return;
+    // Nodes — draw inactive first (behind), then active on top
+    const sortedNodes = [...nodes].sort((a, b) => (a.active ? 1 : 0) - (b.active ? 1 : 0));
+
+    sortedNodes.forEach(n => {
         const cat = CATEGORIES[n.category];
         const isHovered = n === hovering;
         const isConnected = hovering && edgeData.some(e =>
             (e.source === hovering && e.target === n) || (e.target === hovering && e.source === n)
         );
-        const dimmed = hovering && !isHovered && !isConnected;
+        const hoverDimmed = hovering && !isHovered && !isConnected;
+        const filterInactive = anyFilter && !n.active;
 
-        // Glow
-        if (isHovered) {
+        // Determine overall opacity for node
+        let nodeOpacity;
+        if (filterInactive) nodeOpacity = 0.12;
+        else if (hoverDimmed) nodeOpacity = 0.18;
+        else nodeOpacity = 1;
+
+        // Glow for hovered active nodes
+        if (isHovered && !filterInactive) {
             ctx.save();
             ctx.shadowColor = cat.glow; ctx.shadowBlur = 35;
             ctx.beginPath(); ctx.arc(n.x, n.y, n.radius + 4, 0, Math.PI * 2);
@@ -686,60 +699,78 @@ function draw() {
             ctx.restore();
         }
 
-        // Circle
+        // Circle fill
         const grad = ctx.createRadialGradient(
             n.x - n.radius * 0.3, n.y - n.radius * 0.3, n.radius * 0.1,
             n.x, n.y, n.radius
         );
-        const ba = dimmed ? 0.15 : 1;
-        grad.addColorStop(0, adjustAlpha(lighten(cat.color, 40), ba));
-        grad.addColorStop(1, adjustAlpha(cat.color, ba * 0.7));
+        grad.addColorStop(0, adjustAlpha(lighten(cat.color, 40), nodeOpacity));
+        grad.addColorStop(1, adjustAlpha(cat.color, nodeOpacity * 0.7));
         ctx.beginPath(); ctx.arc(n.x, n.y, n.radius, 0, Math.PI * 2);
         ctx.fillStyle = grad; ctx.fill();
-        ctx.strokeStyle = adjustAlpha(isHovered ? '#ffffff' : cat.color, dimmed ? 0.08 : 0.5);
-        ctx.lineWidth = isHovered ? 2.5 : 1.5; ctx.stroke();
 
-        // Label — clipped to circle
+        // Border
+        ctx.strokeStyle = adjustAlpha(
+            isHovered && !filterInactive ? '#ffffff' : cat.color,
+            filterInactive ? 0.06 : (hoverDimmed ? 0.1 : 0.5)
+        );
+        ctx.lineWidth = isHovered && !filterInactive ? 2.5 : 1.5;
+        ctx.stroke();
+
+        // Label — clipped to circle, with dark backing for readability
         ctx.save();
         ctx.beginPath(); ctx.arc(n.x, n.y, n.radius - 3, 0, Math.PI * 2); ctx.clip();
 
-        const fillAlpha = dimmed ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.95)';
-        ctx.fillStyle = fillAlpha;
         ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        if (isHovered) { ctx.shadowColor = 'rgba(255,255,255,0.4)'; ctx.shadowBlur = 6; }
 
-        // Split label by explicit \n or auto-wrap
+        // Split label lines
         const lines = n.label.split('\n');
-        // Find max font size that fits
         let fontSize = Math.max(9, Math.min(14, n.radius * 0.38));
-        ctx.font = `600 ${fontSize}px 'Segoe UI', sans-serif`;
 
-        // Check each line fits within the chord at its y position
-        const lineHeight = fontSize * 1.2;
-        const totalHeight = lines.length * lineHeight;
-        const startY = n.y - (totalHeight / 2) + lineHeight / 2;
-
-        // Shrink font until all lines fit
-        for (let attempt = 0; attempt < 8; attempt++) {
-            ctx.font = `600 ${fontSize}px 'Segoe UI', sans-serif`;
-            let allFit = true;
+        // Shrink font until all lines fit within circle chords
+        const calcFit = (fs) => {
+            ctx.font = `700 ${fs}px 'Segoe UI', sans-serif`;
+            const lh = fs * 1.25;
+            const th = lines.length * lh;
+            const sy = -(th / 2) + lh / 2;
             for (let li = 0; li < lines.length; li++) {
-                const ly = startY + li * lineHeight - n.y; // offset from center
-                const chordHalf = Math.sqrt(Math.max(0, (n.radius - 4) * (n.radius - 4) - ly * ly));
-                if (ctx.measureText(lines[li]).width > chordHalf * 2 - 4) {
-                    allFit = false; break;
-                }
+                const ly = sy + li * lh;
+                const chordHalf = Math.sqrt(Math.max(0, (n.radius - 5) * (n.radius - 5) - ly * ly));
+                if (ctx.measureText(lines[li]).width > chordHalf * 2 - 6) return false;
             }
-            if (allFit) break;
+            return true;
+        };
+        for (let attempt = 0; attempt < 10; attempt++) {
+            if (calcFit(fontSize)) break;
             fontSize -= 0.5;
         }
-        ctx.font = `600 ${fontSize}px 'Segoe UI', sans-serif`;
+        ctx.font = `700 ${fontSize}px 'Segoe UI', sans-serif`;
 
-        const lh2 = fontSize * 1.2;
-        const th2 = lines.length * lh2;
-        const sy2 = n.y - (th2 / 2) + lh2 / 2;
+        const lh = fontSize * 1.25;
+        const th = lines.length * lh;
+        const sy = n.y - (th / 2) + lh / 2;
+
+        // Text opacity
+        const textAlpha = filterInactive ? 0.1 : (hoverDimmed ? 0.12 : 1);
+
+        // Dark stroke behind text for contrast (always, not just on hover)
+        if (textAlpha > 0.15) {
+            ctx.strokeStyle = `rgba(0,0,0,${textAlpha * 0.9})`;
+            ctx.lineWidth = 3;
+            ctx.lineJoin = 'round';
+            lines.forEach((line, li) => {
+                ctx.strokeText(line, n.x, sy + li * lh);
+            });
+        }
+
+        // White text fill
+        ctx.fillStyle = `rgba(255,255,255,${textAlpha})`;
+        if (isHovered && !filterInactive) {
+            ctx.shadowColor = 'rgba(255,255,255,0.5)';
+            ctx.shadowBlur = 8;
+        }
         lines.forEach((line, li) => {
-            ctx.fillText(line, n.x, sy2 + li * lh2);
+            ctx.fillText(line, n.x, sy + li * lh);
         });
 
         ctx.shadowBlur = 0;
