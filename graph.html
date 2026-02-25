@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Azure Resource Relationship Graph</title>
+<style>
+:root {
+    --bg-primary: #0a0e1a;
+    --bg-card: #1a2035;
+    --border: #1e2d4a;
+    --text: #e2e8f0;
+    --text-muted: #8892a8;
+    --text-bright: #f1f5f9;
+    --neon-cyan: #22d3ee;
+    --neon-blue: #60a5fa;
+    --neon-purple: #a78bfa;
+    --neon-pink: #f472b6;
+    --neon-green: #34d399;
+    --neon-orange: #fb923c;
+    --azure-blue: #3b9eff;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text);
+    overflow: hidden;
+    height: 100vh;
+}
+
+.header {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 10;
+    background: rgba(10, 14, 26, 0.9);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header h1 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--neon-blue);
+    text-shadow: 0 0 15px rgba(96,165,250,0.3);
+}
+
+.header .subtitle {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    margin-top: 0.15rem;
+}
+
+.header-right {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.btn {
+    background: rgba(59,158,255,0.12);
+    border: 1px solid rgba(59,158,255,0.3);
+    color: var(--neon-cyan);
+    padding: 0.35rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s;
+}
+.btn:hover {
+    background: rgba(59,158,255,0.25);
+    box-shadow: 0 0 12px rgba(34,211,238,0.2);
+}
+
+.back-link {
+    color: var(--azure-blue);
+    text-decoration: none;
+    font-size: 0.82rem;
+    transition: color 0.2s, text-shadow 0.2s;
+}
+.back-link:hover {
+    color: var(--neon-cyan);
+    text-shadow: 0 0 8px rgba(34,211,238,0.3);
+}
+
+canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    cursor: grab;
+}
+canvas:active { cursor: grabbing; }
+
+/* Tooltip */
+.tooltip {
+    position: fixed;
+    display: none;
+    background: rgba(26, 32, 53, 0.95);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    font-size: 0.82rem;
+    max-width: 320px;
+    pointer-events: none;
+    z-index: 20;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.4), 0 0 20px rgba(59,158,255,0.08);
+}
+.tooltip h3 {
+    color: var(--neon-cyan);
+    font-size: 0.9rem;
+    margin-bottom: 0.35rem;
+    text-shadow: 0 0 8px rgba(34,211,238,0.3);
+}
+.tooltip .tt-type {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    margin-bottom: 0.5rem;
+}
+.tooltip .tt-stat {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.15rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.tooltip .tt-stat:last-child { border-bottom: none; }
+.tooltip .tt-label { color: var(--text-muted); }
+.tooltip .tt-value { color: var(--text-bright); font-weight: 600; }
+
+/* Legend */
+.legend {
+    position: fixed;
+    bottom: 1.5rem;
+    left: 1.5rem;
+    z-index: 10;
+    background: rgba(26, 32, 53, 0.9);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    font-size: 0.78rem;
+}
+.legend h4 {
+    color: var(--neon-blue);
+    margin-bottom: 0.5rem;
+    font-size: 0.82rem;
+    text-shadow: 0 0 6px rgba(96,165,250,0.2);
+}
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.3rem;
+    color: var(--text-muted);
+}
+.legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+.legend-line {
+    width: 20px;
+    height: 2px;
+    flex-shrink: 0;
+    border-radius: 1px;
+}
+
+/* Info panel */
+.info-panel {
+    position: fixed;
+    top: 5rem;
+    right: 1.5rem;
+    z-index: 10;
+    background: rgba(26, 32, 53, 0.9);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.25rem 1.5rem;
+    max-width: 300px;
+    font-size: 0.82rem;
+    line-height: 1.6;
+    color: var(--text-muted);
+}
+.info-panel h4 {
+    color: var(--neon-blue);
+    margin-bottom: 0.5rem;
+    font-size: 0.88rem;
+    text-shadow: 0 0 6px rgba(96,165,250,0.2);
+}
+.info-panel strong { color: var(--neon-cyan); }
+.info-panel p { margin-bottom: 0.5rem; }
+</style>
+</head>
+<body>
+
+<div class="header">
+    <div>
+        <h1>Azure Resource Relationship Graph</h1>
+        <div class="subtitle">Force-directed visualisation of service interdependencies</div>
+    </div>
+    <div class="header-right">
+        <button class="btn" id="btn-reset">Reset View</button>
+        <button class="btn" id="btn-freeze">Freeze</button>
+        <a href="index.html" class="back-link">&larr; Back to Report</a>
+    </div>
+</div>
+
+<canvas id="graph"></canvas>
+
+<div class="tooltip" id="tooltip"></div>
+
+<div class="legend">
+    <h4>Legend</h4>
+    <div class="legend-item"><div class="legend-dot" style="background:#3b9eff;box-shadow:0 0 6px rgba(59,158,255,0.5)"></div> Compute</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#22d3ee;box-shadow:0 0 6px rgba(34,211,238,0.5)"></div> Networking</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#a78bfa;box-shadow:0 0 6px rgba(167,139,250,0.5)"></div> Data & Storage</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#f472b6;box-shadow:0 0 6px rgba(244,114,182,0.5)"></div> Security & Identity</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#34d399;box-shadow:0 0 6px rgba(52,211,153,0.5)"></div> App Platform</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#fb923c;box-shadow:0 0 6px rgba(251,146,60,0.5)"></div> Monitoring & Mgmt</div>
+    <div style="margin-top:0.5rem;border-top:1px solid rgba(255,255,255,0.06);padding-top:0.5rem">
+        <div class="legend-item"><div class="legend-line" style="background:rgba(59,158,255,0.4)"></div> Depends on / Integrates with</div>
+        <div class="legend-item"><div class="legend-line" style="background:rgba(59,158,255,0.15)"></div> Weaker relationship</div>
+    </div>
+    <div style="margin-top:0.4rem;color:#4a5568;font-size:0.72rem">Node size = relative complexity score</div>
+</div>
+
+<div class="info-panel" id="info-panel">
+    <h4>About This Graph</h4>
+    <p>Each node represents an Azure resource provider. <strong>Lines between nodes</strong> indicate that the two services are commonly deployed together, have direct API-level integration, or one depends on the other for core functionality.</p>
+    <p><strong>Node size</strong> reflects the provider's complexity score &mdash; larger nodes have more configuration parameters, resource types, and SKU variants.</p>
+    <p><strong>Edge thickness</strong> indicates relationship strength: a thick line means a hard dependency or deep integration; a thin line means a common-but-optional pairing.</p>
+    <p>Drag nodes to rearrange. Scroll to zoom. Hover for details.</p>
+</div>
+
+<script>
+// ============================================================
+// DATA: 10 representative Azure providers with relationships
+// ============================================================
+const CATEGORIES = {
+    compute:    { color: '#3b9eff', glow: 'rgba(59,158,255,0.5)' },
+    networking: { color: '#22d3ee', glow: 'rgba(34,211,238,0.5)' },
+    data:       { color: '#a78bfa', glow: 'rgba(167,139,250,0.5)' },
+    security:   { color: '#f472b6', glow: 'rgba(244,114,182,0.5)' },
+    app:        { color: '#34d399', glow: 'rgba(52,211,153,0.5)' },
+    monitoring: { color: '#fb923c', glow: 'rgba(251,146,60,0.5)' },
+};
+
+const nodes = [
+    {
+        id: 'Compute',
+        label: 'Compute',
+        category: 'compute',
+        score: 1407,
+        params: 1407,
+        resourceTypes: 38,
+        skus: 4635,
+        operations: 418,
+        products: 18,
+        desc: 'Virtual Machines, Scale Sets, Managed Disks, Galleries, Dedicated Hosts'
+    },
+    {
+        id: 'Network',
+        label: 'Network',
+        category: 'networking',
+        score: 8549,
+        params: 8549,
+        resourceTypes: 172,
+        skus: 90,
+        operations: 1437,
+        products: 50,
+        desc: 'VNets, NSGs, Load Balancers, Firewalls, VPN Gateways, DNS, Front Door'
+    },
+    {
+        id: 'Storage',
+        label: 'Storage',
+        category: 'data',
+        score: 1855,
+        params: 1855,
+        resourceTypes: 36,
+        skus: 306,
+        operations: 346,
+        products: 16,
+        desc: 'Blob, Files, Queues, Tables, Data Lake Gen2, Immutable Storage'
+    },
+    {
+        id: 'KeyVault',
+        label: 'Key Vault',
+        category: 'security',
+        score: 418,
+        params: 418,
+        resourceTypes: 10,
+        skus: 0,
+        operations: 155,
+        products: 11,
+        desc: 'Keys, Secrets, Certificates, Managed HSM, Access Policies'
+    },
+    {
+        id: 'SQL',
+        label: 'SQL',
+        category: 'data',
+        score: 3477,
+        params: 3477,
+        resourceTypes: 58,
+        skus: 1185,
+        operations: 678,
+        products: 21,
+        desc: 'SQL Database, Elastic Pools, Managed Instance, Hyperscale, Failover Groups'
+    },
+    {
+        id: 'ContainerService',
+        label: 'Kubernetes Service (AKS)',
+        category: 'compute',
+        score: 867,
+        params: 867,
+        resourceTypes: 16,
+        skus: 0,
+        operations: 88,
+        products: 14,
+        desc: 'AKS Clusters, Node Pools, Fleet Manager, Extensions, Workload Identity'
+    },
+    {
+        id: 'Web',
+        label: 'Web',
+        category: 'app',
+        score: 5914,
+        params: 2746,
+        resourceTypes: 78,
+        skus: 24,
+        operations: 666,
+        products: 12,
+        desc: 'App Service, Functions, Static Web Apps, App Service Environments'
+    },
+    {
+        id: 'Insights',
+        label: 'Azure Monitor',
+        category: 'monitoring',
+        score: 1070,
+        params: 1070,
+        resourceTypes: 30,
+        skus: 0,
+        operations: 265,
+        products: 16,
+        desc: 'Metrics, Alerts, App Insights, Autoscale, Diagnostic Settings, Workbooks'
+    },
+    {
+        id: 'Security',
+        label: 'Defender for Cloud',
+        category: 'security',
+        score: 621,
+        params: 621,
+        resourceTypes: 55,
+        skus: 0,
+        operations: 396,
+        products: 24,
+        desc: 'Defender Plans, Secure Score, Compliance, JIT Access, DevOps Security'
+    },
+    {
+        id: 'Authorization',
+        label: 'Authorization',
+        category: 'security',
+        score: 273,
+        params: 273,
+        resourceTypes: 50,
+        skus: 0,
+        operations: 138,
+        products: 14,
+        desc: 'RBAC, Azure Policy, Locks, PIM, Access Reviews, Conditions'
+    },
+];
+
+// Relationships: [source, target, strength 0-1]
+// strength 1 = hard dependency, 0.3 = common pairing
+const edges = [
+    // Compute depends heavily on Network and Storage
+    ['Compute', 'Network', 1.0],
+    ['Compute', 'Storage', 0.8],
+    ['Compute', 'KeyVault', 0.6],
+    ['Compute', 'Insights', 0.7],
+    ['Compute', 'Security', 0.5],
+    ['Compute', 'Authorization', 0.4],
+
+    // AKS depends on Network, integrates with KeyVault, Monitor
+    ['ContainerService', 'Network', 0.9],
+    ['ContainerService', 'Compute', 0.7],
+    ['ContainerService', 'Insights', 0.6],
+    ['ContainerService', 'KeyVault', 0.5],
+    ['ContainerService', 'Storage', 0.4],
+    ['ContainerService', 'Authorization', 0.4],
+
+    // Web/App Service integrates broadly
+    ['Web', 'Network', 0.7],
+    ['Web', 'Storage', 0.5],
+    ['Web', 'KeyVault', 0.6],
+    ['Web', 'Insights', 0.8],
+    ['Web', 'SQL', 0.7],
+    ['Web', 'Security', 0.4],
+
+    // SQL integrates with security, networking, monitoring
+    ['SQL', 'Network', 0.6],
+    ['SQL', 'KeyVault', 0.7],
+    ['SQL', 'Insights', 0.5],
+    ['SQL', 'Security', 0.5],
+    ['SQL', 'Storage', 0.4],
+
+    // Storage has broad integration
+    ['Storage', 'Network', 0.6],
+    ['Storage', 'KeyVault', 0.7],
+    ['Storage', 'Insights', 0.5],
+
+    // KeyVault is used by almost everything
+    ['KeyVault', 'Insights', 0.4],
+    ['KeyVault', 'Authorization', 0.5],
+
+    // Security/Defender monitors everything
+    ['Security', 'Insights', 0.6],
+    ['Security', 'Authorization', 0.7],
+    ['Security', 'Network', 0.5],
+
+    // Authorization underpins everything
+    ['Authorization', 'Insights', 0.4],
+
+    // Network + Monitor
+    ['Network', 'Insights', 0.6],
+];
+
+// ============================================================
+// FORCE-DIRECTED GRAPH ENGINE
+// ============================================================
+const canvas = document.getElementById('graph');
+const ctx = canvas.getContext('2d');
+const tooltip = document.getElementById('tooltip');
+
+let W, H, dpr;
+let frozen = false;
+let dragging = null;
+let hovering = null;
+let panX = 0, panY = 0, zoom = 1;
+let lastMouse = { x: 0, y: 0 };
+let isPanning = false;
+
+function resize() {
+    dpr = window.devicePixelRatio || 1;
+    W = window.innerWidth;
+    H = window.innerHeight;
+    canvas.width = W * dpr;
+    canvas.height = H * dpr;
+    canvas.style.width = W + 'px';
+    canvas.style.height = H + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+window.addEventListener('resize', resize);
+resize();
+
+// Initialize node positions in a circle
+const maxScore = Math.max(...nodes.map(n => n.score));
+nodes.forEach((n, i) => {
+    const angle = (i / nodes.length) * Math.PI * 2 - Math.PI / 2;
+    const r = Math.min(W, H) * 0.25;
+    n.x = W / 2 + Math.cos(angle) * r;
+    n.y = H / 2 + Math.sin(angle) * r;
+    n.vx = 0;
+    n.vy = 0;
+    n.radius = 18 + (n.score / maxScore) * 32;
+});
+
+// Build edge index
+const edgeData = edges.map(([src, tgt, strength]) => ({
+    source: nodes.find(n => n.id === src),
+    target: nodes.find(n => n.id === tgt),
+    strength: strength
+}));
+
+// Physics simulation
+function simulate() {
+    if (frozen) return;
+
+    const centerX = W / 2;
+    const centerY = H / 2;
+    const damping = 0.88;
+    const dt = 0.6;
+
+    // Repulsion between all nodes
+    for (let i = 0; i < nodes.length; i++) {
+        for (let j = i + 1; j < nodes.length; j++) {
+            const a = nodes[i], b = nodes[j];
+            let dx = b.x - a.x;
+            let dy = b.y - a.y;
+            let dist = Math.sqrt(dx * dx + dy * dy) || 1;
+            const force = 28000 / (dist * dist);
+            const fx = (dx / dist) * force;
+            const fy = (dy / dist) * force;
+            a.vx -= fx * dt;
+            a.vy -= fy * dt;
+            b.vx += fx * dt;
+            b.vy += fy * dt;
+        }
+    }
+
+    // Attraction along edges
+    edgeData.forEach(e => {
+        const dx = e.target.x - e.source.x;
+        const dy = e.target.y - e.source.y;
+        const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+        const idealDist = 180 + (1 - e.strength) * 120;
+        const force = (dist - idealDist) * 0.006 * e.strength;
+        const fx = (dx / dist) * force;
+        const fy = (dy / dist) * force;
+        e.source.vx += fx * dt;
+        e.source.vy += fy * dt;
+        e.target.vx -= fx * dt;
+        e.target.vy -= fy * dt;
+    });
+
+    // Gravity toward center
+    nodes.forEach(n => {
+        if (n === dragging) return;
+        n.vx += (centerX - n.x) * 0.0003 * dt;
+        n.vy += (centerY - n.y) * 0.0003 * dt;
+        n.vx *= damping;
+        n.vy *= damping;
+        n.x += n.vx;
+        n.y += n.vy;
+    });
+}
+
+// Rendering
+function draw() {
+    ctx.save();
+    ctx.clearRect(0, 0, W, H);
+
+    // Background grid
+    ctx.save();
+    ctx.translate(panX, panY);
+    ctx.scale(zoom, zoom);
+
+    // Draw edges
+    edgeData.forEach(e => {
+        const isHovered = hovering && (e.source === hovering || e.target === hovering);
+        const alpha = isHovered ? 0.6 : (hovering ? 0.06 : 0.15 + e.strength * 0.2);
+        const width = 1 + e.strength * 2.5;
+
+        ctx.beginPath();
+        ctx.moveTo(e.source.x, e.source.y);
+        ctx.lineTo(e.target.x, e.target.y);
+        ctx.strokeStyle = isHovered
+            ? `rgba(80,230,255,${alpha})`
+            : `rgba(59,158,255,${alpha})`;
+        ctx.lineWidth = isHovered ? width + 1 : width;
+        ctx.stroke();
+
+        if (isHovered) {
+            ctx.shadowColor = 'rgba(80,230,255,0.3)';
+            ctx.shadowBlur = 8;
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+        }
+    });
+
+    // Draw nodes
+    nodes.forEach(n => {
+        const cat = CATEGORIES[n.category];
+        const isHovered = n === hovering;
+        const isConnected = hovering && edgeData.some(e =>
+            (e.source === hovering && e.target === n) ||
+            (e.target === hovering && e.source === n)
+        );
+        const dimmed = hovering && !isHovered && !isConnected;
+
+        // Outer glow
+        if (isHovered) {
+            ctx.save();
+            ctx.shadowColor = cat.glow;
+            ctx.shadowBlur = 30;
+            ctx.beginPath();
+            ctx.arc(n.x, n.y, n.radius + 4, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(0,0,0,0)';
+            ctx.fill();
+            ctx.restore();
+        }
+
+        // Node circle
+        const gradient = ctx.createRadialGradient(
+            n.x - n.radius * 0.3, n.y - n.radius * 0.3, n.radius * 0.1,
+            n.x, n.y, n.radius
+        );
+        const baseAlpha = dimmed ? 0.15 : 1;
+        gradient.addColorStop(0, adjustAlpha(lighten(cat.color, 30), baseAlpha));
+        gradient.addColorStop(1, adjustAlpha(cat.color, baseAlpha * 0.8));
+
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, n.radius, 0, Math.PI * 2);
+        ctx.fillStyle = gradient;
+        ctx.fill();
+
+        // Border
+        ctx.strokeStyle = adjustAlpha(isHovered ? '#fff' : cat.color, dimmed ? 0.1 : 0.6);
+        ctx.lineWidth = isHovered ? 2.5 : 1.5;
+        ctx.stroke();
+
+        // Label
+        const fontSize = Math.max(10, Math.min(13, n.radius * 0.42));
+        ctx.font = `600 ${fontSize}px 'Segoe UI', sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = dimmed ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.95)';
+        if (isHovered) {
+            ctx.shadowColor = 'rgba(255,255,255,0.3)';
+            ctx.shadowBlur = 6;
+        }
+
+        // Word wrap for long labels
+        const words = n.label.split(' ');
+        if (words.length > 1 && ctx.measureText(n.label).width > n.radius * 1.6) {
+            const mid = Math.ceil(words.length / 2);
+            const line1 = words.slice(0, mid).join(' ');
+            const line2 = words.slice(mid).join(' ');
+            ctx.fillText(line1, n.x, n.y - fontSize * 0.45);
+            ctx.fillText(line2, n.x, n.y + fontSize * 0.55);
+        } else {
+            ctx.fillText(n.label, n.x, n.y);
+        }
+        ctx.shadowBlur = 0;
+    });
+
+    ctx.restore();
+    ctx.restore();
+}
+
+function adjustAlpha(hex, alpha) {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return `rgba(${r},${g},${b},${alpha})`;
+}
+
+function lighten(hex, pct) {
+    let r = parseInt(hex.slice(1, 3), 16);
+    let g = parseInt(hex.slice(3, 5), 16);
+    let b = parseInt(hex.slice(5, 7), 16);
+    r = Math.min(255, r + pct);
+    g = Math.min(255, g + pct);
+    b = Math.min(255, b + pct);
+    return `#${r.toString(16).padStart(2,'0')}${g.toString(16).padStart(2,'0')}${b.toString(16).padStart(2,'0')}`;
+}
+
+// ============================================================
+// INTERACTION
+// ============================================================
+function screenToWorld(sx, sy) {
+    return {
+        x: (sx - panX) / zoom,
+        y: (sy - panY) / zoom
+    };
+}
+
+function nodeAt(sx, sy) {
+    const { x, y } = screenToWorld(sx, sy);
+    for (let i = nodes.length - 1; i >= 0; i--) {
+        const n = nodes[i];
+        const dx = n.x - x, dy = n.y - y;
+        if (dx * dx + dy * dy < n.radius * n.radius) return n;
+    }
+    return null;
+}
+
+canvas.addEventListener('mousedown', e => {
+    const n = nodeAt(e.clientX, e.clientY);
+    if (n) {
+        dragging = n;
+        canvas.style.cursor = 'grabbing';
+    } else {
+        isPanning = true;
+        lastMouse = { x: e.clientX, y: e.clientY };
+        canvas.style.cursor = 'grabbing';
+    }
+});
+
+canvas.addEventListener('mousemove', e => {
+    if (dragging) {
+        const { x, y } = screenToWorld(e.clientX, e.clientY);
+        dragging.x = x;
+        dragging.y = y;
+        dragging.vx = 0;
+        dragging.vy = 0;
+    } else if (isPanning) {
+        panX += e.clientX - lastMouse.x;
+        panY += e.clientY - lastMouse.y;
+        lastMouse = { x: e.clientX, y: e.clientY };
+    } else {
+        const n = nodeAt(e.clientX, e.clientY);
+        hovering = n;
+        canvas.style.cursor = n ? 'pointer' : 'grab';
+
+        if (n) {
+            const connections = edgeData
+                .filter(ed => ed.source === n || ed.target === n)
+                .map(ed => {
+                    const other = ed.source === n ? ed.target : ed.source;
+                    return other.label;
+                });
+
+            tooltip.style.display = 'block';
+            tooltip.style.left = (e.clientX + 16) + 'px';
+            tooltip.style.top = (e.clientY - 10) + 'px';
+            tooltip.innerHTML = `
+                <h3>${n.label}</h3>
+                <div class="tt-type">${n.desc}</div>
+                <div class="tt-stat"><span class="tt-label">Config Parameters</span><span class="tt-value">${n.params.toLocaleString()}</span></div>
+                <div class="tt-stat"><span class="tt-label">Resource Types</span><span class="tt-value">${n.resourceTypes}</span></div>
+                <div class="tt-stat"><span class="tt-label">SKU Variants</span><span class="tt-value">${n.skus.toLocaleString()}</span></div>
+                <div class="tt-stat"><span class="tt-label">API Operations</span><span class="tt-value">${n.operations}</span></div>
+                <div class="tt-stat"><span class="tt-label">Products</span><span class="tt-value">${n.products}</span></div>
+                <div class="tt-stat"><span class="tt-label">Connections</span><span class="tt-value">${connections.length} (${connections.join(', ')})</span></div>
+            `;
+
+            // Keep tooltip in viewport
+            const rect = tooltip.getBoundingClientRect();
+            if (rect.right > W) tooltip.style.left = (e.clientX - rect.width - 16) + 'px';
+            if (rect.bottom > H) tooltip.style.top = (e.clientY - rect.height - 10) + 'px';
+        } else {
+            tooltip.style.display = 'none';
+        }
+    }
+});
+
+canvas.addEventListener('mouseup', () => {
+    dragging = null;
+    isPanning = false;
+    canvas.style.cursor = 'grab';
+});
+
+canvas.addEventListener('mouseleave', () => {
+    dragging = null;
+    isPanning = false;
+    hovering = null;
+    tooltip.style.display = 'none';
+});
+
+canvas.addEventListener('wheel', e => {
+    e.preventDefault();
+    const zoomFactor = e.deltaY > 0 ? 0.92 : 1.08;
+    const wx = (e.clientX - panX) / zoom;
+    const wy = (e.clientY - panY) / zoom;
+    zoom *= zoomFactor;
+    zoom = Math.max(0.2, Math.min(5, zoom));
+    panX = e.clientX - wx * zoom;
+    panY = e.clientY - wy * zoom;
+}, { passive: false });
+
+// Buttons
+document.getElementById('btn-reset').addEventListener('click', () => {
+    panX = 0; panY = 0; zoom = 1;
+    nodes.forEach((n, i) => {
+        const angle = (i / nodes.length) * Math.PI * 2 - Math.PI / 2;
+        const r = Math.min(W, H) * 0.25;
+        n.x = W / 2 + Math.cos(angle) * r;
+        n.y = H / 2 + Math.sin(angle) * r;
+        n.vx = 0; n.vy = 0;
+    });
+    frozen = false;
+    document.getElementById('btn-freeze').textContent = 'Freeze';
+});
+
+document.getElementById('btn-freeze').addEventListener('click', () => {
+    frozen = !frozen;
+    document.getElementById('btn-freeze').textContent = frozen ? 'Unfreeze' : 'Freeze';
+});
+
+// Animation loop
+function loop() {
+    simulate();
+    draw();
+    requestAnimationFrame(loop);
+}
+loop();
+</script>
+</body>
+</html>
