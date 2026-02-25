@@ -356,6 +356,117 @@ canvas:active { cursor: grabbing; }
     line-height: 1.4;
 }
 .tooltip .tt-regions strong { color: var(--neon-blue); }
+
+/* Right detail panel */
+.detail-panel {
+    position: fixed;
+    top: 0; right: 0; bottom: 0;
+    width: 340px;
+    background: rgba(16, 20, 35, 0.97);
+    backdrop-filter: blur(12px);
+    border-left: 1px solid var(--border);
+    z-index: 15;
+    display: flex;
+    flex-direction: column;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    overflow: hidden;
+}
+.detail-panel.open { transform: translateX(0); }
+.detail-header {
+    padding: 1rem 1.25rem 0.75rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.75rem;
+}
+.detail-title { display: flex; align-items: center; gap: 0.5rem; flex: 1; min-width: 0; }
+.detail-title h2 {
+    font-size: 1.05rem; color: var(--neon-cyan);
+    text-shadow: 0 0 12px rgba(34,211,238,0.3); word-break: break-word;
+}
+.detail-cat-badge {
+    font-size: 0.62rem; padding: 0.15rem 0.5rem; border-radius: 10px;
+    font-weight: 600; white-space: nowrap; display: inline-block; margin-top: 0.2rem;
+}
+.detail-close {
+    background: none; border: none; color: var(--text-muted); font-size: 1.5rem;
+    cursor: pointer; padding: 0; line-height: 1; transition: color 0.2s; flex-shrink: 0;
+}
+.detail-close:hover { color: var(--neon-cyan); }
+.detail-body {
+    flex: 1; overflow-y: auto; padding: 0;
+    scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+}
+.detail-body::-webkit-scrollbar { width: 5px; }
+.detail-body::-webkit-scrollbar-track { background: transparent; }
+.detail-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+.detail-desc {
+    padding: 0.75rem 1.25rem; font-size: 0.8rem;
+    color: var(--text-muted); line-height: 1.5; border-bottom: 1px solid var(--border);
+}
+.detail-section {
+    padding: 0.75rem 1.25rem; border-bottom: 1px solid var(--border);
+}
+.detail-section h3 {
+    font-size: 0.72rem; font-weight: 600; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.5rem;
+    display: flex; justify-content: space-between; align-items: center;
+}
+.detail-section h3 .ds-count {
+    color: var(--neon-cyan); font-size: 0.68rem;
+    text-shadow: 0 0 6px rgba(34,211,238,0.2);
+}
+.detail-stat-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;
+}
+.detail-stat-card {
+    background: rgba(30,42,66,0.5); border: 1px solid rgba(30,45,74,0.5);
+    border-radius: 6px; padding: 0.5rem 0.65rem;
+}
+.detail-stat-card .ds-value {
+    font-size: 1rem; font-weight: 700; color: var(--neon-cyan);
+    text-shadow: 0 0 8px rgba(34,211,238,0.2);
+}
+.detail-stat-card .ds-label {
+    font-size: 0.65rem; color: var(--text-muted); margin-top: 0.1rem;
+}
+.dli {
+    display: block; padding: 0.4rem; border-radius: 5px;
+    cursor: pointer; transition: background 0.15s; margin-bottom: 0.1rem;
+}
+.dli:hover { background: rgba(59,158,255,0.1); }
+.dli-row {
+    display: flex; align-items: center; gap: 0.5rem; font-size: 0.78rem; color: var(--text);
+}
+.dli-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.dli-name { flex: 1; min-width: 0; }
+.dli-meta { font-size: 0.68rem; color: var(--text-muted); flex-shrink: 0; }
+.dli-desc {
+    font-size: 0.67rem; color: var(--text-muted); margin-top: 0.15rem;
+    padding-left: 1.1rem; line-height: 1.35;
+}
+.strength-bar { display: flex; gap: 2px; flex-shrink: 0; }
+.strength-bar span {
+    width: 4px; height: 4px; border-radius: 50%; background: var(--border);
+}
+.strength-bar span.on {
+    background: var(--neon-cyan); box-shadow: 0 0 3px rgba(34,211,238,0.4);
+}
+.detail-regions {
+    padding: 0.75rem 1.25rem; font-size: 0.72rem;
+    color: var(--text-muted); line-height: 1.5;
+}
+.detail-regions strong { color: var(--neon-blue); }
+.detail-regions .region-tags {
+    display: flex; flex-wrap: wrap; gap: 0.25rem; margin-top: 0.35rem;
+}
+.region-tag {
+    font-size: 0.62rem; padding: 0.1rem 0.4rem; border-radius: 3px;
+    background: rgba(30,42,66,0.6); border: 1px solid rgba(30,45,74,0.4);
+    color: var(--text-muted);
+}
 </style>
 </head>
 <body>
@@ -413,6 +524,14 @@ canvas:active { cursor: grabbing; }
 
 <canvas id="graph"></canvas>
 <div class="tooltip" id="tooltip"></div>
+
+<div class="detail-panel" id="detail-panel">
+    <div class="detail-header">
+        <div class="detail-title"><h2 id="detail-name"></h2></div>
+        <button class="detail-close" id="detail-close">&times;</button>
+    </div>
+    <div class="detail-body" id="detail-body"></div>
+</div>
 
 <script>
 // ============================================================
@@ -704,6 +823,205 @@ const SUB_DEFS = [
     ['auth-eligible','Eligible\nAssignments','Authorization'],
 ];
 
+// Sub-node descriptions for detail panel
+const SUB_DESCS = {
+    'compute-vms':'700+ SKU sizes across general purpose, compute-optimized, memory-optimized, storage, GPU, HPC, and confidential VM families.',
+    'compute-vmss':'Uniform and flexible mode scale sets with autoscale, rolling upgrades, and fault domain management.',
+    'compute-disks':'Ultra, Premium SSD v2, Premium SSD, Standard SSD, Standard HDD tiers with bursting and shared disk support.',
+    'compute-des':'Platform-managed, customer-managed, and double encryption with confidential encryption support.',
+    'compute-snapshots':'Incremental and full snapshots with cross-region copy and trusted launch support.',
+    'compute-drp':'Crash-consistent and application-consistent disk restore points for disaster recovery.',
+    'compute-images':'Generalized and specialized managed images created from VHDs for VM deployment.',
+    'compute-gallery':'Shared image galleries with image definitions, versions, community and direct shared galleries.',
+    'compute-vmapps':'VM application definitions and versions for custom script and software delivery.',
+    'compute-avsets':'Fault domain and update domain grouping for high availability within a datacenter.',
+    'compute-ppg':'Low-latency co-location of VMs within the same datacenter proximity zone.',
+    'compute-capacity':'Guaranteed compute capacity reservations per SKU for planned workload deployments.',
+    'compute-hosts':'Single-tenant physical servers providing hardware isolation for compliance and licensing.',
+    'compute-sshkeys':'Centrally managed SSH public keys for Linux VM authentication.',
+    'compute-extensions':'Custom Script, DSC, diagnostics, monitoring agents, disk encryption, and more.',
+    'compute-cloudsvcs':'Classic PaaS web and worker roles (extended support) for legacy cloud service workloads.',
+    'compute-rpc':'VM-level crash-consistent and application-consistent restore point collections.',
+    'compute-diskaccess':'Private endpoint access to managed disks bypassing public network exposure.',
+    'network-vnet':'Virtual networks with subnets, peering, service endpoints, and VNet integration.',
+    'network-nsg':'Inbound and outbound security rules with application security group bindings.',
+    'network-asg':'Logical grouping of VM NICs for simplified NSG rule management.',
+    'network-lb':'Basic, Standard, and Gateway SKUs with frontend IPs, backend pools, health probes.',
+    'network-appgw':'Layer 7 load balancer with URL path routing, SSL termination, and autoscale.',
+    'network-waf':'OWASP/CRS rule sets, custom rules, bot protection for App Gateway and Front Door.',
+    'network-firewall':'Network rules, application rules, NAT rules, threat intelligence, IDPS, TLS inspection.',
+    'network-fwpolicy':'Rule collection groups and collections with IP group associations for firewall management.',
+    'network-bastion':'Secure RDP/SSH access without public IPs via Basic, Standard, and Developer SKUs.',
+    'network-ddos':'Standard and IP protection plans with automatic attack mitigation and telemetry.',
+    'network-natgw':'Outbound SNAT with configurable idle timeout and public IP association.',
+    'network-pip':'Basic and Standard SKUs with static/dynamic allocation for IPv4 and IPv6.',
+    'network-pipprefix':'Contiguous public IP ranges with bring-your-own-IP (BYOIP) support.',
+    'network-customip':'Bring your own IP address ranges to Azure for use with public resources.',
+    'network-nic':'IP configurations with accelerated networking and IP forwarding support.',
+    'network-rt':'User-defined routes with BGP route propagation and custom next hop types.',
+    'network-routefilter':'BGP community filtering for controlling ExpressRoute route advertisements.',
+    'network-vpngw':'Site-to-site, point-to-site, VNet-to-VNet with IKEv2, OpenVPN, SSTP protocols.',
+    'network-lng':'On-premises VPN device endpoint definition with BGP settings and address spaces.',
+    'network-er':'Private and Microsoft peering with Standard/Premium tiers, metered/unlimited billing.',
+    'network-ergw':'Standard, High Performance, Ultra Performance gateway SKUs with FastPath support.',
+    'network-erport':'ExpressRoute Direct connections at 10 Gbps and 100 Gbps port speeds.',
+    'network-vwan':'Hub-and-spoke topology with any-to-any connectivity across branch, VNet, and users.',
+    'network-vwanvpn':'Site-to-site VPN connections within the Virtual WAN hub infrastructure.',
+    'network-p2svpn':'Point-to-site VPN gateway within Virtual WAN for remote user connectivity.',
+    'network-vpnsite':'Branch office connectivity definitions for Virtual WAN site-to-site tunnels.',
+    'network-vhub':'Virtual WAN routing, route tables, and security partner provider integration.',
+    'network-dns':'Public DNS hosting for A, AAAA, CNAME, MX, NS, SRV, TXT, and other record types.',
+    'network-privdns':'Private name resolution within VNets with auto-registration and virtual network links.',
+    'network-dnsresolver':'Inbound and outbound endpoints with conditional forwarding rule sets.',
+    'network-dnspolicy':'DNS security rules and virtual network link policies for resolver governance.',
+    'network-tm':'DNS-based global load balancing with priority, weighted, performance, geographic routing.',
+    'network-fd':'Global load balancing, CDN, WAF, SSL offload with Classic, Standard, Premium tiers.',
+    'network-pe':'Private connectivity to PaaS services and custom Private Link services over VNet.',
+    'network-pls':'Expose your own service to consumers via Private Endpoint across tenants.',
+    'network-watcher':'Network topology, packet capture, IP flow verify, next hop, VPN diagnostics.',
+    'network-connmon':'End-to-end connectivity monitoring with latency and reachability tracking.',
+    'network-flowlogs':'NSG traffic capture with traffic analytics and configurable retention policies.',
+    'network-manager':'Centralized connectivity configs and security admin rules with scope management.',
+    'network-nsp':'PaaS firewall perimeter with access rules and diagnostic logging.',
+    'network-nva':'Orchestrated network virtual appliance deployment with boot diagnostics.',
+    'network-dscp':'QoS traffic marking configuration for differentiated services code points.',
+    'network-ipgroups':'Reusable IP address collections for firewall and network rule management.',
+    'network-ipam':'IP address management pools for centralized address allocation tracking.',
+    'network-sep':'Restrict VNet service endpoint access to specific Azure resource instances.',
+    'network-tap':'Mirror network traffic from NICs for monitoring and analytics appliances.',
+    'network-vrouter':'Route server enabling BGP peering between NVAs and Azure virtual network.',
+    'network-webcats':'URL categorisation database for Azure Firewall web filtering rules.',
+    'network-verifier':'Network reachability analysis and intent verification between endpoints.',
+    'storage-accounts':'GPv2, BlobStorage, BlockBlob, FileStorage with LRS, ZRS, GRS, GZRS redundancy options.',
+    'storage-blob':'Block, append, page blobs with hot, cool, cold, archive tiers and lifecycle policies.',
+    'storage-adls':'Hierarchical namespace with POSIX ACLs and directory-level permissions for analytics.',
+    'storage-files':'SMB 3.x and NFS 4.1 shares with standard HDD/SSD and premium SSD tiers.',
+    'storage-queue':'Message queuing with 64 KB messages, 7-day retention, and visibility timeout.',
+    'storage-table':'NoSQL key-value store with OData protocol and partition/row key design.',
+    'storage-immutable':'WORM policies with legal hold, time-based retention, and version-level immutability.',
+    'storage-versioning':'Automatic version creation on blob overwrite/delete with version-level management.',
+    'storage-softdelete':'Blob, container, and file share soft delete with configurable retention periods.',
+    'storage-encryption':'Microsoft-managed or customer-managed keys per scope with infrastructure encryption.',
+    'storage-replication':'Async cross-region or cross-account blob replication with prefix filters.',
+    'storage-static':'Static website hosting with index document, error document, and CDN integration.',
+    'storage-firewall':'IP rules, VNet rules, resource instance rules, trusted Azure service exceptions.',
+    'storage-pe':'Per-service private endpoints for blob, file, queue, table, DFS, and web.',
+    'storage-sas':'Account SAS, service SAS, user delegation SAS with stored access policies.',
+    'storage-tasks':'Automated data management actions with conditions, assignments, and reporting.',
+    'keyvault-standard':'Software-protected keys, secrets, certificates with RBAC or access policy authorization.',
+    'keyvault-premium':'HSM-backed keys (FIPS 140-2 Level 2) with software-protected secrets and certs.',
+    'keyvault-mhsm':'Dedicated FIPS 140-2 Level 3 HSM with single-tenant, customer-controlled security domain.',
+    'keyvault-keys':'RSA, EC, AES keys for wrap/unwrap, sign/verify, encrypt/decrypt operations.',
+    'keyvault-secrets':'Arbitrary byte sequences up to 25 KB for connection strings, passwords, API keys.',
+    'keyvault-certs':'Self-signed or CA-issued certificates with PKCS#12/PEM format and auto-renewal.',
+    'keyvault-rotation':'Automatic key rotation with time-based triggers and pre-expiry notifications.',
+    'keyvault-access':'Vault access policies vs Azure RBAC with per-key, per-secret, per-cert permissions.',
+    'keyvault-softdelete':'90-day retention with purge protection lock and deleted object recovery.',
+    'keyvault-pe':'Private endpoint connectivity with IP rules, VNet rules, and trusted service bypass.',
+    'keyvault-backup':'Individual key/secret/certificate backup with cross-region restore for Managed HSM.',
+    'sql-db':'Provisioned DTU/vCore or serverless vCore with General Purpose, Business Critical, Hyperscale tiers.',
+    'sql-elastic':'Shared DTU or vCore resources across multiple databases in a single pool.',
+    'sql-hyperscale':'Up to 100 TB with read scale-out, named replicas, fast scale up/down, 35-day PITR.',
+    'sql-mi':'Near 100% SQL Server compatibility with VNet injection and link feature for hybrid.',
+    'sql-mipools':'Shared compute resources across multiple managed instances in a pool.',
+    'sql-jobs':'Cross-database T-SQL job scheduling via elastic job agents.',
+    'sql-failover':'Automatic/manual geo-failover with read/write and read-only listener endpoints.',
+    'sql-georep':'Active geo-replication with up to 4 readable secondary databases.',
+    'sql-ltr':'Weekly, monthly, yearly backup retention up to 10 years for compliance.',
+    'sql-pitr':'Point-in-time restore from 1-35 days with LRS/ZRS/GRS backup storage.',
+    'sql-tde':'Transparent data encryption with service-managed or customer-managed keys in Key Vault.',
+    'sql-ae':'Client-side column encryption with secure enclave support for rich queries on encrypted data.',
+    'sql-audit':'Server and database-level audit logging to Storage, Log Analytics, or Event Hub.',
+    'sql-atp':'SQL injection detection, anomalous access patterns, and brute force alert detection.',
+    'sql-va':'Security scanning with baseline management and remediation script generation.',
+    'sql-ddm':'Default, email, random, and custom string masking for sensitive columns.',
+    'sql-ledger':'Tamper-evident and append-only ledger tables with cryptographic digest management.',
+    'sql-sync':'Bi-directional data sync between SQL databases and on-premises SQL Server.',
+    'sql-dnsalias':'CNAME indirection for connection string stability during server migrations.',
+    'sql-vc':'Managed Instance infrastructure grouping for networking and management.',
+    'sql-devops':'Azure DevOps pipeline audit logging for SQL operations tracking.',
+    'aks-cluster':'Managed Kubernetes control plane with free, standard, and premium tiers.',
+    'aks-syspools':'CoreDNS, kube-proxy, metrics-server with taint-based workload segregation.',
+    'aks-userpools':'Application workloads with auto-scaling, spot instances, ARM64, GPU, confidential VMs.',
+    'aks-vnodes':'ACI burst-based serverless containers within AKS for elastic scaling.',
+    'aks-fleet':'Multi-cluster orchestration with update management and workload propagation.',
+    'aks-extensions':'Flux GitOps, Dapr, Azure ML, Key Vault CSI Driver, Azure Policy extensions.',
+    'aks-maintenance':'Planned maintenance windows for control plane and node OS updates.',
+    'aks-snapshots':'Node pool snapshots for rollback, cloning, and disaster recovery.',
+    'aks-trustedaccess':'Azure service access to AKS clusters via managed role bindings.',
+    'aks-netpolicy':'Azure NPM, Calico, Cilium with kubenet, Azure CNI, CNI Overlay plugins.',
+    'aks-workloadid':'OIDC issuer with federated credentials for pod-level managed identity.',
+    'aks-automatic':'Opinionated Kubernetes with auto node provisioning, scaling, and networking.',
+    'aks-imgclean':'Stale container image garbage collection to free node disk space.',
+    'aks-backup':'AKS backup via Velero integration with Azure Backup service.',
+    'web-apps':'Windows/Linux/container hosting for .NET, Java, Node.js, Python, PHP, Ruby apps.',
+    'web-functions':'Consumption, Flex, Premium, Dedicated plans with HTTP, Timer, Blob, Queue triggers.',
+    'web-plans':'Free, Shared, Basic, Standard, Premium v3, Isolated v2 tiers with scaling.',
+    'web-ase':'ASE v3 with internal/external load balancer, zone redundancy, dedicated isolated network.',
+    'web-slots':'Staging/canary/A-B testing with slot swaps, auto-swap, and traffic routing.',
+    'web-certs':'Standard and wildcard certificates with Key Vault integration and auto-renewal.',
+    'web-domains':'Domain registration with DNS management and privacy protection.',
+    'web-staticapps':'Global CDN with serverless API backends, GitHub/DevOps CI/CD, auth providers.',
+    'web-hybrid':'TCP relay through Azure Relay for on-premises resource access without VPN.',
+    'web-webjobs':'Continuous and triggered background tasks running within App Service.',
+    'web-managedcerts':'Free SSL certificates for custom domains with automatic provisioning.',
+    'web-vnetint':'Regional VNet integration with subnet delegation for outbound connectivity.',
+    'insights-metrics':'Platform metrics, custom metrics, and Prometheus metrics collection and querying.',
+    'insights-alerts':'Static thresholds, dynamic thresholds, multi-resource, multi-condition alert rules.',
+    'insights-actlog':'Subscription-level operations, service health, autoscale, and security events.',
+    'insights-actlogalerts':'Administrative, service health, resource health, and recommendation alert rules.',
+    'insights-sqr':'Log alerts using KQL with cross-resource queries and frequency scheduling.',
+    'insights-actiongroups':'Email, SMS, voice, webhook, ITSM, Event Hub, Logic App, Function, Runbook targets.',
+    'insights-autoscale':'Metric-based, schedule-based, and predictive autoscale with cooldown rules.',
+    'insights-diagnostic':'Platform logs and metrics routing to Log Analytics, Storage, Event Hub.',
+    'insights-appinsights':'APM with distributed tracing, dependency tracking, Live Metrics, availability tests.',
+    'insights-profiler':'Code-level performance tracing for production workload bottleneck analysis.',
+    'insights-snapshot':'Production exception debugging with automatic snapshot collection.',
+    'insights-dcr':'Data transformations, filtering, and multi-destination routing with log ingestion API.',
+    'insights-dce':'Ingestion and configuration endpoints for data collection pipeline.',
+    'insights-pls':'Private connectivity for Monitor, Log Analytics, and App Insights via AMPLS.',
+    'insights-workbooks':'Interactive data visualization with parameterized queries and cross-resource dashboards.',
+    'insights-webtests':'URL ping tests, multi-step availability tests, and standard web tests.',
+    'security-servers':'Plan 1: basic EDR. Plan 2: full MDE, vulnerability assessment, file integrity, adaptive controls.',
+    'security-appservice':'Threat detection for web apps and APIs hosted on App Service.',
+    'security-sql':'Threat detection and vulnerability assessment for SQL Database and Synapse.',
+    'security-sqlmachines':'Protection for SQL Server on VMs and Arc-enabled SQL instances.',
+    'security-opensource':'Threat detection for Azure Database for PostgreSQL, MySQL, and MariaDB.',
+    'security-storage':'Malware scanning, sensitive data threat detection, and activity monitoring.',
+    'security-containers':'Runtime protection, image scanning, Kubernetes policy, CI/CD pipeline scanning.',
+    'security-keyvault':'Anomalous access detection, secret/key enumeration, and suspicious operation alerts.',
+    'security-dns':'Domain generation algorithm detection, DNS tunneling, and malicious domain alerts.',
+    'security-arm':'Suspicious ARM operations, lateral movement, and persistence attempt detection.',
+    'security-apis':'API threat detection, anomalous usage patterns, and OWASP API risk alerts.',
+    'security-cspm':'Attack path analysis, cloud security graph, and agentless scanning posture management.',
+    'security-alerts':'Prioritized security alerts with kill chain mapping and incident grouping.',
+    'security-assessments':'Benchmark-based security posture evaluation with remediation recommendations.',
+    'security-score':'Quantified security posture score across subscriptions and resources.',
+    'security-compliance':'PCI DSS, ISO 27001, NIST 800-53, SOC 2, CIS, HIPAA, FedRAMP assessments.',
+    'security-jit':'Time-limited RDP/SSH port opening with approval workflow and NSG automation.',
+    'security-appcontrols':'Application allow-listing policy recommendations and enforcement.',
+    'security-anhr':'NSG rule tightening recommendations based on actual traffic analysis.',
+    'security-fim':'Registry, OS files, and application files change detection and alerting.',
+    'security-automation':'Trigger Logic Apps on security alerts, recommendations, or compliance changes.',
+    'security-autoprov':'Automatic agent deployment for Log Analytics, Azure Monitor, MDE, Qualys.',
+    'security-multicloud':'AWS and GCP CSPM and workload protection via cross-cloud connectors.',
+    'security-devops':'Azure DevOps, GitHub, GitLab code scanning, IaC scanning, secrets detection.',
+    'auth-rbac':'400+ built-in roles, custom role definitions, and deny assignments for access control.',
+    'auth-roleassign':'Scope hierarchy from management group to resource with conditions and principal types.',
+    'auth-customroles':'JSON-based actions, notActions, dataActions, notDataActions, and assignable scopes.',
+    'auth-policydef':'1000+ built-in policies with Audit, Deny, Modify, DeployIfNotExists effects.',
+    'auth-initiatives':'Policy sets for regulatory compliance, security baselines, and organizational standards.',
+    'auth-assignments':'Scope, exclusions, enforcement mode, managed identity, and non-compliance messages.',
+    'auth-remediation':'Resource remediation for DeployIfNotExists and Modify policies with parallel execution.',
+    'auth-exemptions':'Waiver or mitigated time-bound resource-specific policy exceptions.',
+    'auth-locks':'CanNotDelete and ReadOnly locks with scope-based inheritance and lock notes.',
+    'auth-pim':'Just-in-time role activation with approval workflows, MFA, and time-bound assignments.',
+    'auth-accessreviews':'Periodic recertification of role assignments, group membership, and app access.',
+    'auth-blueprints':'Environment templates with RBAC, policy, ARM templates (deprecated, use Bicep/templates).',
+    'auth-conditions':'Attribute-based access control with storage blob and role assignment conditions.',
+    'auth-eligible':'PIM-managed assignments requiring activation, MFA, justification, and approval chain.',
+};
+
 // ============================================================
 // DATA — PARENT-PARENT EDGES [source, target, strength]
 // ============================================================
@@ -974,18 +1292,25 @@ let W, H, dpr;
 let frozen = false;
 let dragging = null;
 let hovering = null;
+let selected = null;   // click-pinned node
+let detailOpen = false;
 let panX = 0, panY = 0, zoom = 1;
 let lastMouse = { x: 0, y: 0 };
 let isPanning = false;
+let mouseDownPos = null; // for click vs drag detection
+const CLICK_THRESHOLD = 5;
 
 function resize() {
     dpr = window.devicePixelRatio || 1;
-    W = window.innerWidth - panelWidth;
+    const detailW = detailOpen ? 340 : 0;
+    W = window.innerWidth - panelWidth - detailW;
     H = window.innerHeight;
     canvas.width = W * dpr;
     canvas.height = H * dpr;
     canvas.style.width = W + 'px';
     canvas.style.height = H + 'px';
+    canvas.style.right = detailW + 'px';
+    document.querySelector('.header').style.right = detailW + 'px';
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 }
 window.addEventListener('resize', resize);
@@ -1091,7 +1416,8 @@ function draw() {
 
     const visNodes = showSubs ? allNodes : parentNodes;
     const anyFilter = visNodes.some(n => !n.active);
-    const connSet = hovering ? hovering.connections : null;
+    const highlight = hovering || selected;
+    const connSet = highlight ? highlight.connections : null;
 
     // --- EDGES ---
     // Cross edges (behind everything)
@@ -1099,12 +1425,12 @@ function draw() {
         ctx.setLineDash([3, 3]);
         crossEdgeData.forEach(e => {
             const bothActive = e.source.active && e.target.active;
-            const isHov = hovering && (e.source === hovering || e.target === hovering);
-            const isConnHov = hovering && connSet && connSet.has(e.source) && connSet.has(e.target);
+            const isHov = highlight && (e.source === highlight || e.target === highlight);
+            const isConnHov = highlight && connSet && connSet.has(e.source) && connSet.has(e.target);
             let alpha;
             if (isHov) alpha = 0.45;
             else if (isConnHov) alpha = 0.25;
-            else if (hovering) alpha = 0.02;
+            else if (highlight) alpha = 0.02;
             else if (anyFilter && !bothActive) alpha = 0.02;
             else alpha = 0.06 + e.strength * 0.08;
             ctx.beginPath();
@@ -1121,10 +1447,10 @@ function draw() {
     if (showSubs) {
         childEdgeData.forEach(e => {
             const bothActive = e.source.active && e.target.active;
-            const isHov = hovering && (e.source === hovering || e.target === hovering);
+            const isHov = highlight && (e.source === highlight || e.target === highlight);
             let alpha;
             if (isHov) alpha = 0.4;
-            else if (hovering) alpha = 0.03;
+            else if (highlight) alpha = 0.03;
             else if (anyFilter && !bothActive) alpha = 0.02;
             else alpha = 0.12;
             const cat = CATEGORIES[e.target.category];
@@ -1140,11 +1466,11 @@ function draw() {
     // Parent-parent edges
     parentEdgeData.forEach(e => {
         const bothActive = e.source.active && e.target.active;
-        const isHov = hovering && (e.source === hovering || e.target === hovering);
+        const isHov = highlight && (e.source === highlight || e.target === highlight);
         const filterDim = anyFilter && !bothActive;
         let alpha;
         if (isHov) alpha = 0.6;
-        else if (hovering) alpha = 0.05;
+        else if (highlight) alpha = 0.05;
         else if (filterDim) alpha = 0.04;
         else alpha = 0.12 + e.strength * 0.2;
         const width = 1 + e.strength * 2.5;
@@ -1161,7 +1487,6 @@ function draw() {
     });
 
     // --- NODES ---
-    // Sort: inactive behind active, subs behind parents
     const sorted = [...visNodes].sort((a, b) => {
         const aScore = (a.active ? 2 : 0) + (a.isParent ? 1 : 0);
         const bScore = (b.active ? 2 : 0) + (b.isParent ? 1 : 0);
@@ -1170,23 +1495,36 @@ function draw() {
 
     sorted.forEach(n => {
         const cat = CATEGORIES[n.category];
-        const isHovered = n === hovering;
+        const isHighlighted = n === highlight;
         const isConnected = connSet && connSet.has(n);
-        const hoverDimmed = hovering && !isHovered && !isConnected;
+        const highlightDimmed = highlight && !isHighlighted && !isConnected;
         const filterInactive = anyFilter && !n.active;
+        const isSelected = n === selected;
 
         let nodeOpacity;
         if (filterInactive) nodeOpacity = 0.12;
-        else if (hoverDimmed) nodeOpacity = 0.15;
+        else if (highlightDimmed) nodeOpacity = 0.15;
         else nodeOpacity = 1;
 
-        // Sub-nodes slightly less prominent when not hovered
-        if (!n.isParent && !isHovered && !isConnected && nodeOpacity === 1) {
+        if (!n.isParent && !isHighlighted && !isConnected && nodeOpacity === 1) {
             nodeOpacity = 0.85;
         }
 
-        // Glow for hovered active nodes
-        if (isHovered && !filterInactive) {
+        // Selected node ring
+        if (isSelected && !filterInactive) {
+            ctx.save();
+            ctx.strokeStyle = '#22d3ee';
+            ctx.lineWidth = 2.5;
+            ctx.shadowColor = 'rgba(34,211,238,0.6)'; ctx.shadowBlur = 18;
+            ctx.setLineDash([4, 3]);
+            ctx.beginPath(); ctx.arc(n.x, n.y, n.radius + 6, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.restore();
+        }
+
+        // Glow for highlighted active nodes
+        if (isHighlighted && !filterInactive) {
             ctx.save();
             ctx.shadowColor = cat.glow; ctx.shadowBlur = n.isParent ? 35 : 20;
             ctx.beginPath(); ctx.arc(n.x, n.y, n.radius + 4, 0, Math.PI * 2);
@@ -1206,10 +1544,10 @@ function draw() {
 
         // Border
         ctx.strokeStyle = adjustAlpha(
-            isHovered && !filterInactive ? '#ffffff' : cat.color,
-            filterInactive ? 0.06 : (hoverDimmed ? 0.1 : (n.isParent ? 0.5 : 0.35))
+            isHighlighted && !filterInactive ? '#ffffff' : cat.color,
+            filterInactive ? 0.06 : (highlightDimmed ? 0.1 : (n.isParent ? 0.5 : 0.35))
         );
-        ctx.lineWidth = isHovered && !filterInactive ? 2.5 : (n.isParent ? 1.5 : 1);
+        ctx.lineWidth = isHighlighted && !filterInactive ? 2.5 : (n.isParent ? 1.5 : 1);
         ctx.stroke();
 
         // Label — clipped to circle, with dark backing
@@ -1244,7 +1582,7 @@ function draw() {
         const lh = fontSize * 1.25;
         const th = lines.length * lh;
         const sy = n.y - (th / 2) + lh / 2;
-        const textAlpha = filterInactive ? 0.1 : (hoverDimmed ? 0.12 : nodeOpacity);
+        const textAlpha = filterInactive ? 0.1 : (highlightDimmed ? 0.12 : nodeOpacity);
 
         if (textAlpha > 0.15) {
             ctx.strokeStyle = `rgba(0,0,0,${textAlpha * 0.9})`;
@@ -1256,7 +1594,7 @@ function draw() {
         }
 
         ctx.fillStyle = `rgba(255,255,255,${textAlpha})`;
-        if (isHovered && !filterInactive) {
+        if (isHighlighted && !filterInactive) {
             ctx.shadowColor = 'rgba(255,255,255,0.5)';
             ctx.shadowBlur = 8;
         }
@@ -1301,6 +1639,7 @@ function nodeAt(sx, sy) {
 }
 
 canvas.addEventListener('mousedown', e => {
+    mouseDownPos = { x: e.clientX, y: e.clientY };
     const n = nodeAt(e.clientX, e.clientY);
     if (n) { dragging = n; canvas.style.cursor = 'grabbing'; }
     else { isPanning = true; lastMouse = {x: e.clientX, y: e.clientY}; canvas.style.cursor = 'grabbing'; }
@@ -1317,41 +1656,18 @@ canvas.addEventListener('mousemove', e => {
         const n = nodeAt(e.clientX, e.clientY);
         hovering = n;
         canvas.style.cursor = n ? 'pointer' : 'grab';
+        // Tooltip on hover (brief summary)
         if (n) {
-            const conns = allEdges
-                .filter(ed => ed.source === n || ed.target === n)
-                .map(ed => {
-                    const other = ed.source === n ? ed.target : ed.source;
-                    return other.label.replace(/\n/g, ' ');
-                });
-            const regionCount = n.regions.length;
-            const hasGlobal = n.regions.includes('Global');
-            const regionSample = hasGlobal
-                ? 'Global (all regions)'
-                : n.regions.slice(0, 5).join(', ') + (regionCount > 5 ? ` +${regionCount - 5} more` : '');
-
-            let html = `<h3>${n.label.replace(/\n/g, ' ')}</h3>`;
+            const name = n.label.replace(/\n/g, ' ');
+            let html = `<h3>${name}</h3>`;
             if (n.isParent) {
-                const childCount = subNodes.filter(s => s.parentId === n.id).length;
                 html += `<div class="tt-type">${n.desc}</div>`;
-                html += `<div class="tt-stat"><span class="tt-label">Config Parameters</span><span class="tt-value">${n.params.toLocaleString()}</span></div>`;
-                html += `<div class="tt-stat"><span class="tt-label">Resource Types</span><span class="tt-value">${n.resourceTypes}</span></div>`;
-                html += `<div class="tt-stat"><span class="tt-label">SKU Variants</span><span class="tt-value">${n.skus.toLocaleString()}</span></div>`;
-                html += `<div class="tt-stat"><span class="tt-label">API Operations</span><span class="tt-value">${n.operations}</span></div>`;
-                html += `<div class="tt-stat"><span class="tt-label">Sub-Services</span><span class="tt-value">${childCount}</span></div>`;
+                html += `<div class="tt-stat"><span class="tt-label">Config Params</span><span class="tt-value">${n.params.toLocaleString()}</span></div>`;
+                html += `<div class="tt-stat"><span class="tt-label">Sub-Services</span><span class="tt-value">${subNodes.filter(s=>s.parentId===n.id).length}</span></div>`;
             } else {
-                const parent = parentMap[n.parentId];
-                html += `<div class="tt-type">Part of <strong style="color:var(--neon-blue)">${parent.label.replace(/\n/g, ' ')}</strong></div>`;
-                const crossConns = crossEdgeData
-                    .filter(ed => ed.source === n || ed.target === n)
-                    .map(ed => (ed.source === n ? ed.target : ed.source).label.replace(/\n/g, ' '));
-                if (crossConns.length > 0) {
-                    html += `<div class="tt-stat"><span class="tt-label">Related To</span><span class="tt-value">${crossConns.join(', ')}</span></div>`;
-                }
+                html += `<div class="tt-type">Part of <strong style="color:var(--neon-blue)">${parentMap[n.parentId].label.replace(/\n/g,' ')}</strong></div>`;
             }
-            html += `<div class="tt-stat"><span class="tt-label">Connections</span><span class="tt-value">${conns.length}</span></div>`;
-            html += `<div class="tt-regions"><strong>${hasGlobal ? 'Global' : regionCount + ' regions'}:</strong> ${regionSample}</div>`;
-
+            html += `<div style="font-size:0.65rem;color:var(--text-muted);margin-top:0.4rem;border-top:1px solid rgba(255,255,255,0.06);padding-top:0.35rem">Click for details</div>`;
             tooltip.style.display = 'block';
             tooltip.style.left = (e.clientX + 16) + 'px';
             tooltip.style.top = (e.clientY - 10) + 'px';
@@ -1365,8 +1681,27 @@ canvas.addEventListener('mousemove', e => {
     }
 });
 
-canvas.addEventListener('mouseup', () => { dragging = null; isPanning = false; canvas.style.cursor = 'grab'; });
-canvas.addEventListener('mouseleave', () => { dragging = null; isPanning = false; hovering = null; tooltip.style.display = 'none'; });
+canvas.addEventListener('mouseup', e => {
+    const wasDrag = mouseDownPos && (
+        Math.abs(e.clientX - mouseDownPos.x) > CLICK_THRESHOLD ||
+        Math.abs(e.clientY - mouseDownPos.y) > CLICK_THRESHOLD
+    );
+    if (!wasDrag && mouseDownPos) {
+        const n = nodeAt(e.clientX, e.clientY);
+        if (n) {
+            if (selected === n) { closeDetail(); }
+            else { openDetail(n); }
+        } else {
+            if (selected) closeDetail();
+        }
+    }
+    dragging = null; isPanning = false; mouseDownPos = null;
+    canvas.style.cursor = 'grab';
+});
+canvas.addEventListener('mouseleave', () => {
+    dragging = null; isPanning = false; hovering = null;
+    mouseDownPos = null; tooltip.style.display = 'none';
+});
 canvas.addEventListener('wheel', e => {
     e.preventDefault();
     const f = e.deltaY > 0 ? 0.92 : 1.08;
@@ -1394,6 +1729,155 @@ document.getElementById('btn-freeze').addEventListener('click', () => {
     frozen = !frozen;
     document.getElementById('btn-freeze').textContent = frozen ? 'Unfreeze' : 'Freeze';
 });
+
+// ============================================================
+// DETAIL PANEL
+// ============================================================
+const detailPanel = document.getElementById('detail-panel');
+const detailBody = document.getElementById('detail-body');
+const detailName = document.getElementById('detail-name');
+
+function strengthDots(val, max = 5) {
+    const filled = Math.round(val * max);
+    let html = '<div class="strength-bar">';
+    for (let i = 0; i < max; i++) html += `<span class="${i < filled ? 'on' : ''}"></span>`;
+    return html + '</div>';
+}
+
+function openDetail(node) {
+    selected = node;
+    detailOpen = true;
+    detailPanel.classList.add('open');
+    tooltip.style.display = 'none';
+    resize();
+    populateDetail(node);
+}
+
+function closeDetail() {
+    selected = null;
+    detailOpen = false;
+    detailPanel.classList.remove('open');
+    resize();
+}
+
+document.getElementById('detail-close').addEventListener('click', closeDetail);
+
+function selectNode(nodeId) {
+    const n = nodeMap[nodeId];
+    if (n) openDetail(n);
+}
+
+function populateDetail(n) {
+    const name = n.label.replace(/\n/g, ' ');
+    const cat = CATEGORIES[n.category];
+    detailName.innerHTML = name;
+
+    let html = '';
+    // Category badge
+    html += `<div style="padding:0 1.25rem 0.5rem"><span class="detail-cat-badge" style="background:${adjustAlpha(cat.color,0.15)};color:${cat.color};border:1px solid ${adjustAlpha(cat.color,0.3)}">${cat.label}</span></div>`;
+
+    if (n.isParent) {
+        // Description
+        html += `<div class="detail-desc">${n.desc}</div>`;
+        // Stats
+        html += `<div class="detail-section"><h3>Statistics</h3><div class="detail-stat-grid">`;
+        html += `<div class="detail-stat-card"><div class="ds-value">${n.params.toLocaleString()}</div><div class="ds-label">Config Parameters</div></div>`;
+        html += `<div class="detail-stat-card"><div class="ds-value">${n.resourceTypes}</div><div class="ds-label">Resource Types</div></div>`;
+        html += `<div class="detail-stat-card"><div class="ds-value">${n.skus.toLocaleString()}</div><div class="ds-label">SKU Variants</div></div>`;
+        html += `<div class="detail-stat-card"><div class="ds-value">${n.operations}</div><div class="ds-label">API Operations</div></div>`;
+        html += `</div></div>`;
+        // Sub-services
+        const children = subNodes.filter(s => s.parentId === n.id);
+        html += `<div class="detail-section"><h3>Sub-Services <span class="ds-count">${children.length}</span></h3>`;
+        children.forEach(child => {
+            const cname = child.label.replace(/\n/g, ' ');
+            const desc = SUB_DESCS[child.id] || '';
+            html += `<div class="dli" onclick="selectNode('${child.id}')">`;
+            html += `<div class="dli-row"><div class="dli-dot" style="background:${cat.color}"></div><span class="dli-name">${cname}</span></div>`;
+            if (desc) html += `<div class="dli-desc">${desc}</div>`;
+            html += `</div>`;
+        });
+        html += `</div>`;
+        // Connected providers
+        const provEdges = parentEdgeData.filter(e => e.source === n || e.target === n);
+        if (provEdges.length > 0) {
+            html += `<div class="detail-section"><h3>Related Providers <span class="ds-count">${provEdges.length}</span></h3>`;
+            provEdges.sort((a,b) => b.strength - a.strength).forEach(e => {
+                const other = e.source === n ? e.target : e.source;
+                const ocat = CATEGORIES[other.category];
+                const oname = other.label.replace(/\n/g, ' ');
+                html += `<div class="dli" onclick="selectNode('${other.id}')">`;
+                html += `<div class="dli-row"><div class="dli-dot" style="background:${ocat.color}"></div><span class="dli-name">${oname}</span>${strengthDots(e.strength)}</div>`;
+                html += `<div class="dli-desc">${other.desc}</div>`;
+                html += `</div>`;
+            });
+            html += `</div>`;
+        }
+    } else {
+        // Sub-node detail
+        const desc = SUB_DESCS[n.id] || '';
+        if (desc) html += `<div class="detail-desc">${desc}</div>`;
+        // Parent
+        const parent = parentMap[n.parentId];
+        const pcat = CATEGORIES[parent.category];
+        html += `<div class="detail-section"><h3>Parent Provider</h3>`;
+        html += `<div class="dli" onclick="selectNode('${parent.id}')">`;
+        html += `<div class="dli-row"><div class="dli-dot" style="background:${pcat.color}"></div><span class="dli-name">${parent.label.replace(/\n/g,' ')}</span><span class="dli-meta">${parent.params.toLocaleString()} params</span></div>`;
+        html += `<div class="dli-desc">${parent.desc}</div>`;
+        html += `</div></div>`;
+        // Cross-provider related services
+        const crossLinks = crossEdgeData.filter(e => e.source === n || e.target === n);
+        if (crossLinks.length > 0) {
+            // Group by parent provider
+            const grouped = {};
+            crossLinks.sort((a,b) => b.strength - a.strength).forEach(e => {
+                const other = e.source === n ? e.target : e.source;
+                const opid = other.isParent ? other.id : other.parentId;
+                if (!grouped[opid]) grouped[opid] = [];
+                grouped[opid].push({ node: other, strength: e.strength });
+            });
+            html += `<div class="detail-section"><h3>Related Services <span class="ds-count">${crossLinks.length}</span></h3>`;
+            Object.entries(grouped).forEach(([pid, items]) => {
+                const pp = parentMap[pid];
+                const ppcat = CATEGORIES[pp.category];
+                html += `<div style="font-size:0.68rem;color:${ppcat.color};font-weight:600;margin:0.5rem 0 0.2rem;text-transform:uppercase;letter-spacing:0.04em">${pp.label.replace(/\n/g,' ')}</div>`;
+                items.forEach(({node: other, strength}) => {
+                    const oname = other.label.replace(/\n/g, ' ');
+                    const odesc = other.isParent ? other.desc : (SUB_DESCS[other.id] || '');
+                    html += `<div class="dli" onclick="selectNode('${other.id}')">`;
+                    html += `<div class="dli-row"><div class="dli-dot" style="background:${ppcat.color}"></div><span class="dli-name">${oname}</span>${strengthDots(strength)}</div>`;
+                    if (odesc) html += `<div class="dli-desc">${odesc}</div>`;
+                    html += `</div>`;
+                });
+            });
+            html += `</div>`;
+        }
+        // Siblings
+        const siblings = subNodes.filter(s => s.parentId === n.parentId && s !== n);
+        if (siblings.length > 0) {
+            html += `<div class="detail-section"><h3>Sibling Services <span class="ds-count">${siblings.length}</span></h3>`;
+            siblings.forEach(sib => {
+                const sname = sib.label.replace(/\n/g, ' ');
+                html += `<div class="dli" onclick="selectNode('${sib.id}')">`;
+                html += `<div class="dli-row"><div class="dli-dot" style="background:${cat.color}"></div><span class="dli-name">${sname}</span></div>`;
+                html += `</div>`;
+            });
+            html += `</div>`;
+        }
+    }
+    // Region availability
+    const hasGlobal = n.regions.includes('Global');
+    const regionCount = hasGlobal ? allRegions.length : n.regions.filter(r => r !== 'Global').length;
+    html += `<div class="detail-regions">`;
+    html += `<strong>${hasGlobal ? 'Global — All ' + allRegions.length + ' Regions' : regionCount + ' Regions'}</strong>`;
+    html += `<div class="region-tags">`;
+    const displayRegions = hasGlobal ? allRegions : n.regions.filter(r => r !== 'Global');
+    displayRegions.forEach(r => { html += `<span class="region-tag">${r}</span>`; });
+    html += `</div></div>`;
+
+    detailBody.innerHTML = html;
+    detailBody.scrollTop = 0;
+}
 
 // Animation loop
 function loop() { simulate(); draw(); requestAnimationFrame(loop); }
