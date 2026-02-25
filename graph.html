@@ -21,7 +21,7 @@
     --neon-green: #34d399;
     --neon-orange: #fb923c;
     --azure-blue: #3b9eff;
-    --panel-width: 260px;
+    --panel-width: 280px;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -34,7 +34,6 @@ body {
     height: 100vh;
 }
 
-/* Header */
 .header {
     position: fixed;
     top: 0; left: var(--panel-width); right: 0;
@@ -228,28 +227,84 @@ body {
 .region-search:focus { border-color: var(--azure-blue); }
 .region-search::placeholder { color: var(--text-muted); opacity: 0.5; }
 
-/* Legend at bottom of panel */
+/* Toggle switch */
+.toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.35rem 0.4rem;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+.toggle-row:hover { background: rgba(59,158,255,0.08); }
+.toggle-label {
+    font-size: 0.78rem;
+    color: var(--text);
+}
+.toggle-switch {
+    width: 36px;
+    height: 20px;
+    background: var(--border);
+    border-radius: 10px;
+    position: relative;
+    transition: background 0.2s, box-shadow 0.2s;
+    flex-shrink: 0;
+}
+.toggle-switch.on {
+    background: var(--neon-cyan);
+    box-shadow: 0 0 8px rgba(34,211,238,0.3);
+}
+.toggle-switch::after {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    background: white;
+    border-radius: 50%;
+    top: 2px;
+    left: 2px;
+    transition: transform 0.2s;
+}
+.toggle-switch.on::after {
+    transform: translateX(16px);
+}
+.sub-stats {
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    margin-top: 0.25rem;
+    padding: 0 0.4rem;
+}
+
+/* Legend */
 .panel-legend {
     padding: 0.75rem 1rem;
     border-top: 1px solid var(--border);
-    font-size: 0.72rem;
-    color: #4a5568;
+    font-size: 0.68rem;
 }
 .panel-legend .legend-item {
     display: flex;
     align-items: center;
     gap: 0.4rem;
-    margin-bottom: 0.2rem;
+    margin-bottom: 0.25rem;
     color: var(--text-muted);
-}
-.legend-line-thin {
-    width: 16px; height: 1px; background: rgba(59,158,255,0.2); flex-shrink: 0;
 }
 .legend-line-thick {
     width: 16px; height: 3px; background: rgba(59,158,255,0.5); border-radius: 1px; flex-shrink: 0;
 }
+.legend-line-thin {
+    width: 16px; height: 1px; background: rgba(59,158,255,0.25); flex-shrink: 0;
+}
+.legend-line-dashed {
+    width: 16px; height: 0; border-top: 1px dashed rgba(167,139,250,0.5); flex-shrink: 0;
+}
+.legend-node-big {
+    width: 12px; height: 12px; border-radius: 50%; background: rgba(59,158,255,0.5); flex-shrink: 0;
+}
+.legend-node-small {
+    width: 7px; height: 7px; border-radius: 50%; background: rgba(59,158,255,0.35); flex-shrink: 0; margin: 0 2.5px;
+}
 
-/* Canvas */
 canvas {
     position: fixed;
     top: 0; left: var(--panel-width); right: 0; bottom: 0;
@@ -258,7 +313,6 @@ canvas {
 }
 canvas:active { cursor: grabbing; }
 
-/* Tooltip */
 .tooltip {
     position: fixed;
     display: none;
@@ -306,20 +360,25 @@ canvas:active { cursor: grabbing; }
 </head>
 <body>
 
-<!-- Left filter panel -->
 <div class="filter-panel">
     <div class="panel-header">
         <h2>Filters</h2>
-        <p>Filter by category or region availability</p>
+        <p>Filter by category, depth, or region availability</p>
     </div>
     <div class="panel-body">
-        <!-- Categories -->
         <div class="filter-group" id="cat-filters">
             <h3>Categories <span class="count" id="cat-count"></span></h3>
-            <!-- populated by JS -->
         </div>
 
-        <!-- Regions -->
+        <div class="filter-group">
+            <h3>Display</h3>
+            <div class="toggle-row" id="toggle-row-subs">
+                <span class="toggle-label">Sub-Services</span>
+                <div class="toggle-switch on" id="toggle-subs"></div>
+            </div>
+            <div class="sub-stats" id="sub-stats"></div>
+        </div>
+
         <div class="filter-group" id="region-filters">
             <h3>Regions <span class="count" id="region-count"></span></h3>
             <input type="text" class="region-search" id="region-search" placeholder="Search regions...">
@@ -327,23 +386,23 @@ canvas:active { cursor: grabbing; }
                 <button class="filter-link" id="regions-all">Select All</button>
                 <button class="filter-link" id="regions-none">Clear All</button>
             </div>
-            <div id="region-list" style="margin-top:0.4rem">
-                <!-- populated by JS -->
-            </div>
+            <div id="region-list" style="margin-top:0.4rem"></div>
         </div>
     </div>
     <div class="panel-legend">
-        <div class="legend-item"><div class="legend-line-thick"></div> Strong dependency</div>
-        <div class="legend-item"><div class="legend-line-thin"></div> Weaker integration</div>
+        <div class="legend-item"><div class="legend-node-big"></div> Resource provider</div>
+        <div class="legend-item"><div class="legend-node-small"></div> Sub-service / product</div>
+        <div class="legend-item"><div class="legend-line-thick"></div> Provider dependency</div>
+        <div class="legend-item"><div class="legend-line-thin"></div> Parent &harr; sub-service</div>
+        <div class="legend-item"><div class="legend-line-dashed"></div> Cross-service relationship</div>
         <div style="margin-top:0.3rem;color:#3a4158">Node size = complexity score</div>
     </div>
 </div>
 
-<!-- Header -->
 <div class="header">
     <div>
         <h1>Azure Resource Relationship Graph</h1>
-        <div class="subtitle">Force-directed visualisation of service interdependencies</div>
+        <div class="subtitle">Force-directed visualisation of service and sub-service interdependencies</div>
     </div>
     <div class="header-right">
         <button class="btn" id="btn-reset">Reset View</button>
@@ -357,7 +416,7 @@ canvas:active { cursor: grabbing; }
 
 <script>
 // ============================================================
-// DATA
+// DATA — CATEGORIES
 // ============================================================
 const CATEGORIES = {
     compute:    { color: '#3b9eff', glow: 'rgba(59,158,255,0.5)',   label: 'Compute' },
@@ -368,70 +427,287 @@ const CATEGORIES = {
     monitoring: { color: '#fb923c', glow: 'rgba(251,146,60,0.5)',   label: 'Monitoring & Mgmt' },
 };
 
-const nodes = [
+// ============================================================
+// DATA — PARENT NODES (10 resource providers)
+// ============================================================
+const parentNodes = [
     {
-        id: 'Compute', label: 'Compute', category: 'compute',
+        id: 'Compute', label: 'Compute', category: 'compute', isParent: true,
         score: 1407, params: 1407, resourceTypes: 38, skus: 4635, operations: 418, products: 18,
         desc: 'Virtual Machines, Scale Sets, Managed Disks, Galleries, Dedicated Hosts',
         regions: ['East US','East US 2','West US','West US 2','West US 3','Central US','North Central US','South Central US','West Central US','North Europe','West Europe','UK South','UK West','France Central','Germany West Central','Switzerland North','Norway East','Sweden Central','Poland Central','Italy North','Spain Central','Canada Central','Canada East','Brazil South','Australia East','Australia Southeast','Japan East','Japan West','Korea Central','Southeast Asia','East Asia','Central India','South India','UAE North','South Africa North','Qatar Central']
     },
     {
-        id: 'Network', label: 'Network', category: 'networking',
+        id: 'Network', label: 'Network', category: 'networking', isParent: true,
         score: 8549, params: 8549, resourceTypes: 172, skus: 90, operations: 1437, products: 50,
         desc: 'VNets, NSGs, Load Balancers, Firewalls, VPN Gateways, DNS, Front Door',
         regions: ['East US','East US 2','West US','West US 2','West US 3','Central US','North Central US','South Central US','North Europe','West Europe','UK South','UK West','France Central','Germany West Central','Switzerland North','Norway East','Sweden Central','Canada Central','Canada East','Brazil South','Australia East','Australia Southeast','Japan East','Japan West','Korea Central','Southeast Asia','East Asia','Central India','UAE North','South Africa North','Qatar Central','Poland Central','Italy North','Israel Central','Mexico Central']
     },
     {
-        id: 'Storage', label: 'Storage', category: 'data',
+        id: 'Storage', label: 'Storage', category: 'data', isParent: true,
         score: 1855, params: 1855, resourceTypes: 36, skus: 306, operations: 346, products: 16,
         desc: 'Blob, Files, Queues, Tables, Data Lake Gen2, Immutable Storage',
         regions: ['East US','East US 2','West US','West US 2','West US 3','Central US','North Central US','South Central US','North Europe','West Europe','UK South','UK West','France Central','Germany West Central','Switzerland North','Norway East','Sweden Central','Canada Central','Canada East','Brazil South','Australia East','Australia Southeast','Japan East','Japan West','Korea Central','Southeast Asia','East Asia','Central India','UAE North','South Africa North','Qatar Central','Poland Central','Italy North']
     },
     {
-        id: 'KeyVault', label: 'Key Vault', category: 'security',
+        id: 'KeyVault', label: 'Key Vault', category: 'security', isParent: true,
         score: 418, params: 418, resourceTypes: 10, skus: 0, operations: 155, products: 11,
         desc: 'Keys, Secrets, Certificates, Managed HSM, Access Policies',
         regions: ['East US','East US 2','West US','West US 2','West US 3','Central US','North Central US','South Central US','North Europe','West Europe','UK South','UK West','France Central','Germany West Central','Switzerland North','Norway East','Sweden Central','Canada Central','Canada East','Brazil South','Australia East','Australia Southeast','Japan East','Japan West','Korea Central','Southeast Asia','East Asia','Central India','UAE North','South Africa North']
     },
     {
-        id: 'SQL', label: 'SQL', category: 'data',
+        id: 'SQL', label: 'SQL', category: 'data', isParent: true,
         score: 3477, params: 3477, resourceTypes: 58, skus: 1185, operations: 678, products: 21,
         desc: 'SQL Database, Elastic Pools, Managed Instance, Hyperscale, Failover Groups',
         regions: ['East US','East US 2','West US','West US 2','West US 3','Central US','North Central US','South Central US','North Europe','West Europe','UK South','UK West','France Central','Germany West Central','Switzerland North','Norway East','Sweden Central','Canada Central','Canada East','Brazil South','Australia East','Australia Southeast','Japan East','Japan West','Korea Central','Southeast Asia','East Asia','Central India','UAE North','South Africa North','Qatar Central']
     },
     {
-        id: 'ContainerService', label: 'Kubernetes\nService (AKS)', category: 'compute',
+        id: 'ContainerService', label: 'Kubernetes\nService (AKS)', category: 'compute', isParent: true,
         score: 867, params: 867, resourceTypes: 16, skus: 0, operations: 88, products: 14,
         desc: 'AKS Clusters, Node Pools, Fleet Manager, Extensions, Workload Identity',
         regions: ['East US','East US 2','West US','West US 2','West US 3','Central US','North Central US','South Central US','North Europe','West Europe','UK South','France Central','Germany West Central','Switzerland North','Norway East','Sweden Central','Canada Central','Canada East','Brazil South','Australia East','Japan East','Korea Central','Southeast Asia','East Asia','Central India','UAE North','South Africa North']
     },
     {
-        id: 'Web', label: 'Web', category: 'app',
+        id: 'Web', label: 'Web', category: 'app', isParent: true,
         score: 5914, params: 2746, resourceTypes: 78, skus: 24, operations: 666, products: 12,
         desc: 'App Service, Functions, Static Web Apps, App Service Environments',
         regions: ['East US','East US 2','West US','West US 2','West US 3','Central US','North Central US','South Central US','North Europe','West Europe','UK South','UK West','France Central','Germany West Central','Switzerland North','Norway East','Sweden Central','Canada Central','Canada East','Brazil South','Australia East','Australia Southeast','Japan East','Japan West','Korea Central','Southeast Asia','East Asia','Central India','UAE North','South Africa North']
     },
     {
-        id: 'Insights', label: 'Azure\nMonitor', category: 'monitoring',
+        id: 'Insights', label: 'Azure\nMonitor', category: 'monitoring', isParent: true,
         score: 1070, params: 1070, resourceTypes: 30, skus: 0, operations: 265, products: 16,
         desc: 'Metrics, Alerts, App Insights, Autoscale, Diagnostic Settings, Workbooks',
         regions: ['East US','East US 2','West US','West US 2','West US 3','Central US','North Central US','South Central US','North Europe','West Europe','UK South','UK West','France Central','Germany West Central','Switzerland North','Norway East','Sweden Central','Canada Central','Canada East','Brazil South','Australia East','Australia Southeast','Japan East','Japan West','Korea Central','Southeast Asia','East Asia','Central India','UAE North','South Africa North','Global']
     },
     {
-        id: 'Security', label: 'Defender\nfor Cloud', category: 'security',
+        id: 'Security', label: 'Defender\nfor Cloud', category: 'security', isParent: true,
         score: 621, params: 621, resourceTypes: 55, skus: 0, operations: 396, products: 24,
         desc: 'Defender Plans, Secure Score, Compliance, JIT Access, DevOps Security',
         regions: ['East US','East US 2','West US','West US 2','Central US','North Central US','South Central US','North Europe','West Europe','UK South','France Central','Germany West Central','Switzerland North','Norway East','Sweden Central','Canada Central','Brazil South','Australia East','Japan East','Korea Central','Southeast Asia','East Asia','Central India','UAE North','South Africa North','Global']
     },
     {
-        id: 'Authorization', label: 'Authorization', category: 'security',
+        id: 'Authorization', label: 'Authorization', category: 'security', isParent: true,
         score: 273, params: 273, resourceTypes: 50, skus: 0, operations: 138, products: 14,
         desc: 'RBAC, Azure Policy, Locks, PIM, Access Reviews, Conditions',
         regions: ['Global']
     },
 ];
 
-const edges = [
+// ============================================================
+// DATA — SUB-NODE DEFINITIONS [id, label, parentId]
+// ============================================================
+const SUB_DEFS = [
+    // --- Compute (18) ---
+    ['compute-vms','Virtual\nMachines','Compute'],
+    ['compute-vmss','Scale Sets','Compute'],
+    ['compute-disks','Managed\nDisks','Compute'],
+    ['compute-des','Disk Encrypt\nSets','Compute'],
+    ['compute-snapshots','Snapshots','Compute'],
+    ['compute-drp','Disk Restore\nPoints','Compute'],
+    ['compute-images','Images','Compute'],
+    ['compute-gallery','Compute\nGallery','Compute'],
+    ['compute-vmapps','VM Apps','Compute'],
+    ['compute-avsets','Availability\nSets','Compute'],
+    ['compute-ppg','Proximity\nPlacement','Compute'],
+    ['compute-capacity','Capacity\nReservation','Compute'],
+    ['compute-hosts','Dedicated\nHosts','Compute'],
+    ['compute-sshkeys','SSH Keys','Compute'],
+    ['compute-extensions','VM\nExtensions','Compute'],
+    ['compute-cloudsvcs','Cloud\nServices','Compute'],
+    ['compute-rpc','Restore\nPoints','Compute'],
+    ['compute-diskaccess','Disk Access','Compute'],
+    // --- Network (49) ---
+    ['network-vnet','VNet','Network'],
+    ['network-nsg','NSG','Network'],
+    ['network-asg','App Security\nGroup','Network'],
+    ['network-lb','Load\nBalancer','Network'],
+    ['network-appgw','App\nGateway','Network'],
+    ['network-waf','WAF','Network'],
+    ['network-firewall','Azure\nFirewall','Network'],
+    ['network-fwpolicy','Firewall\nPolicy','Network'],
+    ['network-bastion','Bastion','Network'],
+    ['network-ddos','DDoS\nProtection','Network'],
+    ['network-natgw','NAT\nGateway','Network'],
+    ['network-pip','Public IP','Network'],
+    ['network-pipprefix','IP Prefix','Network'],
+    ['network-customip','Custom IP','Network'],
+    ['network-nic','NIC','Network'],
+    ['network-rt','Route\nTable','Network'],
+    ['network-routefilter','Route\nFilter','Network'],
+    ['network-vpngw','VPN\nGateway','Network'],
+    ['network-lng','Local Net\nGateway','Network'],
+    ['network-er','ExpressRoute','Network'],
+    ['network-ergw','ER\nGateway','Network'],
+    ['network-erport','ER Port','Network'],
+    ['network-vwan','Virtual\nWAN','Network'],
+    ['network-vwanvpn','vWAN VPN','Network'],
+    ['network-p2svpn','P2S VPN','Network'],
+    ['network-vpnsite','VPN Site','Network'],
+    ['network-vhub','Virtual\nHub','Network'],
+    ['network-dns','DNS Zone','Network'],
+    ['network-privdns','Private\nDNS','Network'],
+    ['network-dnsresolver','DNS\nResolver','Network'],
+    ['network-dnspolicy','DNS Policy','Network'],
+    ['network-tm','Traffic\nManager','Network'],
+    ['network-fd','Front Door','Network'],
+    ['network-pe','Private\nEndpoint','Network'],
+    ['network-pls','Private Link','Network'],
+    ['network-watcher','Network\nWatcher','Network'],
+    ['network-connmon','Connection\nMonitor','Network'],
+    ['network-flowlogs','Flow Logs','Network'],
+    ['network-manager','Network\nManager','Network'],
+    ['network-nsp','Security\nPerimeter','Network'],
+    ['network-nva','NVA','Network'],
+    ['network-dscp','DSCP','Network'],
+    ['network-ipgroups','IP Groups','Network'],
+    ['network-ipam','IPAM','Network'],
+    ['network-sep','Endpoint\nPolicy','Network'],
+    ['network-tap','VNet Tap','Network'],
+    ['network-vrouter','Route\nServer','Network'],
+    ['network-webcats','Web\nCategories','Network'],
+    ['network-verifier','Network\nVerifier','Network'],
+    // --- Storage (16) ---
+    ['storage-accounts','Storage\nAccounts','Storage'],
+    ['storage-blob','Blob\nStorage','Storage'],
+    ['storage-adls','Data Lake\nGen2','Storage'],
+    ['storage-files','Azure\nFiles','Storage'],
+    ['storage-queue','Queue\nStorage','Storage'],
+    ['storage-table','Table\nStorage','Storage'],
+    ['storage-immutable','Immutable\nStorage','Storage'],
+    ['storage-versioning','Blob\nVersioning','Storage'],
+    ['storage-softdelete','Soft\nDelete','Storage'],
+    ['storage-encryption','Encryption\nScopes','Storage'],
+    ['storage-replication','Object\nReplication','Storage'],
+    ['storage-static','Static\nWebsite','Storage'],
+    ['storage-firewall','Storage\nFirewall','Storage'],
+    ['storage-pe','Private\nEndpoints','Storage'],
+    ['storage-sas','SAS\nTokens','Storage'],
+    ['storage-tasks','Storage\nTasks','Storage'],
+    // --- Key Vault (11) ---
+    ['keyvault-standard','Standard\nVault','KeyVault'],
+    ['keyvault-premium','Premium\nVault','KeyVault'],
+    ['keyvault-mhsm','Managed\nHSM','KeyVault'],
+    ['keyvault-keys','Keys','KeyVault'],
+    ['keyvault-secrets','Secrets','KeyVault'],
+    ['keyvault-certs','Certificates','KeyVault'],
+    ['keyvault-rotation','Key\nRotation','KeyVault'],
+    ['keyvault-access','Access\nControl','KeyVault'],
+    ['keyvault-softdelete','Soft Delete\n& Purge','KeyVault'],
+    ['keyvault-pe','Private\nEndpoints','KeyVault'],
+    ['keyvault-backup','Backup\n& Restore','KeyVault'],
+    // --- SQL (21) ---
+    ['sql-db','SQL\nDatabase','SQL'],
+    ['sql-elastic','Elastic\nPool','SQL'],
+    ['sql-hyperscale','Hyperscale','SQL'],
+    ['sql-mi','Managed\nInstance','SQL'],
+    ['sql-mipools','MI Pools','SQL'],
+    ['sql-jobs','Elastic\nJobs','SQL'],
+    ['sql-failover','Failover\nGroups','SQL'],
+    ['sql-georep','Geo\nReplication','SQL'],
+    ['sql-ltr','Long-Term\nBackup','SQL'],
+    ['sql-pitr','Short-Term\nBackup','SQL'],
+    ['sql-tde','TDE','SQL'],
+    ['sql-ae','Always\nEncrypted','SQL'],
+    ['sql-audit','Auditing','SQL'],
+    ['sql-atp','Threat\nProtection','SQL'],
+    ['sql-va','Vulnerability\nAssessment','SQL'],
+    ['sql-ddm','Dynamic\nMasking','SQL'],
+    ['sql-ledger','Ledger','SQL'],
+    ['sql-sync','Sync\nGroups','SQL'],
+    ['sql-dnsalias','DNS\nAlias','SQL'],
+    ['sql-vc','Virtual\nClusters','SQL'],
+    ['sql-devops','DevOps\nAudit','SQL'],
+    // --- Container Service / AKS (14) ---
+    ['aks-cluster','AKS\nCluster','ContainerService'],
+    ['aks-syspools','System\nNode Pools','ContainerService'],
+    ['aks-userpools','User\nNode Pools','ContainerService'],
+    ['aks-vnodes','Virtual\nNodes','ContainerService'],
+    ['aks-fleet','Fleet\nManager','ContainerService'],
+    ['aks-extensions','Cluster\nExtensions','ContainerService'],
+    ['aks-maintenance','Maintenance\nConfig','ContainerService'],
+    ['aks-snapshots','Cluster\nSnapshots','ContainerService'],
+    ['aks-trustedaccess','Trusted\nAccess','ContainerService'],
+    ['aks-netpolicy','Network\nPolicies','ContainerService'],
+    ['aks-workloadid','Workload\nIdentity','ContainerService'],
+    ['aks-automatic','AKS\nAutomatic','ContainerService'],
+    ['aks-imgclean','Image\nCleaner','ContainerService'],
+    ['aks-backup','AKS\nBackup','ContainerService'],
+    // --- Web (12) ---
+    ['web-apps','Web\nApps','Web'],
+    ['web-functions','Azure\nFunctions','Web'],
+    ['web-plans','App Service\nPlans','Web'],
+    ['web-ase','App Service\nEnvironment','Web'],
+    ['web-slots','Deployment\nSlots','Web'],
+    ['web-certs','App Service\nCerts','Web'],
+    ['web-domains','App Service\nDomains','Web'],
+    ['web-staticapps','Static\nWeb Apps','Web'],
+    ['web-hybrid','Hybrid\nConnections','Web'],
+    ['web-webjobs','WebJobs','Web'],
+    ['web-managedcerts','Managed\nCerts','Web'],
+    ['web-vnetint','VNet\nIntegration','Web'],
+    // --- Insights / Monitor (16) ---
+    ['insights-metrics','Monitor\nMetrics','Insights'],
+    ['insights-alerts','Metric\nAlerts','Insights'],
+    ['insights-actlog','Activity\nLog','Insights'],
+    ['insights-actlogalerts','Activity\nAlerts','Insights'],
+    ['insights-sqr','Scheduled\nQueries','Insights'],
+    ['insights-actiongroups','Action\nGroups','Insights'],
+    ['insights-autoscale','Autoscale','Insights'],
+    ['insights-diagnostic','Diagnostic\nSettings','Insights'],
+    ['insights-appinsights','App\nInsights','Insights'],
+    ['insights-profiler','Profiler','Insights'],
+    ['insights-snapshot','Snapshot\nDebugger','Insights'],
+    ['insights-dcr','Data Collection\nRules','Insights'],
+    ['insights-dce','Data Collection\nEndpoints','Insights'],
+    ['insights-pls','Private Link\nScopes','Insights'],
+    ['insights-workbooks','Workbooks','Insights'],
+    ['insights-webtests','Web\nTests','Insights'],
+    // --- Security / Defender (24) ---
+    ['security-servers','Defender\nServers','Security'],
+    ['security-appservice','Defender\nApp Service','Security'],
+    ['security-sql','Defender\nSQL','Security'],
+    ['security-sqlmachines','Defender SQL\nMachines','Security'],
+    ['security-opensource','Defender\nOSS DBs','Security'],
+    ['security-storage','Defender\nStorage','Security'],
+    ['security-containers','Defender\nContainers','Security'],
+    ['security-keyvault','Defender\nKey Vault','Security'],
+    ['security-dns','Defender\nDNS','Security'],
+    ['security-arm','Defender\nARM','Security'],
+    ['security-apis','Defender\nAPIs','Security'],
+    ['security-cspm','Cloud\nCSPM','Security'],
+    ['security-alerts','Security\nAlerts','Security'],
+    ['security-assessments','Security\nAssessments','Security'],
+    ['security-score','Secure\nScore','Security'],
+    ['security-compliance','Regulatory\nCompliance','Security'],
+    ['security-jit','JIT VM\nAccess','Security'],
+    ['security-appcontrols','App\nControls','Security'],
+    ['security-anhr','Network\nHardening','Security'],
+    ['security-fim','File Integrity\nMonitoring','Security'],
+    ['security-automation','Workflow\nAutomation','Security'],
+    ['security-autoprov','Auto\nProvisioning','Security'],
+    ['security-multicloud','Multi-Cloud\nConnectors','Security'],
+    ['security-devops','DevOps\nSecurity','Security'],
+    // --- Authorization (14) ---
+    ['auth-rbac','RBAC','Authorization'],
+    ['auth-roleassign','Role\nAssignments','Authorization'],
+    ['auth-customroles','Custom\nRoles','Authorization'],
+    ['auth-policydef','Policy\nDefinitions','Authorization'],
+    ['auth-initiatives','Policy\nInitiatives','Authorization'],
+    ['auth-assignments','Policy\nAssignments','Authorization'],
+    ['auth-remediation','Remediation\nTasks','Authorization'],
+    ['auth-exemptions','Policy\nExemptions','Authorization'],
+    ['auth-locks','Resource\nLocks','Authorization'],
+    ['auth-pim','PIM','Authorization'],
+    ['auth-accessreviews','Access\nReviews','Authorization'],
+    ['auth-blueprints','Blueprints','Authorization'],
+    ['auth-conditions','ABAC\nConditions','Authorization'],
+    ['auth-eligible','Eligible\nAssignments','Authorization'],
+];
+
+// ============================================================
+// DATA — PARENT-PARENT EDGES [source, target, strength]
+// ============================================================
+const PARENT_EDGES = [
     ['Compute','Network',1.0],['Compute','Storage',0.8],['Compute','KeyVault',0.6],
     ['Compute','Insights',0.7],['Compute','Security',0.5],['Compute','Authorization',0.4],
     ['ContainerService','Network',0.9],['ContainerService','Compute',0.7],
@@ -448,27 +724,150 @@ const edges = [
 ];
 
 // ============================================================
+// DATA — CROSS-PROVIDER SUB-NODE EDGES [source, target, strength]
+// ============================================================
+const CROSS_EDGES = [
+    // Compute <-> Network
+    ['compute-vms','network-vnet',0.9],['compute-vms','network-nsg',0.7],
+    ['compute-vms','network-nic',0.9],['compute-vms','network-pip',0.5],
+    ['compute-vms','network-lb',0.5],['compute-vms','network-bastion',0.7],
+    ['compute-vmss','network-vnet',0.7],['compute-vmss','network-lb',0.8],
+    ['compute-vmss','network-appgw',0.6],
+    // Compute <-> Storage/KeyVault
+    ['compute-disks','keyvault-keys',0.7],['compute-des','keyvault-keys',0.9],
+    ['compute-vms','storage-accounts',0.4],
+    // Compute <-> Monitor/Security/Auth
+    ['compute-vms','insights-appinsights',0.4],['compute-vmss','insights-autoscale',0.8],
+    ['compute-vms','security-servers',0.8],['compute-vms','security-jit',0.7],
+    ['compute-vms','auth-rbac',0.4],
+    // AKS <-> various
+    ['aks-cluster','network-vnet',0.8],['aks-cluster','network-firewall',0.5],
+    ['aks-cluster','network-lb',0.5],['aks-cluster','keyvault-secrets',0.6],
+    ['aks-cluster','insights-appinsights',0.5],['aks-cluster','security-containers',0.8],
+    ['aks-cluster','auth-rbac',0.5],['aks-userpools','compute-vmss',0.6],
+    ['aks-vnodes','network-vnet',0.4],['aks-workloadid','auth-rbac',0.6],
+    ['aks-netpolicy','network-nsg',0.5],
+    // Web <-> various
+    ['web-apps','network-vnet',0.5],['web-apps','insights-appinsights',0.9],
+    ['web-apps','keyvault-secrets',0.7],['web-apps','sql-db',0.7],
+    ['web-apps','storage-accounts',0.5],['web-apps','network-pe',0.4],
+    ['web-apps','security-appservice',0.7],
+    ['web-functions','storage-accounts',0.9],['web-functions','insights-appinsights',0.7],
+    ['web-functions','keyvault-secrets',0.5],['web-functions','storage-blob',0.6],
+    ['web-functions','storage-queue',0.5],
+    ['web-staticapps','network-dns',0.4],['web-plans','insights-autoscale',0.6],
+    ['web-vnetint','network-vnet',0.9],['web-certs','keyvault-certs',0.8],
+    // SQL <-> various
+    ['sql-db','network-pe',0.5],['sql-db','keyvault-keys',0.5],
+    ['sql-db','security-sql',0.8],['sql-db','insights-diagnostic',0.4],
+    ['sql-tde','keyvault-keys',0.9],['sql-audit','storage-accounts',0.6],
+    ['sql-ae','keyvault-keys',0.7],
+    ['sql-mi','network-vnet',0.8],['sql-mi','network-nsg',0.5],
+    ['sql-failover','network-dns',0.3],
+    // Storage <-> various
+    ['storage-accounts','network-pe',0.6],['storage-encryption','keyvault-keys',0.9],
+    ['storage-accounts','security-storage',0.7],['storage-accounts','insights-diagnostic',0.4],
+    ['storage-accounts','auth-rbac',0.5],['storage-firewall','network-vnet',0.5],
+    ['storage-files','compute-vms',0.3],
+    // KeyVault <-> various
+    ['keyvault-pe','network-pe',0.7],['keyvault-certs','network-appgw',0.5],
+    ['keyvault-standard','security-keyvault',0.7],['keyvault-access','auth-rbac',0.7],
+    // Security/Defender <-> targets
+    ['security-cspm','auth-policydef',0.6],['security-jit','network-nsg',0.5],
+    ['security-compliance','auth-policydef',0.6],['security-fim','compute-vms',0.4],
+    ['security-autoprov','insights-dcr',0.4],['security-anhr','network-nsg',0.4],
+    // Insights <-> various
+    ['insights-pls','network-pe',0.6],['insights-webtests','web-apps',0.5],
+    // Auth <-> various
+    ['auth-conditions','storage-accounts',0.4],['auth-policydef','insights-diagnostic',0.3],
+];
+
+// ============================================================
+// INITIALIZATION — Build node & edge objects
+// ============================================================
+const nodeMap = {};
+const parentMap = {};
+parentNodes.forEach(n => {
+    n.vx = 0; n.vy = 0;
+    n.connections = new Set();
+    nodeMap[n.id] = n;
+    parentMap[n.id] = n;
+});
+
+const maxScore = Math.max(...parentNodes.map(n => n.score));
+parentNodes.forEach(n => {
+    n.radius = 22 + (n.score / maxScore) * 36;
+});
+
+// Create sub-nodes from compact defs
+const subNodes = SUB_DEFS.map(([id, label, parentId]) => {
+    const parent = parentMap[parentId];
+    const node = {
+        id, label, parentId,
+        isParent: false,
+        category: parent.category,
+        regions: parent.regions,
+        radius: 9 + (parent.score / maxScore) * 5,
+        vx: 0, vy: 0,
+        connections: new Set(),
+    };
+    nodeMap[id] = node;
+    return node;
+});
+
+const allNodes = [...parentNodes, ...subNodes];
+
+// Build edge data objects
+const parentEdgeData = PARENT_EDGES
+    .map(([s,t,str]) => ({source: nodeMap[s], target: nodeMap[t], strength: str, type:'parent'}))
+    .filter(e => e.source && e.target);
+
+const childEdgeData = subNodes.map(sub => ({
+    source: parentMap[sub.parentId],
+    target: sub,
+    strength: 0.5,
+    type: 'child'
+}));
+
+const crossEdgeData = CROSS_EDGES
+    .map(([s,t,str]) => ({source: nodeMap[s], target: nodeMap[t], strength: str, type:'cross'}))
+    .filter(e => e.source && e.target);
+
+// Pre-compute connection sets
+const allEdges = [...parentEdgeData, ...childEdgeData, ...crossEdgeData];
+allEdges.forEach(e => {
+    e.source.connections.add(e.target);
+    e.target.connections.add(e.source);
+});
+
+// Update sub-stats
+document.getElementById('sub-stats').textContent =
+    `${subNodes.length} sub-services across ${parentNodes.length} providers`;
+
+// ============================================================
 // FILTER STATE
 // ============================================================
 let activeCategories = new Set(Object.keys(CATEGORIES));
 let activeRegions = new Set();
+let showSubs = true;
 
-// Collect all unique regions
-const allRegions = [...new Set(nodes.flatMap(n => n.regions))].sort();
+// Collect unique regions (exclude 'Global' from filter list)
+const allRegions = [...new Set(allNodes.flatMap(n => n.regions))].filter(r => r !== 'Global').sort();
 allRegions.forEach(r => activeRegions.add(r));
 
 function isNodeActive(n) {
     if (!activeCategories.has(n.category)) return false;
-    if (activeRegions.size === allRegions.length) return true; // all selected = no filter
+    if (activeRegions.size === allRegions.length) return true; // all selected = no region filter
+    // Global resources are available everywhere
+    if (n.regions.includes('Global')) return true;
     return n.regions.some(r => activeRegions.has(r));
 }
 
 // ============================================================
-// BUILD FILTER UI
+// FILTER UI
 // ============================================================
 function buildCategoryFilters() {
     const container = document.getElementById('cat-filters');
-    // Keep h3
     const h3 = container.querySelector('h3');
     container.innerHTML = '';
     container.appendChild(h3);
@@ -532,15 +931,22 @@ function updateRegionCount() {
 }
 
 function updateVisibility() {
-    nodes.forEach(n => { n.active = isNodeActive(n); });
+    allNodes.forEach(n => { n.active = isNodeActive(n); });
     updateCatCount();
     updateRegionCount();
 }
 
+// Sub-service toggle
+document.getElementById('toggle-row-subs').addEventListener('click', () => {
+    showSubs = !showSubs;
+    const sw = document.getElementById('toggle-subs');
+    sw.classList.toggle('on', showSubs);
+    if (showSubs) repositionSubs();
+});
+
 document.getElementById('region-search').addEventListener('input', e => {
     buildRegionFilters(e.target.value);
 });
-
 document.getElementById('regions-all').addEventListener('click', () => {
     activeRegions = new Set(allRegions);
     buildRegionFilters(document.getElementById('region-search').value);
@@ -554,7 +960,7 @@ document.getElementById('regions-none').addEventListener('click', () => {
 
 buildCategoryFilters();
 buildRegionFilters();
-nodes.forEach(n => { n.active = true; });
+allNodes.forEach(n => { n.active = true; });
 
 // ============================================================
 // GRAPH ENGINE
@@ -562,7 +968,7 @@ nodes.forEach(n => { n.active = true; });
 const canvas = document.getElementById('graph');
 const ctx = canvas.getContext('2d');
 const tooltip = document.getElementById('tooltip');
-const panelWidth = 260;
+const panelWidth = 280;
 
 let W, H, dpr;
 let frozen = false;
@@ -585,77 +991,159 @@ function resize() {
 window.addEventListener('resize', resize);
 resize();
 
-// Initialize positions
-const maxScore = Math.max(...nodes.map(n => n.score));
-nodes.forEach((n, i) => {
-    const angle = (i / nodes.length) * Math.PI * 2 - Math.PI / 2;
-    const r = Math.min(W, H) * 0.25;
+// Initial positions — parents in circle, children around parents
+parentNodes.forEach((n, i) => {
+    const angle = (i / parentNodes.length) * Math.PI * 2 - Math.PI / 2;
+    const r = Math.min(W, H) * 0.3;
     n.x = W / 2 + Math.cos(angle) * r;
     n.y = H / 2 + Math.sin(angle) * r;
-    n.vx = 0;
-    n.vy = 0;
-    n.radius = 22 + (n.score / maxScore) * 36;
 });
 
-const edgeData = edges.map(([src, tgt, strength]) => ({
-    source: nodes.find(n => n.id === src),
-    target: nodes.find(n => n.id === tgt),
-    strength
-}));
+function repositionSubs() {
+    parentNodes.forEach(parent => {
+        const children = subNodes.filter(s => s.parentId === parent.id);
+        children.forEach((child, i) => {
+            const angle = (i / children.length) * Math.PI * 2;
+            const dist = parent.radius + 40 + Math.random() * 20;
+            child.x = parent.x + Math.cos(angle) * dist;
+            child.y = parent.y + Math.sin(angle) * dist;
+            child.vx = 0; child.vy = 0;
+        });
+    });
+}
+repositionSubs();
 
-// Physics — all nodes always simulated (never hidden)
+// Physics
 function simulate() {
     if (frozen) return;
     const centerX = W / 2, centerY = H / 2;
     const damping = 0.88, dt = 0.6;
+    const active = showSubs ? allNodes : parentNodes;
 
-    for (let i = 0; i < nodes.length; i++) {
-        for (let j = i + 1; j < nodes.length; j++) {
-            const a = nodes[i], b = nodes[j];
+    // Repulsion
+    for (let i = 0; i < active.length; i++) {
+        for (let j = i + 1; j < active.length; j++) {
+            const a = active[i], b = active[j];
             let dx = b.x - a.x, dy = b.y - a.y;
             let dist = Math.sqrt(dx * dx + dy * dy) || 1;
-            const force = 32000 / (dist * dist);
+            const bothParent = a.isParent && b.isParent;
+            const eitherParent = a.isParent || b.isParent;
+            const repulse = bothParent ? 32000 : (eitherParent ? 4000 : 1500);
+            const force = repulse / (dist * dist);
             const fx = (dx / dist) * force, fy = (dy / dist) * force;
             a.vx -= fx * dt; a.vy -= fy * dt;
             b.vx += fx * dt; b.vy += fy * dt;
         }
     }
 
-    edgeData.forEach(e => {
+    // Parent-parent springs
+    parentEdgeData.forEach(e => {
         const dx = e.target.x - e.source.x, dy = e.target.y - e.source.y;
         const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-        const idealDist = 200 + (1 - e.strength) * 120;
-        const force = (dist - idealDist) * 0.005 * e.strength;
+        const idealDist = 250 + (1 - e.strength) * 150;
+        const force = (dist - idealDist) * 0.004 * e.strength;
         const fx = (dx / dist) * force, fy = (dy / dist) * force;
         e.source.vx += fx * dt; e.source.vy += fy * dt;
         e.target.vx -= fx * dt; e.target.vy -= fy * dt;
     });
 
-    nodes.forEach(n => {
+    // Child springs (parent <-> child)
+    if (showSubs) {
+        childEdgeData.forEach(e => {
+            const dx = e.target.x - e.source.x, dy = e.target.y - e.source.y;
+            const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+            const idealDist = e.source.radius + 55;
+            const force = (dist - idealDist) * 0.018;
+            const fx = (dx / dist) * force, fy = (dy / dist) * force;
+            e.source.vx += fx * dt * 0.3; e.source.vy += fy * dt * 0.3;
+            e.target.vx -= fx * dt; e.target.vy -= fy * dt;
+        });
+
+        // Cross springs
+        crossEdgeData.forEach(e => {
+            const dx = e.target.x - e.source.x, dy = e.target.y - e.source.y;
+            const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+            const idealDist = 200;
+            const force = (dist - idealDist) * 0.002 * e.strength;
+            const fx = (dx / dist) * force, fy = (dy / dist) * force;
+            e.source.vx += fx * dt; e.source.vy += fy * dt;
+            e.target.vx -= fx * dt; e.target.vy -= fy * dt;
+        });
+    }
+
+    // Center gravity + damping
+    active.forEach(n => {
         if (n === dragging) return;
-        n.vx += (centerX - n.x) * 0.0004 * dt;
-        n.vy += (centerY - n.y) * 0.0004 * dt;
+        const grav = n.isParent ? 0.0004 : 0.0001;
+        n.vx += (centerX - n.x) * grav * dt;
+        n.vy += (centerY - n.y) * grav * dt;
         n.vx *= damping; n.vy *= damping;
         n.x += n.vx; n.y += n.vy;
     });
 }
 
-// Drawing — all nodes always rendered, inactive ones dimmed
+// Drawing
 function draw() {
     ctx.clearRect(0, 0, W, H);
     ctx.save();
     ctx.translate(panX, panY);
     ctx.scale(zoom, zoom);
 
-    const anyFilter = nodes.some(n => !n.active);
+    const visNodes = showSubs ? allNodes : parentNodes;
+    const anyFilter = visNodes.some(n => !n.active);
+    const connSet = hovering ? hovering.connections : null;
 
-    // Edges
-    edgeData.forEach(e => {
+    // --- EDGES ---
+    // Cross edges (behind everything)
+    if (showSubs) {
+        ctx.setLineDash([3, 3]);
+        crossEdgeData.forEach(e => {
+            const bothActive = e.source.active && e.target.active;
+            const isHov = hovering && (e.source === hovering || e.target === hovering);
+            const isConnHov = hovering && connSet && connSet.has(e.source) && connSet.has(e.target);
+            let alpha;
+            if (isHov) alpha = 0.45;
+            else if (isConnHov) alpha = 0.25;
+            else if (hovering) alpha = 0.02;
+            else if (anyFilter && !bothActive) alpha = 0.02;
+            else alpha = 0.06 + e.strength * 0.08;
+            ctx.beginPath();
+            ctx.moveTo(e.source.x, e.source.y);
+            ctx.lineTo(e.target.x, e.target.y);
+            ctx.strokeStyle = `rgba(167,139,250,${alpha})`;
+            ctx.lineWidth = 0.8;
+            ctx.stroke();
+        });
+        ctx.setLineDash([]);
+    }
+
+    // Child edges
+    if (showSubs) {
+        childEdgeData.forEach(e => {
+            const bothActive = e.source.active && e.target.active;
+            const isHov = hovering && (e.source === hovering || e.target === hovering);
+            let alpha;
+            if (isHov) alpha = 0.4;
+            else if (hovering) alpha = 0.03;
+            else if (anyFilter && !bothActive) alpha = 0.02;
+            else alpha = 0.12;
+            const cat = CATEGORIES[e.target.category];
+            ctx.beginPath();
+            ctx.moveTo(e.source.x, e.source.y);
+            ctx.lineTo(e.target.x, e.target.y);
+            ctx.strokeStyle = adjustAlpha(cat.color, alpha);
+            ctx.lineWidth = 0.8;
+            ctx.stroke();
+        });
+    }
+
+    // Parent-parent edges
+    parentEdgeData.forEach(e => {
         const bothActive = e.source.active && e.target.active;
-        const isHovered = hovering && (e.source === hovering || e.target === hovering);
+        const isHov = hovering && (e.source === hovering || e.target === hovering);
         const filterDim = anyFilter && !bothActive;
         let alpha;
-        if (isHovered) alpha = 0.6;
+        if (isHov) alpha = 0.6;
         else if (hovering) alpha = 0.05;
         else if (filterDim) alpha = 0.04;
         else alpha = 0.12 + e.strength * 0.2;
@@ -663,37 +1151,44 @@ function draw() {
         ctx.beginPath();
         ctx.moveTo(e.source.x, e.source.y);
         ctx.lineTo(e.target.x, e.target.y);
-        ctx.strokeStyle = isHovered ? `rgba(80,230,255,${alpha})` : `rgba(59,158,255,${alpha})`;
-        ctx.lineWidth = isHovered ? width + 1 : width;
+        ctx.strokeStyle = isHov ? `rgba(80,230,255,${alpha})` : `rgba(59,158,255,${alpha})`;
+        ctx.lineWidth = isHov ? width + 1 : width;
         ctx.stroke();
-        if (isHovered) {
+        if (isHov) {
             ctx.shadowColor = 'rgba(80,230,255,0.3)'; ctx.shadowBlur = 8;
             ctx.stroke(); ctx.shadowBlur = 0;
         }
     });
 
-    // Nodes — draw inactive first (behind), then active on top
-    const sortedNodes = [...nodes].sort((a, b) => (a.active ? 1 : 0) - (b.active ? 1 : 0));
+    // --- NODES ---
+    // Sort: inactive behind active, subs behind parents
+    const sorted = [...visNodes].sort((a, b) => {
+        const aScore = (a.active ? 2 : 0) + (a.isParent ? 1 : 0);
+        const bScore = (b.active ? 2 : 0) + (b.isParent ? 1 : 0);
+        return aScore - bScore;
+    });
 
-    sortedNodes.forEach(n => {
+    sorted.forEach(n => {
         const cat = CATEGORIES[n.category];
         const isHovered = n === hovering;
-        const isConnected = hovering && edgeData.some(e =>
-            (e.source === hovering && e.target === n) || (e.target === hovering && e.source === n)
-        );
+        const isConnected = connSet && connSet.has(n);
         const hoverDimmed = hovering && !isHovered && !isConnected;
         const filterInactive = anyFilter && !n.active;
 
-        // Determine overall opacity for node
         let nodeOpacity;
         if (filterInactive) nodeOpacity = 0.12;
-        else if (hoverDimmed) nodeOpacity = 0.18;
+        else if (hoverDimmed) nodeOpacity = 0.15;
         else nodeOpacity = 1;
+
+        // Sub-nodes slightly less prominent when not hovered
+        if (!n.isParent && !isHovered && !isConnected && nodeOpacity === 1) {
+            nodeOpacity = 0.85;
+        }
 
         // Glow for hovered active nodes
         if (isHovered && !filterInactive) {
             ctx.save();
-            ctx.shadowColor = cat.glow; ctx.shadowBlur = 35;
+            ctx.shadowColor = cat.glow; ctx.shadowBlur = n.isParent ? 35 : 20;
             ctx.beginPath(); ctx.arc(n.x, n.y, n.radius + 4, 0, Math.PI * 2);
             ctx.fillStyle = 'rgba(0,0,0,0)'; ctx.fill();
             ctx.restore();
@@ -704,30 +1199,29 @@ function draw() {
             n.x - n.radius * 0.3, n.y - n.radius * 0.3, n.radius * 0.1,
             n.x, n.y, n.radius
         );
-        grad.addColorStop(0, adjustAlpha(lighten(cat.color, 40), nodeOpacity));
-        grad.addColorStop(1, adjustAlpha(cat.color, nodeOpacity * 0.7));
+        grad.addColorStop(0, adjustAlpha(lighten(cat.color, n.isParent ? 40 : 55), nodeOpacity));
+        grad.addColorStop(1, adjustAlpha(cat.color, nodeOpacity * (n.isParent ? 0.7 : 0.5)));
         ctx.beginPath(); ctx.arc(n.x, n.y, n.radius, 0, Math.PI * 2);
         ctx.fillStyle = grad; ctx.fill();
 
         // Border
         ctx.strokeStyle = adjustAlpha(
             isHovered && !filterInactive ? '#ffffff' : cat.color,
-            filterInactive ? 0.06 : (hoverDimmed ? 0.1 : 0.5)
+            filterInactive ? 0.06 : (hoverDimmed ? 0.1 : (n.isParent ? 0.5 : 0.35))
         );
-        ctx.lineWidth = isHovered && !filterInactive ? 2.5 : 1.5;
+        ctx.lineWidth = isHovered && !filterInactive ? 2.5 : (n.isParent ? 1.5 : 1);
         ctx.stroke();
 
-        // Label — clipped to circle, with dark backing for readability
+        // Label — clipped to circle, with dark backing
         ctx.save();
-        ctx.beginPath(); ctx.arc(n.x, n.y, n.radius - 3, 0, Math.PI * 2); ctx.clip();
-
+        ctx.beginPath(); ctx.arc(n.x, n.y, n.radius - 2, 0, Math.PI * 2); ctx.clip();
         ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
 
-        // Split label lines
         const lines = n.label.split('\n');
-        let fontSize = Math.max(9, Math.min(14, n.radius * 0.38));
+        let fontSize = n.isParent
+            ? Math.max(9, Math.min(14, n.radius * 0.38))
+            : Math.max(5, Math.min(9, n.radius * 0.55));
 
-        // Shrink font until all lines fit within circle chords
         const calcFit = (fs) => {
             ctx.font = `700 ${fs}px 'Segoe UI', sans-serif`;
             const lh = fs * 1.25;
@@ -735,8 +1229,9 @@ function draw() {
             const sy = -(th / 2) + lh / 2;
             for (let li = 0; li < lines.length; li++) {
                 const ly = sy + li * lh;
-                const chordHalf = Math.sqrt(Math.max(0, (n.radius - 5) * (n.radius - 5) - ly * ly));
-                if (ctx.measureText(lines[li]).width > chordHalf * 2 - 6) return false;
+                const r2 = n.radius - 3;
+                const chordHalf = Math.sqrt(Math.max(0, r2 * r2 - ly * ly));
+                if (ctx.measureText(lines[li]).width > chordHalf * 2 - 4) return false;
             }
             return true;
         };
@@ -749,21 +1244,17 @@ function draw() {
         const lh = fontSize * 1.25;
         const th = lines.length * lh;
         const sy = n.y - (th / 2) + lh / 2;
+        const textAlpha = filterInactive ? 0.1 : (hoverDimmed ? 0.12 : nodeOpacity);
 
-        // Text opacity
-        const textAlpha = filterInactive ? 0.1 : (hoverDimmed ? 0.12 : 1);
-
-        // Dark stroke behind text for contrast (always, not just on hover)
         if (textAlpha > 0.15) {
             ctx.strokeStyle = `rgba(0,0,0,${textAlpha * 0.9})`;
-            ctx.lineWidth = 3;
+            ctx.lineWidth = n.isParent ? 3 : 2;
             ctx.lineJoin = 'round';
             lines.forEach((line, li) => {
                 ctx.strokeText(line, n.x, sy + li * lh);
             });
         }
 
-        // White text fill
         ctx.fillStyle = `rgba(255,255,255,${textAlpha})`;
         if (isHovered && !filterInactive) {
             ctx.shadowColor = 'rgba(255,255,255,0.5)';
@@ -774,7 +1265,7 @@ function draw() {
         });
 
         ctx.shadowBlur = 0;
-        ctx.restore(); // un-clip
+        ctx.restore();
     });
 
     ctx.restore();
@@ -799,11 +1290,12 @@ function screenToWorld(sx, sy) {
 }
 function nodeAt(sx, sy) {
     const { x, y } = screenToWorld(sx, sy);
-    for (let i = nodes.length - 1; i >= 0; i--) {
-        const n = nodes[i];
-        if (!n.visible) continue;
+    const visNodes = showSubs ? allNodes : parentNodes;
+    // Check in reverse (top-drawn nodes first), prefer parents
+    for (let i = visNodes.length - 1; i >= 0; i--) {
+        const n = visNodes[i];
         const dx = n.x - x, dy = n.y - y;
-        if (dx*dx + dy*dy < n.radius * n.radius) return n;
+        if (dx * dx + dy * dy < n.radius * n.radius) return n;
     }
     return null;
 }
@@ -811,41 +1303,59 @@ function nodeAt(sx, sy) {
 canvas.addEventListener('mousedown', e => {
     const n = nodeAt(e.clientX, e.clientY);
     if (n) { dragging = n; canvas.style.cursor = 'grabbing'; }
-    else { isPanning = true; lastMouse = {x:e.clientX,y:e.clientY}; canvas.style.cursor = 'grabbing'; }
+    else { isPanning = true; lastMouse = {x: e.clientX, y: e.clientY}; canvas.style.cursor = 'grabbing'; }
 });
 
 canvas.addEventListener('mousemove', e => {
     if (dragging) {
-        const {x,y} = screenToWorld(e.clientX, e.clientY);
+        const {x, y} = screenToWorld(e.clientX, e.clientY);
         dragging.x = x; dragging.y = y; dragging.vx = 0; dragging.vy = 0;
     } else if (isPanning) {
         panX += e.clientX - lastMouse.x; panY += e.clientY - lastMouse.y;
-        lastMouse = {x:e.clientX,y:e.clientY};
+        lastMouse = {x: e.clientX, y: e.clientY};
     } else {
         const n = nodeAt(e.clientX, e.clientY);
         hovering = n;
         canvas.style.cursor = n ? 'pointer' : 'grab';
         if (n) {
-            const conns = edgeData
-                .filter(ed => (ed.source === n || ed.target === n) && ed.source.visible && ed.target.visible)
-                .map(ed => (ed.source === n ? ed.target : ed.source).label.replace(/\n/g,' '));
+            const conns = allEdges
+                .filter(ed => ed.source === n || ed.target === n)
+                .map(ed => {
+                    const other = ed.source === n ? ed.target : ed.source;
+                    return other.label.replace(/\n/g, ' ');
+                });
             const regionCount = n.regions.length;
-            const regionSample = n.regions.slice(0,6).join(', ') + (regionCount > 6 ? ` +${regionCount-6} more` : '');
+            const hasGlobal = n.regions.includes('Global');
+            const regionSample = hasGlobal
+                ? 'Global (all regions)'
+                : n.regions.slice(0, 5).join(', ') + (regionCount > 5 ? ` +${regionCount - 5} more` : '');
+
+            let html = `<h3>${n.label.replace(/\n/g, ' ')}</h3>`;
+            if (n.isParent) {
+                const childCount = subNodes.filter(s => s.parentId === n.id).length;
+                html += `<div class="tt-type">${n.desc}</div>`;
+                html += `<div class="tt-stat"><span class="tt-label">Config Parameters</span><span class="tt-value">${n.params.toLocaleString()}</span></div>`;
+                html += `<div class="tt-stat"><span class="tt-label">Resource Types</span><span class="tt-value">${n.resourceTypes}</span></div>`;
+                html += `<div class="tt-stat"><span class="tt-label">SKU Variants</span><span class="tt-value">${n.skus.toLocaleString()}</span></div>`;
+                html += `<div class="tt-stat"><span class="tt-label">API Operations</span><span class="tt-value">${n.operations}</span></div>`;
+                html += `<div class="tt-stat"><span class="tt-label">Sub-Services</span><span class="tt-value">${childCount}</span></div>`;
+            } else {
+                const parent = parentMap[n.parentId];
+                html += `<div class="tt-type">Part of <strong style="color:var(--neon-blue)">${parent.label.replace(/\n/g, ' ')}</strong></div>`;
+                const crossConns = crossEdgeData
+                    .filter(ed => ed.source === n || ed.target === n)
+                    .map(ed => (ed.source === n ? ed.target : ed.source).label.replace(/\n/g, ' '));
+                if (crossConns.length > 0) {
+                    html += `<div class="tt-stat"><span class="tt-label">Related To</span><span class="tt-value">${crossConns.join(', ')}</span></div>`;
+                }
+            }
+            html += `<div class="tt-stat"><span class="tt-label">Connections</span><span class="tt-value">${conns.length}</span></div>`;
+            html += `<div class="tt-regions"><strong>${hasGlobal ? 'Global' : regionCount + ' regions'}:</strong> ${regionSample}</div>`;
 
             tooltip.style.display = 'block';
             tooltip.style.left = (e.clientX + 16) + 'px';
             tooltip.style.top = (e.clientY - 10) + 'px';
-            tooltip.innerHTML = `
-                <h3>${n.label.replace(/\n/g,' ')}</h3>
-                <div class="tt-type">${n.desc}</div>
-                <div class="tt-stat"><span class="tt-label">Config Parameters</span><span class="tt-value">${n.params.toLocaleString()}</span></div>
-                <div class="tt-stat"><span class="tt-label">Resource Types</span><span class="tt-value">${n.resourceTypes}</span></div>
-                <div class="tt-stat"><span class="tt-label">SKU Variants</span><span class="tt-value">${n.skus.toLocaleString()}</span></div>
-                <div class="tt-stat"><span class="tt-label">API Operations</span><span class="tt-value">${n.operations}</span></div>
-                <div class="tt-stat"><span class="tt-label">Products</span><span class="tt-value">${n.products}</span></div>
-                <div class="tt-stat"><span class="tt-label">Connections</span><span class="tt-value">${conns.length} (${conns.join(', ')})</span></div>
-                <div class="tt-regions"><strong>${regionCount} regions:</strong> ${regionSample}</div>
-            `;
+            tooltip.innerHTML = html;
             const rect = tooltip.getBoundingClientRect();
             if (rect.right > window.innerWidth) tooltip.style.left = (e.clientX - rect.width - 16) + 'px';
             if (rect.bottom > window.innerHeight) tooltip.style.top = (e.clientY - rect.height - 10) + 'px';
@@ -862,19 +1372,20 @@ canvas.addEventListener('wheel', e => {
     const f = e.deltaY > 0 ? 0.92 : 1.08;
     const wx = (e.clientX - panelWidth - panX) / zoom;
     const wy = (e.clientY - panY) / zoom;
-    zoom = Math.max(0.2, Math.min(5, zoom * f));
+    zoom = Math.max(0.15, Math.min(8, zoom * f));
     panX = e.clientX - panelWidth - wx * zoom;
     panY = e.clientY - wy * zoom;
 }, { passive: false });
 
 document.getElementById('btn-reset').addEventListener('click', () => {
     panX = 0; panY = 0; zoom = 1;
-    nodes.forEach((n, i) => {
-        const angle = (i / nodes.length) * Math.PI * 2 - Math.PI / 2;
-        const r = Math.min(W, H) * 0.25;
-        n.x = W/2 + Math.cos(angle)*r; n.y = H/2 + Math.sin(angle)*r;
+    parentNodes.forEach((n, i) => {
+        const angle = (i / parentNodes.length) * Math.PI * 2 - Math.PI / 2;
+        const r = Math.min(W, H) * 0.3;
+        n.x = W / 2 + Math.cos(angle) * r; n.y = H / 2 + Math.sin(angle) * r;
         n.vx = 0; n.vy = 0;
     });
+    repositionSubs();
     frozen = false;
     document.getElementById('btn-freeze').textContent = 'Freeze';
 });
