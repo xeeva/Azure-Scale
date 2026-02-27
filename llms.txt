@@ -1,0 +1,29 @@
+# Azure Scale
+
+> Measuring the total configuration surface area of Microsoft Azure.
+
+Azure Scale quantifies the knowledge burden that Microsoft Azure places on the teams responsible for managing it. The project crawls every Azure resource provider, enumerates every resource type, counts every configuration parameter, SKU variant, API operation, and licensing option — then presents the results in human terms.
+
+## Key Statistics
+
+- 299 resource providers analysed
+- 4,228 resource types
+- 43,589 recursive configuration parameters
+- 46,809 SKU variants
+- 16,090 API operations
+- Estimated human cost: 3,632 hours (1.7 years) at 5 minutes per parameter
+
+## Methodology
+
+Data is collected from a live Azure subscription using `az provider list`, `az provider show`, and `az rest` for operations and SKU enumeration. OpenAPI specifications are parsed from a local sparse checkout of the azure-rest-api-specs repository to count recursive configuration parameters per resource type. All API responses are cached locally for reproducibility.
+
+## Pages
+
+- [Complexity Report](https://xeeva.github.io/Azure-Scale/azure_complexity_report.html): Full breakdown of every resource provider — resource types, configuration parameters, SKU variants, API operations, and licensing options.
+- [Relationship Graph](https://xeeva.github.io/Azure-Scale/graph.html): Interactive force-directed graph mapping all 299 providers, their sub-services, and cross-provider relationships.
+
+## Links
+
+- Source code: https://github.com/xeeva/Azure-Scale
+- Issues: https://github.com/xeeva/Azure-Scale/issues
+- Sponsor: https://github.com/sponsors/xeeva
