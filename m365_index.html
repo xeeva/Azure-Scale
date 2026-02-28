@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>M365 Scale</title>
+<meta name="description" content="Measuring the total configuration surface area of Microsoft 365 via the Graph API — 18 workloads, 148,000+ properties, and 16,000+ API operations quantified in human terms.">
+<style>
+:root {
+    --bg-primary: #0a0e1a;
+    --bg-card: #1a2035;
+    --border: #1e2d4a;
+    --border-glow: #3b1f7b;
+    --text: #e2e8f0;
+    --text-muted: #8892a8;
+    --m365-purple: #7b5ea7;
+    --neon-purple: #a78bfa;
+    --neon-cyan: #22d3ee;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+    background: var(--bg-primary);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    line-height: 1.7;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 3rem 1.5rem;
+}
+.container {
+    max-width: 720px;
+    width: 100%;
+}
+h1 {
+    font-size: 2.25rem;
+    color: var(--neon-purple);
+    text-shadow: 0 0 20px rgba(167,139,250,0.3);
+    margin-bottom: 0.5rem;
+}
+.subtitle {
+    color: var(--text-muted);
+    font-size: 1.1rem;
+    margin-bottom: 2.5rem;
+}
+.card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.75rem 2rem;
+    margin-bottom: 1.25rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    text-decoration: none;
+    display: block;
+    color: inherit;
+}
+.card:hover {
+    border-color: var(--border-glow);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.3), 0 0 12px rgba(123,94,167,0.1);
+}
+.card h2 {
+    font-size: 1.35rem;
+    color: var(--neon-cyan);
+    text-shadow: 0 0 10px rgba(34,211,238,0.2);
+    margin-bottom: 0.5rem;
+}
+.card p {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+.card .arrow {
+    color: var(--m365-purple);
+    font-size: 1.1rem;
+    margin-top: 0.75rem;
+    display: inline-block;
+}
+.divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 2rem 0;
+}
+.footer {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    line-height: 1.8;
+}
+.footer a {
+    color: var(--m365-purple);
+    text-decoration: none;
+}
+.footer a:hover {
+    text-decoration: underline;
+}
+.scope-note {
+    background: rgba(123,94,167,0.06);
+    border-left: 3px solid var(--m365-purple);
+    padding: 1rem 1.25rem;
+    border-radius: 0 8px 8px 0;
+    margin-bottom: 2rem;
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+}
+.scope-note strong {
+    color: var(--neon-purple);
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <h1>M365 Scale</h1>
+    <p class="subtitle">Measuring the total configuration surface area of Microsoft 365 via the Graph API.</p>
+
+    <div class="scope-note">
+        <strong>Scope:</strong> Everything exposed through the Microsoft Graph API v1.0 &mdash;
+        Entra ID, Intune, Teams, SharePoint, Exchange Online, OneDrive, Security, Purview, and more.
+        Exchange admin settings, Teams admin policies, and SharePoint admin config that are only in
+        PowerShell modules are not yet included (Tier 2, future work).
+    </div>
+
+    <a class="card" href="m365_complexity_report.html">
+        <h2>Complexity Report</h2>
+        <p>
+            The full breakdown of every M365 workload, entity type, configuration property,
+            API operation, and licensing option. Quantifies the knowledge burden that Microsoft 365
+            places on the teams responsible for it, and puts it in human terms.
+        </p>
+        <span class="arrow">Open report &rarr;</span>
+    </a>
+
+    <a class="card" href="m365_graph.html">
+        <h2>Workload Graph</h2>
+        <p>
+            An interactive force-directed graph mapping all M365 workloads, their entity types,
+            and cross-workload relationships. Filter by license tier (E3, E5, P1, P2) to see
+            which workloads light up under each SKU.
+        </p>
+        <span class="arrow">Open graph &rarr;</span>
+    </a>
+
+    <hr class="divider">
+
+    <div class="footer">
+        <p>
+            Data source: Microsoft Graph OpenAPI specification (v1.0) from the
+            <a href="https://github.com/microsoftgraph/msgraph-metadata">msgraph-metadata</a> repository.
+            No authentication or tenant access required &mdash; fully automated from a single public YAML file.
+        </p>
+    </div>
+</div>
+</body>
+</html>
