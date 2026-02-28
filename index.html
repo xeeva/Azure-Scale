@@ -4,22 +4,27 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Azure Scale</title>
-<meta name="description" content="Measuring the total configuration surface area of Microsoft Azure — 299 providers, 43,589 parameters, 46,809 SKUs, and 16,090 API operations quantified in human terms.">
+<meta name="description" content="Measuring the total configuration surface area of Microsoft Azure — 298 providers, 43,000+ parameters, 46,000+ SKUs, and 16,000+ API operations quantified in human terms.">
 <link rel="canonical" href="https://xeeva.github.io/Azure-Scale/">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <meta property="og:title" content="Azure Scale">
-<meta property="og:description" content="Measuring the total configuration surface area of Microsoft Azure — 299 providers, 43,589 parameters, 46,809 SKUs, and 16,090 API operations quantified in human terms.">
+<meta property="og:description" content="Measuring the total configuration surface area of Microsoft Azure — 298 providers, 43,000+ parameters, 46,000+ SKUs, and 16,000+ API operations quantified in human terms.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://xeeva.github.io/Azure-Scale/">
-<meta name="twitter:card" content="summary">
+<meta property="og:image" content="https://xeeva.github.io/Azure-Scale/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Azure Scale">
-<meta name="twitter:description" content="Measuring the total configuration surface area of Microsoft Azure — 299 providers, 43,589 parameters, 46,809 SKUs, and 16,090 API operations quantified in human terms.">
+<meta name="twitter:description" content="Measuring the total configuration surface area of Microsoft Azure — 298 providers, 43,000+ parameters, 46,000+ SKUs, and 16,000+ API operations quantified in human terms.">
+<meta name="twitter:image" content="https://xeeva.github.io/Azure-Scale/og-image.png">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "WebSite",
   "name": "Azure Scale",
   "url": "https://xeeva.github.io/Azure-Scale/",
-  "description": "Measuring the total configuration surface area of Microsoft Azure — 299 providers, 43,589 parameters, 46,809 SKUs, and 16,090 API operations quantified in human terms.",
+  "description": "Measuring the total configuration surface area of Microsoft Azure — 298 providers, 43,000+ parameters, 46,000+ SKUs, and 16,000+ API operations quantified in human terms.",
   "author": {
     "@type": "Person",
     "name": "xeeva",
@@ -38,6 +43,7 @@
     --azure-blue: #3b9eff;
     --neon-cyan: #22d3ee;
     --neon-blue: #60a5fa;
+    --neon-green: #34d399;
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body {
@@ -64,6 +70,11 @@ h1 {
 .subtitle {
     color: var(--text-muted);
     font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+}
+.hook {
+    color: var(--neon-green);
+    font-size: 0.95rem;
     margin-bottom: 2.5rem;
 }
 .card {
@@ -97,6 +108,21 @@ h1 {
     font-size: 1.1rem;
     margin-top: 0.75rem;
     display: inline-block;
+}
+.feature-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 0.75rem;
+}
+.pill {
+    font-size: 0.7rem;
+    padding: 0.15rem 0.55rem;
+    border-radius: 10px;
+    background: rgba(59,158,255,0.1);
+    border: 1px solid rgba(59,158,255,0.25);
+    color: var(--azure-blue);
+    white-space: nowrap;
 }
 .divider {
     border: none;
@@ -155,6 +181,7 @@ h1 {
 <div class="container">
     <h1>Azure Scale</h1>
     <p class="subtitle">Measuring the total configuration surface area of Microsoft Azure.</p>
+    <p class="hook">298 providers. 43,000+ config parameters. ~1.7 years to learn at 5 min each.</p>
 
     <a class="card" href="azure_complexity_report.html">
         <h2>Complexity Report</h2>
@@ -169,10 +196,19 @@ h1 {
     <a class="card" href="graph.html">
         <h2>Relationship Graph</h2>
         <p>
-            An interactive force-directed graph mapping all 299 resource providers, their
-            sub-services, and the cross-provider relationships between them. Filter by category,
-            click any node to inspect it, and see how Azure's services connect.
+            Interactive force-directed graph mapping all 298 resource providers, their sub-services,
+            and cross-provider relationships. Filter by category, click any node to inspect it, and
+            explore how Azure's services connect.
         </p>
+        <div class="feature-pills">
+            <span class="pill">Live Stats</span>
+            <span class="pill">Heatmap</span>
+            <span class="pill">Human Cost</span>
+            <span class="pill">Licensing</span>
+            <span class="pill">Centrality</span>
+            <span class="pill">Comparison</span>
+            <span class="pill">Discount Detail</span>
+        </div>
         <span class="arrow">Open graph &rarr;</span>
     </a>
 

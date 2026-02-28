@@ -1,0 +1,1732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>M365 Workload Relationship Graph</title>
+<meta name="description" content="Interactive force-directed graph mapping all Microsoft 365 workloads, entity types, and cross-workload relationships with license tier filtering.">
+<style>
+:root {
+    --bg-primary: #0a0e1a;
+    --bg-card: #1a2035;
+    --bg-elevated: #1e2a42;
+    --border: #1e2d4a;
+    --border-glow: #3b1f7b;
+    --text: #e2e8f0;
+    --text-muted: #8892a8;
+    --text-bright: #f1f5f9;
+    --neon-cyan: #22d3ee;
+    --neon-blue: #60a5fa;
+    --neon-purple: #a78bfa;
+    --neon-pink: #f472b6;
+    --neon-green: #34d399;
+    --neon-orange: #fb923c;
+    --m365-purple: #7b5ea7;
+    --panel-width: 280px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+    background: var(--bg-primary);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    overflow: hidden;
+    height: 100vh;
+}
+canvas {
+    position: fixed;
+    top: 52px;
+    left: var(--panel-width);
+    width: calc(100vw - var(--panel-width));
+    height: calc(100vh - 52px);
+    cursor: grab;
+}
+canvas:active { cursor: grabbing; }
+
+/* Header */
+.header {
+    position: fixed; top: 0; left: var(--panel-width); right: 0; height: 52px;
+    background: rgba(10,14,26,0.92); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 1.25rem; z-index: 20;
+}
+.header h1 { font-size: 1rem; color: var(--neon-purple); text-shadow: 0 0 8px rgba(167,139,250,0.2); white-space: nowrap; }
+.header .subtitle { font-size: 0.72rem; color: var(--text-muted); }
+.header-right { display: flex; align-items: center; gap: 0.5rem; }
+.btn {
+    background: rgba(123,94,167,0.12); border: 1px solid rgba(123,94,167,0.25);
+    color: var(--neon-purple); border-radius: 6px; padding: 0.3rem 0.8rem;
+    font-size: 0.78rem; cursor: pointer; font-family: inherit; transition: all 0.2s;
+}
+.btn:hover { background: rgba(123,94,167,0.2); border-color: rgba(167,139,250,0.4); }
+.back-link { color: var(--text-muted); text-decoration: none; font-size: 0.78rem; margin-left: 0.5rem; }
+.back-link:hover { color: var(--neon-purple); }
+
+/* Filter panel */
+.filter-panel {
+    position: fixed; top: 0; left: 0; width: var(--panel-width); height: 100vh;
+    background: rgba(20,27,45,0.95); backdrop-filter: blur(12px);
+    border-right: 1px solid var(--border); z-index: 30;
+    display: flex; flex-direction: column; overflow: hidden;
+}
+.panel-header {
+    padding: 1rem 1.25rem 0.75rem; border-bottom: 1px solid var(--border);
+}
+.panel-header h2 { font-size: 1.1rem; color: var(--neon-purple); text-shadow: 0 0 8px rgba(167,139,250,0.2); }
+.panel-header p { font-size: 0.72rem; color: var(--text-muted); margin-top: 0.15rem; }
+.panel-body { flex: 1; overflow-y: auto; padding: 0.75rem 1.25rem; }
+.panel-body::-webkit-scrollbar { width: 4px; }
+.panel-body::-webkit-scrollbar-track { background: transparent; }
+.panel-body::-webkit-scrollbar-thumb { background: rgba(123,94,167,0.3); border-radius: 2px; }
+.filter-group { margin-bottom: 1.1rem; }
+.filter-group h3 { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 0.5rem; }
+.filter-group .count { color: #3a4158; font-weight: 400; }
+.filter-hint { font-size: 0.68rem; color: #3a4158; margin-bottom: 0.5rem; }
+
+/* Search */
+.search-container { position: relative; }
+.search-icon { position: absolute; left: 8px; top: 50%; transform: translateY(-50%); font-size: 0.8rem; opacity: 0.4; pointer-events: none; }
+.search-input {
+    width: 100%; padding: 0.4rem 0.6rem 0.4rem 1.8rem; border-radius: 6px;
+    border: 1px solid var(--border); background: rgba(30,42,66,0.5);
+    color: var(--text); font-size: 0.82rem; font-family: inherit; outline: none;
+    transition: border-color 0.2s;
+}
+.search-input:focus { border-color: rgba(123,94,167,0.5); }
+.search-results {
+    position: absolute; top: 100%; left: 0; right: 0;
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 0 0 6px 6px; max-height: 250px; overflow-y: auto;
+    display: none; z-index: 50;
+}
+.search-results.active { display: block; }
+.search-result {
+    padding: 0.5rem 0.6rem; cursor: pointer; font-size: 0.8rem;
+    display: flex; align-items: center; gap: 0.5rem;
+    border-bottom: 1px solid rgba(30,45,74,0.3);
+}
+.search-result:hover { background: rgba(123,94,167,0.08); }
+.search-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.search-match { color: var(--neon-purple); font-weight: 600; }
+.search-parent { font-size: 0.68rem; color: var(--text-muted); margin-left: auto; }
+.search-badge {
+    font-size: 0.58rem; padding: 0.05rem 0.3rem; border-radius: 3px;
+    background: rgba(123,94,167,0.15); color: var(--neon-purple); margin-left: 0.3rem;
+}
+
+/* Category filters */
+.filter-item {
+    display: flex; align-items: center; gap: 0.5rem; padding: 0.25rem 0;
+    cursor: pointer; font-size: 0.82rem; user-select: none; transition: opacity 0.2s;
+}
+.filter-item:hover { opacity: 0.85; }
+.filter-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.filter-cb {
+    width: 14px; height: 14px; border-radius: 3px;
+    border: 1.5px solid rgba(123,94,167,0.4); background: transparent;
+    position: relative; flex-shrink: 0; transition: all 0.15s;
+}
+.filter-cb.checked { background: var(--m365-purple); border-color: var(--m365-purple); }
+.filter-cb.checked::after {
+    content: ''; position: absolute; left: 3px; top: 0.5px;
+    width: 4px; height: 8px; border: solid var(--bg-primary); border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+/* License tier buttons */
+.license-btn {
+    display: inline-block; padding: 0.25rem 0.6rem; margin: 0.15rem;
+    border-radius: 12px; font-size: 0.72rem; font-weight: 600;
+    cursor: pointer; transition: all 0.2s; border: 1.5px solid;
+    user-select: none;
+}
+.license-btn.active {
+    box-shadow: 0 0 12px var(--glow-color);
+}
+
+/* Toggle */
+.toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 0.2rem 0; }
+.toggle-label { font-size: 0.82rem; }
+.toggle-switch {
+    width: 32px; height: 18px; border-radius: 9px;
+    background: rgba(30,42,66,0.8); border: 1px solid var(--border);
+    cursor: pointer; position: relative; transition: all 0.2s;
+}
+.toggle-switch::after {
+    content: ''; position: absolute; width: 12px; height: 12px;
+    border-radius: 50%; background: var(--text-muted);
+    top: 2px; left: 2px; transition: all 0.2s;
+}
+.toggle-switch.on { background: rgba(123,94,167,0.3); border-color: var(--m365-purple); }
+.toggle-switch.on::after { left: 16px; background: var(--neon-purple); }
+.sub-stats { font-size: 0.68rem; color: #3a4158; margin-top: 0.15rem; }
+
+/* Legend */
+.panel-legend {
+    border-top: 1px solid var(--border); padding: 0.75rem 1.25rem;
+    font-size: 0.72rem; color: var(--text-muted);
+}
+.legend-item { display: flex; align-items: center; margin-bottom: 0.25rem; }
+.legend-node-big {
+    width: 14px; height: 14px; border-radius: 50%; margin-right: 6px;
+    background: radial-gradient(circle at 35% 35%, rgba(167,139,250,0.6), rgba(123,94,167,0.2));
+    border: 1.5px solid rgba(167,139,250,0.5);
+}
+.legend-node-small {
+    width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; margin-left: 3px;
+    background: rgba(167,139,250,0.3); border: 1px solid rgba(167,139,250,0.3);
+}
+.legend-line-thick { width: 20px; height: 3px; margin-right: 6px; border-radius: 1.5px; background: rgba(167,139,250,0.5); }
+.legend-line-thin { width: 20px; height: 1px; margin-right: 6px; background: rgba(167,139,250,0.25); }
+.legend-line-dashed { width: 20px; height: 0; margin-right: 6px; border-top: 1.5px dashed rgba(167,139,250,0.35); }
+
+/* Tooltip */
+.tooltip {
+    position: fixed; padding: 0.5rem 0.75rem; border-radius: 6px;
+    background: rgba(26,32,53,0.95); border: 1px solid var(--border);
+    backdrop-filter: blur(8px); font-size: 0.8rem; pointer-events: none;
+    display: none; z-index: 40; max-width: 300px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+}
+.tooltip.visible { display: block; }
+.tooltip-name { font-weight: 600; color: var(--text-bright); }
+.tooltip-info { color: var(--text-muted); font-size: 0.72rem; margin-top: 0.15rem; }
+
+/* Detail panel */
+.detail-panel {
+    position: fixed; top: 52px; right: -360px; width: 340px;
+    height: calc(100vh - 52px); background: rgba(20,27,45,0.95);
+    backdrop-filter: blur(12px); border-left: 1px solid var(--border);
+    z-index: 25; transition: right 0.3s ease; overflow: hidden;
+    display: flex; flex-direction: column;
+}
+.detail-panel.open { right: 0; }
+.detail-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1rem 1.25rem; border-bottom: 1px solid var(--border);
+}
+.detail-header h2 { font-size: 1.05rem; color: var(--text-bright); }
+.detail-close {
+    background: none; border: none; color: var(--text-muted); font-size: 1.3rem;
+    cursor: pointer; padding: 0.2rem 0.5rem; border-radius: 4px; transition: all 0.2s;
+}
+.detail-close:hover { color: var(--text); background: rgba(255,255,255,0.05); }
+.detail-body {
+    flex: 1; overflow-y: auto; padding: 1rem 1.25rem;
+}
+.detail-body::-webkit-scrollbar { width: 4px; }
+.detail-body::-webkit-scrollbar-thumb { background: rgba(123,94,167,0.3); border-radius: 2px; }
+.detail-category {
+    display: inline-block; padding: 0.15rem 0.5rem; border-radius: 10px;
+    font-size: 0.68rem; font-weight: 600; margin-bottom: 0.75rem;
+}
+.detail-desc { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem; line-height: 1.5; }
+.detail-stat-grid {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; margin-bottom: 1rem;
+}
+.detail-stat {
+    background: rgba(30,42,66,0.5); border-radius: 6px; padding: 0.6rem;
+    text-align: center;
+}
+.detail-stat-val { font-size: 1.15rem; font-weight: 700; color: var(--neon-purple); text-shadow: 0 0 8px rgba(167,139,250,0.2); }
+.detail-stat-label { font-size: 0.65rem; color: var(--text-muted); margin-top: 0.1rem; }
+.detail-section-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin: 0.75rem 0 0.4rem; }
+.detail-connection {
+    display: flex; align-items: center; gap: 0.4rem; padding: 0.3rem 0;
+    font-size: 0.8rem; cursor: pointer; transition: color 0.2s;
+}
+.detail-connection:hover { color: var(--neon-purple); }
+.detail-conn-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.detail-conn-label { font-size: 0.65rem; color: #3a4158; margin-left: auto; }
+.detail-license-tag {
+    display: inline-block; padding: 0.15rem 0.5rem; margin: 0.1rem;
+    border-radius: 8px; font-size: 0.68rem; font-weight: 600;
+    background: rgba(123,94,167,0.12); color: var(--neon-purple);
+    border: 1px solid rgba(123,94,167,0.25);
+}
+</style>
+</head>
+<body>
+
+<div class="filter-panel">
+    <div class="panel-header">
+        <h2>Filters</h2>
+        <p>Filter by category or license tier</p>
+    </div>
+    <div class="panel-body">
+        <div class="filter-group">
+            <h3>Search</h3>
+            <div class="search-container">
+                <span class="search-icon">&#128269;</span>
+                <input type="text" class="search-input" id="search-input" placeholder="Search workloads &amp; features..." autocomplete="off">
+                <div class="search-results" id="search-results"></div>
+            </div>
+        </div>
+        <div class="filter-group" id="cat-filters">
+            <h3>Categories <span class="count" id="cat-count"></span></h3>
+        </div>
+
+        <div class="filter-group" id="license-filters">
+            <h3>License Tiers <span class="count" id="license-count"></span></h3>
+            <p class="filter-hint">Click a license to see what products &amp; features are included</p>
+            <div id="license-list"></div>
+        </div>
+
+        <div class="filter-group">
+            <h3>Display</h3>
+            <div class="toggle-row" id="toggle-row-subs">
+                <span class="toggle-label">Features</span>
+                <div class="toggle-switch" id="toggle-subs"></div>
+            </div>
+            <div class="sub-stats" id="sub-stats"></div>
+        </div>
+    </div>
+    <div class="panel-legend">
+        <div class="legend-item"><div class="legend-node-big"></div> M365 Workload</div>
+        <div class="legend-item"><div class="legend-node-small"></div> Licensed feature</div>
+        <div class="legend-item"><div class="legend-line-thin"></div> Workload &harr; feature</div>
+        <div style="margin-top:0.3rem;color:#3a4158">Node size = complexity score</div>
+        <div style="color:#3a4158">Click a workload to show connections</div>
+    </div>
+</div>
+
+<div class="header">
+    <div>
+        <h1>M365 Workload Relationship Graph</h1>
+        <div class="subtitle">M365 workloads, licensed features &amp; license tier mapping</div>
+    </div>
+    <div class="header-right">
+        <button class="btn" id="btn-reset">Reset View</button>
+        <button class="btn" id="btn-freeze">Freeze</button>
+        <a href="m365_index.html" class="back-link">&larr; Back</a>
+    </div>
+</div>
+
+<canvas id="graph"></canvas>
+<div class="tooltip" id="tooltip"></div>
+
+<div class="detail-panel" id="detail-panel">
+    <div class="detail-header">
+        <div class="detail-title"><h2 id="detail-name"></h2></div>
+        <button class="detail-close" id="detail-close">&times;</button>
+    </div>
+    <div class="detail-body" id="detail-body"></div>
+</div>
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+const CATEGORIES = {
+    identity:{color:'#3b9eff',glow:'rgba(59,158,255,0.5)',label:'Identity & Access'},
+    endpoint:{color:'#34d399',glow:'rgba(52,211,153,0.5)',label:'Endpoint Management'},
+    collaboration:{color:'#a78bfa',glow:'rgba(167,139,250,0.5)',label:'Collaboration'},
+    productivity:{color:'#fbbf24',glow:'rgba(251,191,36,0.5)',label:'Productivity'},
+    security:{color:'#f472b6',glow:'rgba(244,114,182,0.5)',label:'Security & Compliance'},
+    data:{color:'#22d3ee',glow:'rgba(34,211,238,0.5)',label:'Data & Storage'},
+    power:{color:'#10b981',glow:'rgba(16,185,129,0.5)',label:'Power Platform'},
+    ai:{color:'#f59e0b',glow:'rgba(245,158,11,0.5)',label:'AI & Copilot'},
+    viva:{color:'#ec4899',glow:'rgba(236,72,153,0.5)',label:'Viva'},
+    analytics:{color:'#fb923c',glow:'rgba(251,146,60,0.5)',label:'Analytics & Reporting'},
+    platform:{color:'#94a3b8',glow:'rgba(148,163,184,0.5)',label:'Platform Services'}
+};
+const LICENSE_TIERS = {
+    'M365 E1':{color:'#60a5fa',includes:{'Exchange Online':'Plan 1','SharePoint':'Plan 1','OneDrive':'Plan 1','Teams':'Base','Planner':'Base','Forms':'Included','Stream':'Included','Whiteboard':'Included','To Do':'Included','Search':'Included','Service Health':'Included','Bookings':'Included','Notifications':'Included','Reports & Analytics':'Included','Viva Engage':'Base','Viva Insights':'Personal','Viva Learning':'Base','Power Automate':'M365','Power Apps':'M365'}},
+    'M365 E3':{color:'#3b9eff',includes:{'Entra ID':'P1','Intune':'Plan 1','Exchange Online':'Plan 2','SharePoint':'Plan 2','OneDrive':'Plan 2','Teams':'Base','Planner':'Base','Security':'Base','Purview':'Base','Universal Print':'Included','Forms':'Included','Stream':'Included','Whiteboard':'Included','To Do':'Included','Loop':'Included','Clipchamp':'Included','Search':'Included','Service Health':'Included','Bookings':'Included','Notifications':'Included','Reports & Analytics':'Included','Viva Engage':'Base','Viva Insights':'Personal','Viva Learning':'Base','Power Automate':'M365','Power Apps':'M365'}},
+    'M365 E5':{color:'#a78bfa',includes:{'Entra ID':'P2','Intune':'Plan 1','Exchange Online':'Plan 2','SharePoint':'Plan 2','OneDrive':'Plan 2','Teams':'Base','Planner':'Base','Security':'E5 Security','Purview':'E5 Compliance','Universal Print':'Included','Forms':'Included','Stream':'Included','Whiteboard':'Included','To Do':'Included','Loop':'Included','Clipchamp':'Included','Search':'Included','Service Health':'Included','Bookings':'Included','Notifications':'Included','Reports & Analytics':'Included','Viva Engage':'Base','Viva Insights':'Personal','Viva Learning':'Base','Power Automate':'M365','Power Apps':'M365','Power BI':'Pro','Defender for Cloud Apps':'Standalone'}},
+    'M365 F1':{color:'#94a3b8',includes:{'Exchange Online':'Plan 1','SharePoint':'Plan 1','OneDrive':'Plan 1','Teams':'Base','Forms':'Included','Stream':'Included','Whiteboard':'Included','Search':'Included','Service Health':'Included','Notifications':'Included'}},
+    'M365 F3':{color:'#64748b',includes:{'Entra ID':'P1','Intune':'Plan 1','Exchange Online':'Plan 1','SharePoint':'Plan 1','OneDrive':'Plan 1','Teams':'Base','Security':'Base','Forms':'Included','Stream':'Included','Whiteboard':'Included','To Do':'Included','Search':'Included','Service Health':'Included','Notifications':'Included','Power Automate':'M365','Power Apps':'M365'}},
+    'Copilot':{color:'#f59e0b',includes:{'Copilot':'Add-on','Copilot Studio':'Standalone'}},
+    'Entra ID P1':{color:'#22d3ee',includes:{'Entra ID':'P1','External Identities':'P1'}},
+    'Entra ID P2':{color:'#06b6d4',includes:{'Entra ID':'P2','External Identities':'P2'}},
+    'Intune P1':{color:'#34d399',includes:{'Intune':'Plan 1'}},
+    'Intune P2':{color:'#2dd4bf',includes:{'Intune':'Plan 2'}},
+    'Teams Premium':{color:'#818cf8',includes:{'Teams':'Premium'}},
+    'Teams Phone':{color:'#6366f1',includes:{'Teams':'Phone'}},
+    'Power BI Pro':{color:'#10b981',includes:{'Power BI':'Pro'}},
+    'E5 Security':{color:'#f87171',includes:{'Security':'E5 Security','Entra ID':'P2','Defender for Cloud Apps':'Standalone'}},
+    'E5 Compliance':{color:'#fb7185',includes:{'Purview':'E5 Compliance'}},
+    'Viva Suite':{color:'#ec4899',includes:{'Viva Engage':'Premium','Viva Insights':'Premium','Viva Learning':'Premium'}},
+    'Education A5':{color:'#4ade80',includes:{'Education':'A5','Entra ID':'P2','Intune':'Plan 1','Exchange Online':'Plan 2','SharePoint':'Plan 2','OneDrive':'Plan 2','Teams':'Base','Planner':'Base','Security':'E5 Security','Purview':'E5 Compliance','Forms':'Included','Whiteboard':'Included','To Do':'Included','Search':'Included','Service Health':'Included'}}
+};
+const TIER_HIERARCHY = {
+    'Entra ID':['Free','P1','P2','Governance'],
+    'Intune':['Plan 1','Plan 2','Suite'],
+    'Exchange Online':['Plan 1','Plan 2'],
+    'Teams':['Base','Premium','Phone'],
+    'SharePoint':['Plan 1','Plan 2'],
+    'OneDrive':['Plan 1','Plan 2'],
+    'Security':['Base','E5 Security'],
+    'Purview':['Base','E5 Compliance'],
+    'Power Automate':['M365','Per-User','Premium'],
+    'Power Apps':['M365','Per-User','Premium'],
+    'Power BI':['Free','Pro','Premium Per User'],
+    'Copilot':['Add-on'],
+    'Copilot Studio':['Standalone'],
+    'Viva Engage':['Base','Premium'],
+    'Viva Insights':['Personal','Premium'],
+    'Viva Learning':['Base','Premium'],
+    'Planner':['Base','Plan 1'],
+    'Project':['Plan 1','Plan 3','Plan 5'],
+    'Visio':['Plan 1','Plan 2'],
+    'Defender for Cloud Apps':['Standalone'],
+    'Education':['A1','A3','A5'],
+    'External Identities':['Free','P1','P2']
+};
+const parentNodes = [
+    {id:'Entra ID',label:'Entra ID',category:'identity',isParent:true,score:148617.5,params:71776,entityTypes:1019,operations:8069,readOps:4272,writeOps:3797,schemas:1163,enums:144,licenses:['Free','P1 (standalone / M365 E3)','P2 (standalone / M365 E5)','Governance'],desc:'Identity and access management — users, groups, apps, conditional access, roles, authentication methods, directory objects'},
+    {id:'Security',label:'Security',category:'security',isParent:true,score:44188.0,params:21776,entityTypes:324,operations:600,readOps:338,writeOps:262,schemas:410,enums:86,licenses:['Basic (M365 E3)','E5 Security (add-on / M365 E5)','Defender for O365 P1/P2','Defender for Endpoint P1/P2'],desc:'Threat detection, alerts, incidents, attack simulation, secure score'},
+    {id:'OneDrive',label:'OneDrive',category:'data',isParent:true,score:42175.0,params:20505,entityTypes:71,operations:2176,readOps:1088,writeOps:1088,schemas:71,enums:0,licenses:['Plan 1 (M365 E1)','Plan 2 (M365 E3)'],desc:'Personal and shared cloud storage — drives, items, sharing, permissions'},
+    {id:'SharePoint',label:'SharePoint',category:'collaboration',isParent:true,score:27808.0,params:13632,entityTypes:44,operations:988,readOps:587,writeOps:401,schemas:48,enums:4,licenses:['Plan 1 (standalone / M365 E1)','Plan 2 (standalone / M365 E3)'],desc:'Sites, lists, document libraries, content types, site collections'},
+    {id:'Teams',label:'Teams',category:'collaboration',isParent:true,score:27464.0,params:13455,entityTypes:148,operations:794,readOps:361,writeOps:433,schemas:178,enums:30,licenses:['Essentials (standalone)','M365 E1/E3/E5','Premium (add-on)'],desc:'Collaboration — teams, channels, chats, calls, meetings, apps'},
+    {id:'Other',label:'Other',category:'platform',isParent:true,score:23261.0,params:11502,entityTypes:57,operations:400,readOps:207,writeOps:193,schemas:57,enums:0,licenses:[],desc:''},
+    {id:'Power BI',label:'Power BI',category:'power',isParent:true,score:18012.0,params:0,entityTypes:0,operations:0,readOps:0,writeOps:0,schemas:0,enums:0,licenses:['Free','Pro (standalone / M365 E5)','Premium Per User','Premium Per Capacity'],desc:'Business intelligence — datasets, reports, dashboards, workspaces, dataflows, governance, capacity management'},
+    {id:'Purview',label:'Purview',category:'security',isParent:true,score:16654.5,params:8277,entityTypes:62,operations:59,readOps:39,writeOps:20,schemas:69,enums:7,licenses:['Basic (M365 E3)','E5 Compliance (add-on / M365 E5)','Info Protection P1/P2'],desc:'Information protection, data classification, compliance, data loss prevention'},
+    {id:'Education',label:'Education',category:'platform',isParent:true,score:15285.0,params:7489,entityTypes:91,operations:414,readOps:206,writeOps:208,schemas:101,enums:10,licenses:['A1','A3','A5'],desc:'EDU tenants — classes, assignments, education users, schools'},
+    {id:'Power Automate',label:'Power Automate',category:'power',isParent:true,score:15012.0,params:0,entityTypes:0,operations:0,readOps:0,writeOps:0,schemas:0,enums:0,licenses:['M365 E1/E3/E5 (limited)','Per-User Plan','Per-Flow Plan','Premium'],desc:'Workflow automation — cloud flows, desktop flows (RPA), connectors, DLP policies, environments'},
+    {id:'Intune',label:'Intune',category:'endpoint',isParent:true,score:12283.5,params:5694,entityTypes:184,operations:1405,readOps:726,writeOps:679,schemas:195,enums:11,licenses:['Plan 1 (standalone / M365 E3)','Plan 2 (add-on)','Suite'],desc:'Endpoint management — device compliance, configuration profiles, app deployment, managed devices'},
+    {id:'Power Apps',label:'Power Apps',category:'power',isParent:true,score:12012.0,params:0,entityTypes:0,operations:0,readOps:0,writeOps:0,schemas:0,enums:0,licenses:['M365 E1/E3/E5 (limited)','Per-User Plan','Per-App Plan','Premium'],desc:'Low-code application platform — canvas apps, model-driven apps, environments, Dataverse, DLP'},
+    {id:'Project',label:'Project',category:'productivity',isParent:true,score:8009.0,params:0,entityTypes:0,operations:0,readOps:0,writeOps:0,schemas:0,enums:0,licenses:['Plan 1','Plan 3','Plan 5'],desc:'Project management — project plans, timelines, resource management, Gantt charts, roadmaps'},
+    {id:'Copilot',label:'Copilot',category:'ai',isParent:true,score:8003.0,params:0,entityTypes:0,operations:0,readOps:0,writeOps:0,schemas:0,enums:0,licenses:['M365 Copilot (add-on, requires E3/E5)'],desc:'Microsoft 365 Copilot — AI assistant across Word, Excel, PowerPoint, Outlook, Teams, and more'},
+    {id:'Defender for Cloud Apps',label:'Defender for Cloud Apps',category:'security',isParent:true,score:7006.0,params:0,entityTypes:0,operations:0,readOps:0,writeOps:0,schemas:0,enums:0,licenses:['E5 Security (add-on / M365 E5)','Standalone'],desc:'Cloud access security broker (CASB) — app discovery, session controls, anomaly detection, DLP'},
+    {id:'Copilot Studio',label:'Copilot Studio',category:'ai',isParent:true,score:5006.0,params:0,entityTypes:0,operations:0,readOps:0,writeOps:0,schemas:0,enums:0,licenses:['Standalone','Included with M365 Copilot (limited)'],desc:'Custom copilot builder — previously Power Virtual Agents, low-code AI agent creation'},
+    {id:'Viva Engage',label:'Viva Engage',category:'viva',isParent:true,score:4006.0,params:0,entityTypes:0,operations:0,readOps:0,writeOps:0,schemas:0,enums:0,licenses:['M365 E1/E3/E5 (basic)','Viva Suite (premium)'],desc:'Employee communications — communities, storyline, campaigns, analytics (formerly Yammer)'},
+    {id:'Visio',label:'Visio',category:'productivity',isParent:true,score:4006.0,params:0,entityTypes:0,operations:0,readOps:0,writeOps:0,schemas:0,enums:0,licenses:['Plan 1','Plan 2'],desc:'Diagramming — flowcharts, org charts, floor plans, network diagrams, process mapping'},
+    {id:'Bookings',label:'Bookings',category:'productivity',isParent:true,score:3633.0,params:1690,entityTypes:50,operations:394,readOps:210,writeOps:184,schemas:50,enums:0,licenses:['M365 Business Standard+','M365 E3/E5'],desc:'Online scheduling — booking businesses, appointments, services'},
+    {id:'Viva Insights',label:'Viva Insights',category:'viva',isParent:true,score:3009.0,params:0,entityTypes:0,operations:0,readOps:0,writeOps:0,schemas:0,enums:0,licenses:['M365 E1/E3/E5 (personal)','Viva Insights add-on','Viva Suite'],desc:'Workplace analytics — personal insights, manager insights, advanced analytics, meeting culture'},
+    {id:'Stream',label:'Stream',category:'productivity',isParent:true,score:3003.0,params:0,entityTypes:0,operations:0,readOps:0,writeOps:0,schemas:0,enums:0,licenses:['M365 E1/E3/E5'],desc:'Enterprise video — live events, video management, transcription, permissions (built on SharePoint)'},
+    {id:'Service Health',label:'Service Health',category:'analytics',isParent:true,score:2772.0,params:1328,entityTypes:43,operations:140,readOps:62,writeOps:78,schemas:49,enums:6,licenses:['M365 E1/E3/E5'],desc:'Service communications, health overviews, service announcements'},
+    {id:'Viva Learning',label:'Viva Learning',category:'viva',isParent:true,score:2509.0,params:0,entityTypes:0,operations:0,readOps:0,writeOps:0,schemas:0,enums:0,licenses:['M365 E1/E3/E5 (basic)','Viva Learning add-on','Viva Suite'],desc:'Learning management — content aggregation, course assignments, LMS integration, learning paths'},
+    {id:'External Identities',label:'External Identities',category:'identity',isParent:true,score:2174.5,params:1060,entityTypes:15,operations:61,readOps:35,writeOps:26,schemas:15,enums:0,licenses:['Free (50K MAU)','P1','P2'],desc:'B2B collaboration — invitations, cross-tenant access, connected organizations'},
+    {id:'Loop',label:'Loop',category:'productivity',isParent:true,score:2003.0,params:0,entityTypes:0,operations:0,readOps:0,writeOps:0,schemas:0,enums:0,licenses:['M365 E3/E5'],desc:'Collaborative components — Loop pages, workspaces, portable components across M365 apps'},
+    {id:'Forms',label:'Forms',category:'productivity',isParent:true,score:1503.0,params:0,entityTypes:0,operations:0,readOps:0,writeOps:0,schemas:0,enums:0,licenses:['M365 E1/E3/E5'],desc:'Surveys, quizzes, and polls — form creation, response collection, branching logic'},
+    {id:'Universal Print',label:'Universal Print',category:'platform',isParent:true,score:1297.0,params:587,entityTypes:49,operations:142,readOps:73,writeOps:69,schemas:65,enums:16,licenses:['M365 E3/E5'],desc:'Cloud printing — printers, print jobs, shares'},
+    {id:'Whiteboard',label:'Whiteboard',category:'productivity',isParent:true,score:1203.0,params:0,entityTypes:0,operations:0,readOps:0,writeOps:0,schemas:0,enums:0,licenses:['M365 E1/E3/E5'],desc:'Digital collaborative canvas — real-time drawing, sticky notes, templates, Teams integration'},
+    {id:'Exchange Online',label:'Exchange Online',category:'productivity',isParent:true,score:1114.5,params:490,entityTypes:60,operations:131,readOps:75,writeOps:56,schemas:69,enums:9,licenses:['Plan 1 (standalone / M365 E1)','Plan 2 (standalone / M365 E3)','Kiosk (F1/F3)'],desc:'Email, calendars, contacts, mail flow, mailbox settings'},
+    {id:'Search',label:'Search',category:'platform',isParent:true,score:1022.5,params:453,entityTypes:82,operations:63,readOps:31,writeOps:32,schemas:100,enums:18,licenses:['M365 E1/E3/E5'],desc:'Microsoft Search — connectors, external content, query API'},
+    {id:'To Do',label:'To Do',category:'productivity',isParent:true,score:1003.0,params:0,entityTypes:0,operations:0,readOps:0,writeOps:0,schemas:0,enums:0,licenses:['M365 E1/E3/E5'],desc:'Personal task management — lists, tasks, My Day, integration with Planner and Outlook'},
+    {id:'Clipchamp',label:'Clipchamp',category:'productivity',isParent:true,score:803.0,params:0,entityTypes:0,operations:0,readOps:0,writeOps:0,schemas:0,enums:0,licenses:['M365 E3/E5'],desc:'Video editing — templates, screen recording, stock media, export and sharing'},
+    {id:'Reports & Analytics',label:'Reports & Analytics',category:'analytics',isParent:true,score:740.0,params:304,entityTypes:24,operations:210,readOps:151,writeOps:59,schemas:24,enums:0,licenses:['M365 E1/E3/E5'],desc:'Usage reports, audit logs, sign-in logs, activity analytics'},
+    {id:'Planner',label:'Planner',category:'productivity',isParent:true,score:532.5,params:228,entityTypes:23,operations:95,readOps:39,writeOps:56,schemas:25,enums:2,licenses:['M365 E1/E3/E5','Plan 1 (standalone, formerly Premium)'],desc:'Task management — plans, buckets, tasks, assignments'},
+    {id:'Notifications',label:'Notifications',category:'platform',isParent:true,score:41.0,params:17,entityTypes:1,operations:6,readOps:2,writeOps:4,schemas:1,enums:0,licenses:['M365 E1/E3/E5'],desc:'Change notifications — webhook subscriptions for resource changes'}
+];
+
+const subNodes = [
+    {id:'Entra ID-0',parent:'Entra ID',label:'User & Group Management',tier:'Free',isParent:false},
+    {id:'Entra ID-1',parent:'Entra ID',label:'Single Sign-On',tier:'Free',isParent:false},
+    {id:'Entra ID-2',parent:'Entra ID',label:'Multi-Factor Authentication',tier:'Free',isParent:false},
+    {id:'Entra ID-3',parent:'Entra ID',label:'Conditional Access',tier:'P1',isParent:false},
+    {id:'Entra ID-4',parent:'Entra ID',label:'Self-Service Password Reset',tier:'P1',isParent:false},
+    {id:'Entra ID-5',parent:'Entra ID',label:'Dynamic Groups',tier:'P1',isParent:false},
+    {id:'Entra ID-6',parent:'Entra ID',label:'Application Proxy',tier:'P1',isParent:false},
+    {id:'Entra ID-7',parent:'Entra ID',label:'Group-Based Licensing',tier:'P1',isParent:false},
+    {id:'Entra ID-8',parent:'Entra ID',label:'Privileged Identity Management',tier:'P2',isParent:false},
+    {id:'Entra ID-9',parent:'Entra ID',label:'Identity Protection',tier:'P2',isParent:false},
+    {id:'Entra ID-10',parent:'Entra ID',label:'Access Reviews',tier:'P2',isParent:false},
+    {id:'Entra ID-11',parent:'Entra ID',label:'Entitlement Management',tier:'P2',isParent:false},
+    {id:'Entra ID-12',parent:'Entra ID',label:'Lifecycle Workflows',tier:'Governance',isParent:false},
+    {id:'Security-0',parent:'Security',label:'Secure Score',tier:'Base',isParent:false},
+    {id:'Security-1',parent:'Security',label:'Basic Threat Detection',tier:'Base',isParent:false},
+    {id:'Security-2',parent:'Security',label:'Defender for Office 365 P1',tier:'E5 Security',isParent:false},
+    {id:'Security-3',parent:'Security',label:'Defender for Office 365 P2',tier:'E5 Security',isParent:false},
+    {id:'Security-4',parent:'Security',label:'Defender for Endpoint P1',tier:'E5 Security',isParent:false},
+    {id:'Security-5',parent:'Security',label:'Defender for Endpoint P2',tier:'E5 Security',isParent:false},
+    {id:'Security-6',parent:'Security',label:'Defender for Identity',tier:'E5 Security',isParent:false},
+    {id:'Security-7',parent:'Security',label:'Auto Investigation & Response',tier:'E5 Security',isParent:false},
+    {id:'OneDrive-0',parent:'OneDrive',label:'1 TB Storage',tier:'Plan 1',isParent:false},
+    {id:'OneDrive-1',parent:'OneDrive',label:'File Sharing & Sync',tier:'Plan 1',isParent:false},
+    {id:'OneDrive-2',parent:'OneDrive',label:'Personal Vault',tier:'Plan 1',isParent:false},
+    {id:'OneDrive-3',parent:'OneDrive',label:'Unlimited Storage (5+ users)',tier:'Plan 2',isParent:false},
+    {id:'OneDrive-4',parent:'OneDrive',label:'Advanced Auditing',tier:'Plan 2',isParent:false},
+    {id:'SharePoint-0',parent:'SharePoint',label:'Team Sites',tier:'Plan 1',isParent:false},
+    {id:'SharePoint-1',parent:'SharePoint',label:'Document Libraries',tier:'Plan 1',isParent:false},
+    {id:'SharePoint-2',parent:'SharePoint',label:'Content Types & Metadata',tier:'Plan 1',isParent:false},
+    {id:'SharePoint-3',parent:'SharePoint',label:'Basic Search',tier:'Plan 1',isParent:false},
+    {id:'SharePoint-4',parent:'SharePoint',label:'Unlimited Storage (5+ users)',tier:'Plan 2',isParent:false},
+    {id:'SharePoint-5',parent:'SharePoint',label:'Advanced Compliance',tier:'Plan 2',isParent:false},
+    {id:'SharePoint-6',parent:'SharePoint',label:'DLP for SharePoint',tier:'Plan 2',isParent:false},
+    {id:'Teams-0',parent:'Teams',label:'Chat & Channels',tier:'Base',isParent:false},
+    {id:'Teams-1',parent:'Teams',label:'Meetings (up to 1,000)',tier:'Base',isParent:false},
+    {id:'Teams-2',parent:'Teams',label:'File Sharing',tier:'Base',isParent:false},
+    {id:'Teams-3',parent:'Teams',label:'Screen Sharing & Recording',tier:'Base',isParent:false},
+    {id:'Teams-4',parent:'Teams',label:'Custom Meeting Templates',tier:'Premium',isParent:false},
+    {id:'Teams-5',parent:'Teams',label:'Intelligent Recap (AI)',tier:'Premium',isParent:false},
+    {id:'Teams-6',parent:'Teams',label:'Live Translated Captions',tier:'Premium',isParent:false},
+    {id:'Teams-7',parent:'Teams',label:'Meeting Watermarks',tier:'Premium',isParent:false},
+    {id:'Teams-8',parent:'Teams',label:'Advanced Webinars',tier:'Premium',isParent:false},
+    {id:'Teams-9',parent:'Teams',label:'PSTN Calling',tier:'Phone',isParent:false},
+    {id:'Teams-10',parent:'Teams',label:'Auto Attendants',tier:'Phone',isParent:false},
+    {id:'Teams-11',parent:'Teams',label:'Call Queues',tier:'Phone',isParent:false},
+    {id:'Power BI-0',parent:'Power BI',label:'Personal Analytics',tier:'Free',isParent:false},
+    {id:'Power BI-1',parent:'Power BI',label:'Basic Visualisations',tier:'Free',isParent:false},
+    {id:'Power BI-2',parent:'Power BI',label:'Sharing & Workspaces',tier:'Pro',isParent:false},
+    {id:'Power BI-3',parent:'Power BI',label:'Scheduled Refresh',tier:'Pro',isParent:false},
+    {id:'Power BI-4',parent:'Power BI',label:'Paginated Reports',tier:'Pro',isParent:false},
+    {id:'Power BI-5',parent:'Power BI',label:'AI Insights',tier:'Premium Per User',isParent:false},
+    {id:'Power BI-6',parent:'Power BI',label:'Dataflows Gen2',tier:'Premium Per User',isParent:false},
+    {id:'Power BI-7',parent:'Power BI',label:'Deployment Pipelines',tier:'Premium Per User',isParent:false},
+    {id:'Purview-0',parent:'Purview',label:'Basic DLP',tier:'Base',isParent:false},
+    {id:'Purview-1',parent:'Purview',label:'Basic eDiscovery',tier:'Base',isParent:false},
+    {id:'Purview-2',parent:'Purview',label:'Retention Policies',tier:'Base',isParent:false},
+    {id:'Purview-3',parent:'Purview',label:'Sensitivity Labels',tier:'Base',isParent:false},
+    {id:'Purview-4',parent:'Purview',label:'Advanced eDiscovery',tier:'E5 Compliance',isParent:false},
+    {id:'Purview-5',parent:'Purview',label:'Insider Risk Management',tier:'E5 Compliance',isParent:false},
+    {id:'Purview-6',parent:'Purview',label:'Communication Compliance',tier:'E5 Compliance',isParent:false},
+    {id:'Purview-7',parent:'Purview',label:'Information Barriers',tier:'E5 Compliance',isParent:false},
+    {id:'Purview-8',parent:'Purview',label:'Records Management',tier:'E5 Compliance',isParent:false},
+    {id:'Education-0',parent:'Education',label:'Teams for Education',tier:'A1',isParent:false},
+    {id:'Education-1',parent:'Education',label:'Class Notebook',tier:'A1',isParent:false},
+    {id:'Education-2',parent:'Education',label:'Assignments',tier:'A1',isParent:false},
+    {id:'Education-3',parent:'Education',label:'Desktop Office Apps',tier:'A3',isParent:false},
+    {id:'Education-4',parent:'Education',label:'Intune for Education',tier:'A3',isParent:false},
+    {id:'Education-5',parent:'Education',label:'Advanced Compliance',tier:'A5',isParent:false},
+    {id:'Education-6',parent:'Education',label:'Phone System',tier:'A5',isParent:false},
+    {id:'Power Automate-0',parent:'Power Automate',label:'Standard Connectors',tier:'M365',isParent:false},
+    {id:'Power Automate-1',parent:'Power Automate',label:'Basic Cloud Flows',tier:'M365',isParent:false},
+    {id:'Power Automate-2',parent:'Power Automate',label:'Premium Connectors',tier:'Per-User',isParent:false},
+    {id:'Power Automate-3',parent:'Power Automate',label:'Custom Connectors',tier:'Per-User',isParent:false},
+    {id:'Power Automate-4',parent:'Power Automate',label:'AI Builder Credits',tier:'Per-User',isParent:false},
+    {id:'Power Automate-5',parent:'Power Automate',label:'Process Mining',tier:'Premium',isParent:false},
+    {id:'Power Automate-6',parent:'Power Automate',label:'Hosted RPA',tier:'Premium',isParent:false},
+    {id:'Power Automate-7',parent:'Power Automate',label:'Desktop Flows (RPA)',tier:'Premium',isParent:false},
+    {id:'Intune-0',parent:'Intune',label:'Device Enrollment',tier:'Plan 1',isParent:false},
+    {id:'Intune-1',parent:'Intune',label:'Compliance Policies',tier:'Plan 1',isParent:false},
+    {id:'Intune-2',parent:'Intune',label:'Configuration Profiles',tier:'Plan 1',isParent:false},
+    {id:'Intune-3',parent:'Intune',label:'App Deployment',tier:'Plan 1',isParent:false},
+    {id:'Intune-4',parent:'Intune',label:'Windows Autopilot',tier:'Plan 1',isParent:false},
+    {id:'Intune-5',parent:'Intune',label:'Advanced Endpoint Analytics',tier:'Plan 2',isParent:false},
+    {id:'Intune-6',parent:'Intune',label:'Tunnel for MAM',tier:'Plan 2',isParent:false},
+    {id:'Intune-7',parent:'Intune',label:'Remote Help',tier:'Suite',isParent:false},
+    {id:'Intune-8',parent:'Intune',label:'Endpoint Privilege Management',tier:'Suite',isParent:false},
+    {id:'Intune-9',parent:'Intune',label:'Cloud PKI',tier:'Suite',isParent:false},
+    {id:'Power Apps-0',parent:'Power Apps',label:'Basic Canvas Apps',tier:'M365',isParent:false},
+    {id:'Power Apps-1',parent:'Power Apps',label:'Standard Connectors',tier:'M365',isParent:false},
+    {id:'Power Apps-2',parent:'Power Apps',label:'Model-Driven Apps',tier:'Per-User',isParent:false},
+    {id:'Power Apps-3',parent:'Power Apps',label:'Dataverse',tier:'Per-User',isParent:false},
+    {id:'Power Apps-4',parent:'Power Apps',label:'Premium Connectors',tier:'Per-User',isParent:false},
+    {id:'Power Apps-5',parent:'Power Apps',label:'Managed Environments',tier:'Premium',isParent:false},
+    {id:'Power Apps-6',parent:'Power Apps',label:'AI Builder',tier:'Premium',isParent:false},
+    {id:'Project-0',parent:'Project',label:'Project for the Web',tier:'Plan 1',isParent:false},
+    {id:'Project-1',parent:'Project',label:'Grid / Board / Timeline',tier:'Plan 1',isParent:false},
+    {id:'Project-2',parent:'Project',label:'Project Desktop Client',tier:'Plan 3',isParent:false},
+    {id:'Project-3',parent:'Project',label:'Resource Management',tier:'Plan 3',isParent:false},
+    {id:'Project-4',parent:'Project',label:'Timesheets',tier:'Plan 3',isParent:false},
+    {id:'Project-5',parent:'Project',label:'Portfolio Management',tier:'Plan 5',isParent:false},
+    {id:'Project-6',parent:'Project',label:'Demand Management',tier:'Plan 5',isParent:false},
+    {id:'Copilot-0',parent:'Copilot',label:'Copilot in Word',tier:'Add-on',isParent:false},
+    {id:'Copilot-1',parent:'Copilot',label:'Copilot in Excel',tier:'Add-on',isParent:false},
+    {id:'Copilot-2',parent:'Copilot',label:'Copilot in PowerPoint',tier:'Add-on',isParent:false},
+    {id:'Copilot-3',parent:'Copilot',label:'Copilot in Outlook',tier:'Add-on',isParent:false},
+    {id:'Copilot-4',parent:'Copilot',label:'Copilot in Teams',tier:'Add-on',isParent:false},
+    {id:'Copilot-5',parent:'Copilot',label:'Microsoft 365 Chat',tier:'Add-on',isParent:false},
+    {id:'Copilot-6',parent:'Copilot',label:'Copilot Pages',tier:'Add-on',isParent:false},
+    {id:'Defender for Cloud Apps-0',parent:'Defender for Cloud Apps',label:'App Discovery',tier:'Standalone',isParent:false},
+    {id:'Defender for Cloud Apps-1',parent:'Defender for Cloud Apps',label:'Session Controls',tier:'Standalone',isParent:false},
+    {id:'Defender for Cloud Apps-2',parent:'Defender for Cloud Apps',label:'Anomaly Detection',tier:'Standalone',isParent:false},
+    {id:'Defender for Cloud Apps-3',parent:'Defender for Cloud Apps',label:'App Governance',tier:'Standalone',isParent:false},
+    {id:'Copilot Studio-0',parent:'Copilot Studio',label:'Custom Copilots',tier:'Standalone',isParent:false},
+    {id:'Copilot Studio-1',parent:'Copilot Studio',label:'Topics & Plugins',tier:'Standalone',isParent:false},
+    {id:'Copilot Studio-2',parent:'Copilot Studio',label:'Generative AI Answers',tier:'Standalone',isParent:false},
+    {id:'Copilot Studio-3',parent:'Copilot Studio',label:'Multi-Channel Deploy',tier:'Standalone',isParent:false},
+    {id:'Viva Engage-0',parent:'Viva Engage',label:'Communities',tier:'Base',isParent:false},
+    {id:'Viva Engage-1',parent:'Viva Engage',label:'Conversations & Stories',tier:'Base',isParent:false},
+    {id:'Viva Engage-2',parent:'Viva Engage',label:'Campaign Management',tier:'Premium',isParent:false},
+    {id:'Viva Engage-3',parent:'Viva Engage',label:'Leadership Corner',tier:'Premium',isParent:false},
+    {id:'Viva Engage-4',parent:'Viva Engage',label:'Advanced Analytics',tier:'Premium',isParent:false},
+    {id:'Visio-0',parent:'Visio',label:'Visio for the Web',tier:'Plan 1',isParent:false},
+    {id:'Visio-1',parent:'Visio',label:'Basic Diagrams',tier:'Plan 1',isParent:false},
+    {id:'Visio-2',parent:'Visio',label:'Desktop Client',tier:'Plan 2',isParent:false},
+    {id:'Visio-3',parent:'Visio',label:'Advanced Stencils',tier:'Plan 2',isParent:false},
+    {id:'Visio-4',parent:'Visio',label:'Data Linking',tier:'Plan 2',isParent:false},
+    {id:'Bookings-0',parent:'Bookings',label:'Booking Pages',tier:'Included',isParent:false},
+    {id:'Bookings-1',parent:'Bookings',label:'Appointments & Staff',tier:'Included',isParent:false},
+    {id:'Viva Insights-0',parent:'Viva Insights',label:'Personal Insights',tier:'Personal',isParent:false},
+    {id:'Viva Insights-1',parent:'Viva Insights',label:'Focus Time',tier:'Personal',isParent:false},
+    {id:'Viva Insights-2',parent:'Viva Insights',label:'Meeting Habits',tier:'Personal',isParent:false},
+    {id:'Viva Insights-3',parent:'Viva Insights',label:'Manager Insights',tier:'Premium',isParent:false},
+    {id:'Viva Insights-4',parent:'Viva Insights',label:'Advanced Analytics',tier:'Premium',isParent:false},
+    {id:'Viva Insights-5',parent:'Viva Insights',label:'Custom Queries (OData)',tier:'Premium',isParent:false},
+    {id:'Stream-0',parent:'Stream',label:'Video Management',tier:'Included',isParent:false},
+    {id:'Stream-1',parent:'Stream',label:'Live Events',tier:'Included',isParent:false},
+    {id:'Stream-2',parent:'Stream',label:'Transcription',tier:'Included',isParent:false},
+    {id:'Service Health-0',parent:'Service Health',label:'Service Health Dashboard',tier:'Included',isParent:false},
+    {id:'Service Health-1',parent:'Service Health',label:'Message Center',tier:'Included',isParent:false},
+    {id:'Viva Learning-0',parent:'Viva Learning',label:'Microsoft Learn Content',tier:'Base',isParent:false},
+    {id:'Viva Learning-1',parent:'Viva Learning',label:'LinkedIn Learning (limited)',tier:'Base',isParent:false},
+    {id:'Viva Learning-2',parent:'Viva Learning',label:'LMS Integration',tier:'Premium',isParent:false},
+    {id:'Viva Learning-3',parent:'Viva Learning',label:'Learning Paths',tier:'Premium',isParent:false},
+    {id:'Viva Learning-4',parent:'Viva Learning',label:'Assignments & Tracking',tier:'Premium',isParent:false},
+    {id:'External Identities-0',parent:'External Identities',label:'B2B Collaboration',tier:'Free',isParent:false},
+    {id:'External Identities-1',parent:'External Identities',label:'Guest Access (50K MAU)',tier:'Free',isParent:false},
+    {id:'External Identities-2',parent:'External Identities',label:'Conditional Access for Guests',tier:'P1',isParent:false},
+    {id:'External Identities-3',parent:'External Identities',label:'Identity Protection for Externals',tier:'P2',isParent:false},
+    {id:'Loop-0',parent:'Loop',label:'Loop Components',tier:'Included',isParent:false},
+    {id:'Loop-1',parent:'Loop',label:'Workspaces & Pages',tier:'Included',isParent:false},
+    {id:'Forms-0',parent:'Forms',label:'Form Creation',tier:'Included',isParent:false},
+    {id:'Forms-1',parent:'Forms',label:'Branching Logic',tier:'Included',isParent:false},
+    {id:'Forms-2',parent:'Forms',label:'Response Analytics',tier:'Included',isParent:false},
+    {id:'Universal Print-0',parent:'Universal Print',label:'Cloud Print',tier:'Included',isParent:false},
+    {id:'Universal Print-1',parent:'Universal Print',label:'Printer Shares & Connector',tier:'Included',isParent:false},
+    {id:'Whiteboard-0',parent:'Whiteboard',label:'Collaborative Canvas',tier:'Included',isParent:false},
+    {id:'Whiteboard-1',parent:'Whiteboard',label:'Templates & Inking',tier:'Included',isParent:false},
+    {id:'Exchange Online-0',parent:'Exchange Online',label:'50 GB Mailbox',tier:'Plan 1',isParent:false},
+    {id:'Exchange Online-1',parent:'Exchange Online',label:'Mail Flow Rules',tier:'Plan 1',isParent:false},
+    {id:'Exchange Online-2',parent:'Exchange Online',label:'Anti-Spam & Anti-Malware',tier:'Plan 1',isParent:false},
+    {id:'Exchange Online-3',parent:'Exchange Online',label:'Shared Mailboxes',tier:'Plan 1',isParent:false},
+    {id:'Exchange Online-4',parent:'Exchange Online',label:'100 GB Mailbox',tier:'Plan 2',isParent:false},
+    {id:'Exchange Online-5',parent:'Exchange Online',label:'In-Place Archive (unlimited)',tier:'Plan 2',isParent:false},
+    {id:'Exchange Online-6',parent:'Exchange Online',label:'Data Loss Prevention',tier:'Plan 2',isParent:false},
+    {id:'Exchange Online-7',parent:'Exchange Online',label:'Journaling',tier:'Plan 2',isParent:false},
+    {id:'Search-0',parent:'Search',label:'Microsoft Search',tier:'Included',isParent:false},
+    {id:'Search-1',parent:'Search',label:'Graph Connectors',tier:'Included',isParent:false},
+    {id:'To Do-0',parent:'To Do',label:'Tasks & Lists',tier:'Included',isParent:false},
+    {id:'To Do-1',parent:'To Do',label:'My Day & Planner Sync',tier:'Included',isParent:false},
+    {id:'Clipchamp-0',parent:'Clipchamp',label:'Video Editing',tier:'Included',isParent:false},
+    {id:'Clipchamp-1',parent:'Clipchamp',label:'Templates & Stock Media',tier:'Included',isParent:false},
+    {id:'Reports & Analytics-0',parent:'Reports & Analytics',label:'Usage Reports',tier:'Included',isParent:false},
+    {id:'Reports & Analytics-1',parent:'Reports & Analytics',label:'Audit & Sign-In Logs',tier:'Included',isParent:false},
+    {id:'Planner-0',parent:'Planner',label:'Plans & Buckets',tier:'Base',isParent:false},
+    {id:'Planner-1',parent:'Planner',label:'Task Assignments',tier:'Base',isParent:false},
+    {id:'Planner-2',parent:'Planner',label:'Charts & Schedule View',tier:'Base',isParent:false},
+    {id:'Planner-3',parent:'Planner',label:'Goals',tier:'Plan 1',isParent:false},
+    {id:'Planner-4',parent:'Planner',label:'Advanced Scheduling',tier:'Plan 1',isParent:false},
+    {id:'Planner-5',parent:'Planner',label:'Dependencies',tier:'Plan 1',isParent:false},
+    {id:'Planner-6',parent:'Planner',label:'Copilot in Planner',tier:'Plan 1',isParent:false},
+    {id:'Notifications-0',parent:'Notifications',label:'Webhook Subscriptions',tier:'Included',isParent:false}
+];
+const crossEdges = [
+    {source:'Entra ID',target:'Intune',strength:0.8,label:'Device identity & compliance'},
+    {source:'Entra ID',target:'Teams',strength:0.6,label:'User auth & groups'},
+    {source:'Entra ID',target:'Exchange Online',strength:0.6,label:'Mailbox provisioning'},
+    {source:'Entra ID',target:'SharePoint',strength:0.5,label:'Site permissions'},
+    {source:'Entra ID',target:'OneDrive',strength:0.5,label:'User storage provisioning'},
+    {source:'Entra ID',target:'Security',strength:0.7,label:'Identity protection & risk'},
+    {source:'Entra ID',target:'Purview',strength:0.5,label:'Data governance policies'},
+    {source:'Entra ID',target:'External Identities',strength:0.8,label:'B2B/guest access'},
+    {source:'Entra ID',target:'Copilot',strength:0.5,label:'User context & permissions'},
+    {source:'Intune',target:'Security',strength:0.6,label:'Device compliance signals'},
+    {source:'Intune',target:'Defender for Cloud Apps',strength:0.5,label:'App protection policies'},
+    {source:'Teams',target:'SharePoint',strength:0.7,label:'Team files & sites'},
+    {source:'Teams',target:'OneDrive',strength:0.5,label:'Chat file storage'},
+    {source:'Teams',target:'Exchange Online',strength:0.5,label:'Calendar & meetings'},
+    {source:'Teams',target:'Copilot',strength:0.6,label:'Meeting & chat AI'},
+    {source:'Teams',target:'Loop',strength:0.5,label:'Collaborative components'},
+    {source:'Teams',target:'Stream',strength:0.4,label:'Live events & video'},
+    {source:'Teams',target:'Whiteboard',strength:0.4,label:'Whiteboard in meetings'},
+    {source:'SharePoint',target:'OneDrive',strength:0.6,label:'Shared document libraries'},
+    {source:'SharePoint',target:'Search',strength:0.5,label:'Content indexing'},
+    {source:'SharePoint',target:'Stream',strength:0.5,label:'Video storage'},
+    {source:'SharePoint',target:'Loop',strength:0.4,label:'Loop page storage'},
+    {source:'Security',target:'Purview',strength:0.7,label:'Compliance & DLP'},
+    {source:'Security',target:'Defender for Cloud Apps',strength:0.7,label:'Shadow IT & app governance'},
+    {source:'Exchange Online',target:'Purview',strength:0.5,label:'Mail compliance & retention'},
+    {source:'Defender for Cloud Apps',target:'Entra ID',strength:0.5,label:'Conditional access integration'},
+    {source:'Reports & Analytics',target:'Entra ID',strength:0.4,label:'Sign-in & audit logs'},
+    {source:'Reports & Analytics',target:'Teams',strength:0.3,label:'Usage reports'},
+    {source:'Viva Insights',target:'Teams',strength:0.5,label:'Meeting & collaboration analytics'},
+    {source:'Viva Insights',target:'Exchange Online',strength:0.4,label:'Email patterns'},
+    {source:'Planner',target:'Teams',strength:0.5,label:'Task integration'},
+    {source:'Planner',target:'To Do',strength:0.6,label:'Shared tasks sync'},
+    {source:'To Do',target:'Exchange Online',strength:0.4,label:'Flagged emails as tasks'},
+    {source:'Forms',target:'SharePoint',strength:0.3,label:'Response storage'},
+    {source:'Education',target:'Teams',strength:0.5,label:'Class teams'},
+    {source:'Power Automate',target:'SharePoint',strength:0.5,label:'List & document triggers'},
+    {source:'Power Automate',target:'Teams',strength:0.4,label:'Adaptive cards & notifications'},
+    {source:'Power Automate',target:'Entra ID',strength:0.4,label:'User lifecycle automation'},
+    {source:'Power Apps',target:'SharePoint',strength:0.5,label:'Dataverse & lists'},
+    {source:'Power Apps',target:'Power Automate',strength:0.7,label:'App-triggered flows'},
+    {source:'Power BI',target:'SharePoint',strength:0.4,label:'Embedded reports'},
+    {source:'Power BI',target:'Entra ID',strength:0.3,label:'Row-level security'},
+    {source:'Copilot',target:'Exchange Online',strength:0.5,label:'Email drafting & summarisation'},
+    {source:'Copilot',target:'SharePoint',strength:0.5,label:'Document generation'},
+    {source:'Copilot',target:'Power BI',strength:0.4,label:'Data Q&A'},
+    {source:'Copilot Studio',target:'Power Automate',strength:0.5,label:'Bot-triggered flows'},
+    {source:'Copilot Studio',target:'Copilot',strength:0.6,label:'Custom copilot extensions'},
+    {source:'Viva Engage',target:'Teams',strength:0.5,label:'Communities in Teams'},
+    {source:'Viva Learning',target:'Teams',strength:0.4,label:'Learning tab in Teams'},
+    {source:'Viva Learning',target:'SharePoint',strength:0.3,label:'Custom learning content'},
+    {source:'Project',target:'Teams',strength:0.4,label:'Project tab in Teams'},
+    {source:'Project',target:'Planner',strength:0.5,label:'Task integration'},
+    {source:'Project',target:'Power BI',strength:0.3,label:'Project reporting'}
+];
+const DESCRIPTIONS = {
+    'Entra ID-0':'Privileged Access Group Eligibility Schedule Request: 4826 properties (4800 writable, 26 read-only), max depth 6',
+    'Entra ID-1':'Privileged Access Group Assignment Schedule: 4814 properties (4788 writable, 26 read-only), max depth 6',
+    'Entra ID-2':'Privileged Access Group Assignment Schedule Request: 4809 properties (4783 writable, 26 read-only), max depth 6',
+    'Entra ID-3':'Privileged Access Group Assignment Schedule Instance: 4777 properties (4751 writable, 26 read-only), max depth 6',
+    'Entra ID-4':'Shared With Channel Team Info: 3559 properties (3539 writable, 20 read-only), max depth 6',
+    'Entra ID-5':'Associated Team Info: 3557 properties (3537 writable, 20 read-only), max depth 6',
+    'Entra ID-6':'Team: 3551 properties (3531 writable, 20 read-only), max depth 6',
+    'Entra ID-7':'Privileged Access Group Eligibility Schedule: 2407 properties (2394 writable, 13 read-only), max depth 6',
+    'Entra ID-8':'Privileged Access Group Eligibility Schedule Instance: 2391 properties (2378 writable, 13 read-only), max depth 6',
+    'Entra ID-9':'Identity Governance Activate Group Scope: 2380 properties (2367 writable, 13 read-only), max depth 6',
+    'Entra ID-10':'Group: 2378 properties (2365 writable, 13 read-only), max depth 6',
+    'Entra ID-11':'Site: 2109 properties (2097 writable, 12 read-only), max depth 6',
+    'Entra ID-12':'List: 2064 properties (2052 writable, 12 read-only), max depth 6',
+    'Entra ID-13':'List Item: 2050 properties (2038 writable, 12 read-only), max depth 6',
+    'Entra ID-14':'Identity Governance Custom Task Extension Callout Data: 1885 properties (1873 writable, 12 read-only), max depth 6',
+    'Security-0':'Subject Rights Request: 3608 properties (3588 writable, 20 read-only), max depth 6',
+    'Security-1':'Team: 3551 properties (3531 writable, 20 read-only), max depth 6',
+    'Security-2':'Security Unified Group Source: 2394 properties (2381 writable, 13 read-only), max depth 6',
+    'Security-3':'Group: 2378 properties (2365 writable, 13 read-only), max depth 6',
+    'Security-4':'Security Site Source: 2125 properties (2113 writable, 12 read-only), max depth 6',
+    'Security-5':'Site: 2109 properties (2097 writable, 12 read-only), max depth 6',
+    'Security-6':'User: 458 properties (455 writable, 3 read-only), max depth 6',
+    'Security-7':'Security Retention Label: 155 properties (155 writable, 0 read-only), max depth 4',
+    'Security-8':'Security Ediscovery Add To Review Set Operation: 140 properties (140 writable, 0 read-only), max depth 2',
+    'Security-9':'Security Ediscovery Estimate Operation: 128 properties (128 writable, 0 read-only), max depth 2',
+    'Security-10':'Security Ediscovery Search Export Operation: 125 properties (125 writable, 0 read-only), max depth 2',
+    'Security-11':'Simulation: 123 properties (123 writable, 0 read-only), max depth 4',
+    'Security-12':'Security Kubernetes Pod Evidence: 120 properties (120 writable, 0 read-only), max depth 2',
+    'Security-13':'Security Host Pair: 106 properties (106 writable, 0 read-only), max depth 4',
+    'Security-14':'Security Ediscovery Search: 100 properties (100 writable, 0 read-only), max depth 2',
+    'OneDrive-0':'Shared Drive Item: 9383 properties (9329 writable, 54 read-only), max depth 6',
+    'OneDrive-1':'Site: 2109 properties (2097 writable, 12 read-only), max depth 6',
+    'OneDrive-2':'List: 2064 properties (2052 writable, 12 read-only), max depth 6',
+    'OneDrive-3':'List Item: 2050 properties (2038 writable, 12 read-only), max depth 6',
+    'OneDrive-4':'Drive: 1107 properties (1101 writable, 6 read-only), max depth 6',
+    'OneDrive-5':'Item Activity: 1090 properties (1084 writable, 6 read-only), max depth 6',
+    'OneDrive-6':'Drive Item: 1081 properties (1075 writable, 6 read-only), max depth 6',
+    'OneDrive-7':'User: 458 properties (455 writable, 3 read-only), max depth 6',
+    'OneDrive-8':'Workbook Chart: 109 properties (109 writable, 0 read-only), max depth 5',
+    'OneDrive-9':'Column Definition: 88 properties (88 writable, 0 read-only), max depth 5',
+    'OneDrive-10':'Workbook Range: 73 properties (73 writable, 0 read-only), max depth 4',
+    'OneDrive-11':'Content Type: 49 properties (49 writable, 0 read-only), max depth 3',
+    'OneDrive-12':'Workbook Table: 47 properties (47 writable, 0 read-only), max depth 3',
+    'OneDrive-13':'Permission: 41 properties (41 writable, 0 read-only), max depth 3',
+    'OneDrive-14':'Workbook Chart Axes: 40 properties (40 writable, 0 read-only), max depth 4',
+    'SharePoint-0':'Site: 2109 properties (2097 writable, 12 read-only), max depth 6',
+    'SharePoint-1':'List: 2064 properties (2052 writable, 12 read-only), max depth 6',
+    'SharePoint-2':'List Item: 2050 properties (2038 writable, 12 read-only), max depth 6',
+    'SharePoint-3':'Drive: 1107 properties (1101 writable, 6 read-only), max depth 6',
+    'SharePoint-4':'Item Activity: 1090 properties (1084 writable, 6 read-only), max depth 6',
+    'SharePoint-5':'Drive Item: 1081 properties (1075 writable, 6 read-only), max depth 6',
+    'SharePoint-6':'Site Page: 982 properties (976 writable, 6 read-only), max depth 6',
+    'SharePoint-7':'Base Site Page: 954 properties (948 writable, 6 read-only), max depth 6',
+    'SharePoint-8':'Base Item: 945 properties (939 writable, 6 read-only), max depth 6',
+    'SharePoint-9':'User: 458 properties (455 writable, 3 read-only), max depth 6',
+    'SharePoint-10':'Onenote Page: 124 properties (124 writable, 0 read-only), max depth 3',
+    'SharePoint-11':'Column Definition: 88 properties (88 writable, 0 read-only), max depth 5',
+    'SharePoint-12':'Onenote Section: 84 properties (84 writable, 0 read-only), max depth 3',
+    'SharePoint-13':'Term Store Relation: 77 properties (77 writable, 0 read-only), max depth 1',
+    'SharePoint-14':'Content Type: 49 properties (49 writable, 0 read-only), max depth 3',
+    'Teams-0':'Shared With Channel Team Info: 3559 properties (3539 writable, 20 read-only), max depth 6',
+    'Teams-1':'Team: 3551 properties (3531 writable, 20 read-only), max depth 6',
+    'Teams-2':'Group: 2378 properties (2365 writable, 13 read-only), max depth 6',
+    'Teams-3':'Channel: 1102 properties (1096 writable, 6 read-only), max depth 6',
+    'Teams-4':'Drive Item: 1081 properties (1075 writable, 6 read-only), max depth 6',
+    'Teams-5':'Online Meeting Engagement Conversation: 105 properties (102 writable, 3 read-only), max depth 5',
+    'Teams-6':'Call: 74 properties (74 writable, 0 read-only), max depth 2',
+    'Teams-7':'Online Meeting: 73 properties (73 writable, 0 read-only), max depth 5',
+    'Teams-8':'Call Records Call Record: 60 properties (60 writable, 0 read-only), max depth 3',
+    'Teams-9':'Call Records Media: 46 properties (46 writable, 0 read-only), max depth 2',
+    'Teams-10':'Pinned Chat Message Info: 41 properties (41 writable, 0 read-only), max depth 3',
+    'Teams-11':'Chat Message: 38 properties (38 writable, 0 read-only), max depth 3',
+    'Teams-12':'Participant: 38 properties (38 writable, 0 read-only), max depth 2',
+    'Teams-13':'Call Records Organizer: 37 properties (37 writable, 0 read-only), max depth 2',
+    'Teams-14':'Call Records Participant: 37 properties (37 writable, 0 read-only), max depth 2',
+    'Other-0':'Community: 2386 properties (2373 writable, 13 read-only), max depth 6',
+    'Other-1':'Group: 2378 properties (2365 writable, 13 read-only), max depth 6',
+    'Other-2':'File Storage Container: 2077 properties (2065 writable, 12 read-only), max depth 6',
+    'Other-3':'Drive: 1107 properties (1101 writable, 6 read-only), max depth 6',
+    'Other-4':'Recycle Bin: 949 properties (943 writable, 6 read-only), max depth 6',
+    'Other-5':'Recycle Bin Item: 949 properties (943 writable, 6 read-only), max depth 6',
+    'Other-6':'Engagement Role Member: 463 properties (458 writable, 5 read-only), max depth 6',
+    'Other-7':'User: 458 properties (455 writable, 3 read-only), max depth 6',
+    'Other-8':'Application Service Principal: 157 properties (155 writable, 2 read-only), max depth 3',
+    'Other-9':'Column Definition: 88 properties (88 writable, 0 read-only), max depth 5',
+    'Other-10':'Permission: 41 properties (41 writable, 0 read-only), max depth 3',
+    'Other-11':'Agreement: 23 properties (23 writable, 0 read-only), max depth 3',
+    'Other-12':'Storage: 21 properties (21 writable, 0 read-only), max depth 2',
+    'Other-13':'Mailbox Settings: 19 properties (19 writable, 0 read-only), max depth 3',
+    'Other-14':'External Connectors External Connection: 19 properties (19 writable, 0 read-only), max depth 2',
+    'Purview-0':'Subject Rights Request: 3608 properties (3588 writable, 20 read-only), max depth 6',
+    'Purview-1':'Team: 3551 properties (3531 writable, 20 read-only), max depth 6',
+    'Purview-2':'User: 458 properties (455 writable, 3 read-only), max depth 6',
+    'Purview-3':'Android Compliance Policy: 55 properties (55 writable, 0 read-only), max depth 2',
+    'Purview-4':'Android Work Profile Compliance Policy: 55 properties (55 writable, 0 read-only), max depth 2',
+    'Purview-5':'Windows10 Compliance Policy: 53 properties (53 writable, 0 read-only), max depth 2',
+    'Purview-6':'Mac Os Compliance Policy: 51 properties (51 writable, 0 read-only), max depth 2',
+    'Purview-7':'Windows10 Mobile Compliance Policy: 50 properties (50 writable, 0 read-only), max depth 2',
+    'Purview-8':'Ios Compliance Policy: 48 properties (48 writable, 0 read-only), max depth 2',
+    'Purview-9':'Windows81 Compliance Policy: 45 properties (45 writable, 0 read-only), max depth 2',
+    'Purview-10':'Windows Phone81 Compliance Policy: 45 properties (45 writable, 0 read-only), max depth 2',
+    'Purview-11':'Windows Information Protection: 38 properties (38 writable, 0 read-only), max depth 2',
+    'Purview-12':'Mailbox Settings: 19 properties (19 writable, 0 read-only), max depth 3',
+    'Purview-13':'Threat Assessment Request: 17 properties (17 writable, 0 read-only), max depth 1',
+    'Purview-14':'Device Compliance Policy Setting State: 13 properties (13 writable, 0 read-only), max depth 1',
+    'Education-0':'Education Class: 2433 properties (2420 writable, 13 read-only), max depth 6',
+    'Education-1':'Group: 2378 properties (2365 writable, 13 read-only), max depth 6',
+    'Education-2':'Education Root: 531 properties (528 writable, 3 read-only), max depth 6',
+    'Education-3':'Education User: 520 properties (517 writable, 3 read-only), max depth 6',
+    'Education-4':'User: 458 properties (455 writable, 3 read-only), max depth 6',
+    'Education-5':'Education Assignment: 85 properties (76 writable, 9 read-only), max depth 2',
+    'Education-6':'Education Submission: 76 properties (67 writable, 9 read-only), max depth 2',
+    'Education-7':'Education Speaker Progress Resource: 58 properties (56 writable, 2 read-only), max depth 3',
+    'Education-8':'Education School: 49 properties (49 writable, 0 read-only), max depth 2',
+    'Education-9':'Education Feedback Resource Outcome: 39 properties (37 writable, 2 read-only), max depth 2',
+    'Education-10':'Education Rubric: 31 properties (29 writable, 2 read-only), max depth 2',
+    'Education-11':'Education Module: 30 properties (27 writable, 3 read-only), max depth 1',
+    'Education-12':'Education Assignment Resource: 29 properties (27 writable, 2 read-only), max depth 2',
+    'Education-13':'Education Submission Resource: 29 properties (27 writable, 2 read-only), max depth 2',
+    'Education-14':'Education Feedback Outcome: 29 properties (29 writable, 0 read-only), max depth 3',
+    'Intune-0':'Group: 2378 properties (2365 writable, 13 read-only), max depth 6',
+    'Intune-1':'User: 458 properties (455 writable, 3 read-only), max depth 6',
+    'Intune-2':'Device Management: 213 properties (212 writable, 1 read-only), max depth 3',
+    'Intune-3':'Managed Device: 123 properties (81 writable, 42 read-only), max depth 2',
+    'Intune-4':'Service Principal: 68 properties (68 writable, 0 read-only), max depth 2',
+    'Intune-5':'Android Managed App Protection: 57 properties (57 writable, 0 read-only), max depth 2',
+    'Intune-6':'Default Managed App Protection: 56 properties (56 writable, 0 read-only), max depth 1',
+    'Intune-7':'Ios Managed App Protection: 54 properties (54 writable, 0 read-only), max depth 1',
+    'Intune-8':'Windows Information Protection Policy: 51 properties (51 writable, 0 read-only), max depth 2',
+    'Intune-9':'Managed Android Lob App: 49 properties (46 writable, 3 read-only), max depth 2',
+    'Intune-10':'Win32 Lob App: 48 properties (45 writable, 3 read-only), max depth 2',
+    'Intune-11':'Android Lob App: 46 properties (43 writable, 3 read-only), max depth 2',
+    'Intune-12':'Mac Os Lob App: 46 properties (43 writable, 3 read-only), max depth 2',
+    'Intune-13':'Managed Ios Lob App: 45 properties (42 writable, 3 read-only), max depth 2',
+    'Intune-14':'Mac Os Dmg App: 43 properties (40 writable, 3 read-only), max depth 2',
+    'Bookings-0':'Mailbox Restore Artifact: 62 properties (61 writable, 1 read-only), max depth 4',
+    'Bookings-1':'Drive Restore Artifact: 62 properties (60 writable, 2 read-only), max depth 4',
+    'Bookings-2':'Site Restore Artifact: 62 properties (60 writable, 2 read-only), max depth 4',
+    'Bookings-3':'Virtual Event Webinar: 61 properties (61 writable, 0 read-only), max depth 2',
+    'Bookings-4':'Granular Mailbox Restore Artifact: 55 properties (54 writable, 1 read-only), max depth 3',
+    'Bookings-5':'Virtual Event Session: 55 properties (55 writable, 0 read-only), max depth 2',
+    'Bookings-6':'Virtual Event Townhall: 53 properties (53 writable, 0 read-only), max depth 2',
+    'Bookings-7':'Booking Business: 50 properties (48 writable, 2 read-only), max depth 3',
+    'Bookings-8':'Virtual Event: 49 properties (49 writable, 0 read-only), max depth 2',
+    'Bookings-9':'Booking Appointment: 48 properties (46 writable, 2 read-only), max depth 3',
+    'Bookings-10':'Solutions Root: 46 properties (46 writable, 0 read-only), max depth 3',
+    'Bookings-11':'Booking Service: 46 properties (45 writable, 1 read-only), max depth 3',
+    'Bookings-12':'Exchange Restore Session: 45 properties (45 writable, 0 read-only), max depth 3',
+    'Bookings-13':'One Drive For Business Restore Session: 44 properties (44 writable, 0 read-only), max depth 3',
+    'Bookings-14':'Share Point Restore Session: 44 properties (44 writable, 0 read-only), max depth 3',
+    'Service Health-0':'Teams Administration Teams User Configuration: 467 properties (464 writable, 3 read-only), max depth 7',
+    'Service Health-1':'User: 458 properties (455 writable, 3 read-only), max depth 6',
+    'Service Health-2':'Admin: 63 properties (63 writable, 0 read-only), max depth 4',
+    'Service Health-3':'Sharepoint: 28 properties (28 writable, 0 read-only), max depth 3',
+    'Service Health-4':'Sharepoint Settings: 27 properties (27 writable, 0 read-only), max depth 2',
+    'Service Health-5':'Service Update Message: 22 properties (22 writable, 0 read-only), max depth 2',
+    'Service Health-6':'Reseller Delegated Admin Relationship: 21 properties (21 writable, 0 read-only), max depth 2',
+    'Service Health-7':'Mailbox Settings: 19 properties (19 writable, 0 read-only), max depth 3',
+    'Service Health-8':'Browser Shared Cookie: 18 properties (18 writable, 0 read-only), max depth 3',
+    'Service Health-9':'Browser Site: 18 properties (18 writable, 0 read-only), max depth 3',
+    'Service Health-10':'Service Health Issue: 18 properties (18 writable, 0 read-only), max depth 1',
+    'Service Health-11':'Browser Site List: 15 properties (15 writable, 0 read-only), max depth 3',
+    'Service Health-12':'Admin Microsoft365 Apps: 13 properties (13 writable, 0 read-only), max depth 3',
+    'Service Health-13':'Exchange Message Trace: 12 properties (12 writable, 0 read-only), max depth 1',
+    'Service Health-14':'M365 Apps Installation Options: 12 properties (12 writable, 0 read-only), max depth 2',
+    'External Identities-0':'Invitation: 474 properties (471 writable, 3 read-only), max depth 6',
+    'External Identities-1':'User: 458 properties (455 writable, 3 read-only), max depth 6',
+    'External Identities-2':'Mailbox Settings: 19 properties (19 writable, 0 read-only), max depth 3',
+    'External Identities-3':'Delegated Admin Relationship: 18 properties (18 writable, 0 read-only), max depth 1',
+    'External Identities-4':'Tenant Relationship: 16 properties (16 writable, 0 read-only), max depth 3',
+    'External Identities-5':'Multi Tenant Organization: 13 properties (13 writable, 0 read-only), max depth 2',
+    'External Identities-6':'Multi Tenant Organization Member: 12 properties (12 writable, 0 read-only), max depth 1',
+    'External Identities-7':'Delegated Admin Access Assignment: 10 properties (10 writable, 0 read-only), max depth 1',
+    'External Identities-8':'Delegated Admin Relationship Operation: 8 properties (8 writable, 0 read-only), max depth 1',
+    'External Identities-9':'Delegated Admin Customer: 6 properties (6 writable, 0 read-only), max depth 1',
+    'External Identities-10':'Delegated Admin Relationship Request: 6 properties (6 writable, 0 read-only), max depth 1',
+    'External Identities-11':'Multi Tenant Organization Join Request Record: 6 properties (6 writable, 0 read-only), max depth 1',
+    'External Identities-12':'Delegated Admin Service Management Detail: 5 properties (5 writable, 0 read-only), max depth 1',
+    'External Identities-13':'Tenant Information: 5 properties (5 writable, 0 read-only), max depth 1',
+    'External Identities-14':'Directory Object: 4 properties (4 writable, 0 read-only), max depth 1',
+    'Universal Print-0':'Printer Share: 103 properties (103 writable, 0 read-only), max depth 3',
+    'Universal Print-1':'Printer Create Operation: 61 properties (61 writable, 0 read-only), max depth 3',
+    'Universal Print-2':'Printer: 52 properties (52 writable, 0 read-only), max depth 3',
+    'Universal Print-3':'Printer Base: 44 properties (44 writable, 0 read-only), max depth 3',
+    'Universal Print-4':'Print Job: 38 properties (38 writable, 0 read-only), max depth 3',
+    'Universal Print-5':'Print Task: 22 properties (22 writable, 0 read-only), max depth 2',
+    'Universal Print-6':'Print Connector: 21 properties (21 writable, 0 read-only), max depth 2',
+    'Universal Print-7':'Mailbox Settings: 19 properties (19 writable, 0 read-only), max depth 3',
+    'Universal Print-8':'Archived Print Job: 16 properties (16 writable, 0 read-only), max depth 1',
+    'Universal Print-9':'Print Job Configuration: 16 properties (16 writable, 0 read-only), max depth 2',
+    'Universal Print-10':'Print Task Trigger: 14 properties (14 writable, 0 read-only), max depth 1',
+    'Universal Print-11':'Print Usage: 14 properties (14 writable, 0 read-only), max depth 1',
+    'Universal Print-12':'Printer Location: 13 properties (13 writable, 0 read-only), max depth 1',
+    'Universal Print-13':'Print: 12 properties (12 writable, 0 read-only), max depth 4',
+    'Universal Print-14':'Printer Defaults: 11 properties (11 writable, 0 read-only), max depth 1',
+    'Exchange Online-0':'Calendar Sharing Message: 45 properties (45 writable, 0 read-only), max depth 3',
+    'Exchange Online-1':'Room: 28 properties (28 writable, 0 read-only), max depth 2',
+    'Exchange Online-2':'Building: 27 properties (27 writable, 0 read-only), max depth 2',
+    'Exchange Online-3':'Mail Tips: 26 properties (26 writable, 0 read-only), max depth 2',
+    'Exchange Online-4':'Desk: 23 properties (23 writable, 0 read-only), max depth 2',
+    'Exchange Online-5':'Workspace: 23 properties (23 writable, 0 read-only), max depth 2',
+    'Exchange Online-6':'Room List: 20 properties (20 writable, 0 read-only), max depth 2',
+    'Exchange Online-7':'Email File Assessment Request: 20 properties (20 writable, 0 read-only), max depth 1',
+    'Exchange Online-8':'Mail Assessment Request: 20 properties (20 writable, 0 read-only), max depth 1',
+    'Exchange Online-9':'Floor: 18 properties (18 writable, 0 read-only), max depth 2',
+    'Exchange Online-10':'Mail Search Folder: 18 properties (18 writable, 0 read-only), max depth 1',
+    'Exchange Online-11':'Section: 17 properties (17 writable, 0 read-only), max depth 2',
+    'Exchange Online-12':'Place: 16 properties (16 writable, 0 read-only), max depth 2',
+    'Exchange Online-13':'Automatic Replies Mail Tips: 11 properties (11 writable, 0 read-only), max depth 2',
+    'Exchange Online-14':'On Email Otp Send Listener: 10 properties (10 writable, 0 read-only), max depth 3',
+    'Search-0':'Restore Point Search Result: 45 properties (45 writable, 0 read-only), max depth 4',
+    'Search-1':'Search Bookmark: 20 properties (20 writable, 0 read-only), max depth 3',
+    'Search-2':'Search Qna: 20 properties (20 writable, 0 read-only), max depth 3',
+    'Search-3':'External Connectors External Connection: 19 properties (19 writable, 0 read-only), max depth 2',
+    'Search-4':'External Connectors External Activity Result: 19 properties (19 writable, 0 read-only), max depth 3',
+    'Search-5':'Search Request: 17 properties (17 writable, 0 read-only), max depth 2',
+    'Search-6':'Search Acronym: 14 properties (14 writable, 0 read-only), max depth 3',
+    'Search-7':'External Connectors Connection Operation: 13 properties (13 writable, 0 read-only), max depth 3',
+    'Search-8':'External Authentication Method Configuration: 11 properties (11 writable, 0 read-only), max depth 2',
+    'Search-9':'Saml Or Ws Fed External Domain Federation: 11 properties (11 writable, 0 read-only), max depth 1',
+    'Search-10':'Search Search Answer: 11 properties (11 writable, 0 read-only), max depth 3',
+    'Search-11':'Search Response: 10 properties (10 writable, 0 read-only), max depth 2',
+    'Search-12':'Search Identity Set: 10 properties (10 writable, 0 read-only), max depth 1',
+    'Search-13':'External Connectors External Item: 9 properties (9 writable, 0 read-only), max depth 2',
+    'Search-14':'Search Hit: 9 properties (9 writable, 0 read-only), max depth 1',
+    'Reports & Analytics-0':'Provisioning Object Summary: 42 properties (42 writable, 0 read-only), max depth 3',
+    'Reports & Analytics-1':'Report Root: 38 properties (38 writable, 0 read-only), max depth 5',
+    'Reports & Analytics-2':'Sign In: 33 properties (33 writable, 0 read-only), max depth 3',
+    'Reports & Analytics-3':'Partners: 26 properties (26 writable, 0 read-only), max depth 4',
+    'Reports & Analytics-4':'Directory Audit: 24 properties (24 writable, 0 read-only), max depth 2',
+    'Reports & Analytics-5':'Partners Billing Billing: 23 properties (23 writable, 0 read-only), max depth 3',
+    'Reports & Analytics-6':'Print Usage By Printer: 17 properties (17 writable, 0 read-only), max depth 1',
+    'Reports & Analytics-7':'Print Usage By User: 16 properties (16 writable, 0 read-only), max depth 1',
+    'Reports & Analytics-8':'User Registration Details: 14 properties (14 writable, 0 read-only), max depth 1',
+    'Reports & Analytics-9':'Partners Billing Manifest: 13 properties (13 writable, 0 read-only), max depth 1',
+    'Reports & Analytics-10':'Partners Billing Billing Reconciliation: 9 properties (9 writable, 0 read-only), max depth 2',
+    'Reports & Analytics-11':'Partners Billing Azure Usage: 9 properties (9 writable, 0 read-only), max depth 2',
+    'Reports & Analytics-12':'Audit Log Root: 6 properties (6 writable, 0 read-only), max depth 1',
+    'Reports & Analytics-13':'Partners Billing Operation: 5 properties (5 writable, 0 read-only), max depth 1',
+    'Reports & Analytics-14':'Authentication Methods Root: 4 properties (4 writable, 0 read-only), max depth 1',
+    'Planner-0':'Planner Plan: 43 properties (43 writable, 0 read-only), max depth 3',
+    'Planner-1':'Planner Task: 36 properties (36 writable, 0 read-only), max depth 3',
+    'Planner-2':'Planner Plan Details: 30 properties (30 writable, 0 read-only), max depth 2',
+    'Planner-3':'Planner Category Descriptions: 26 properties (26 writable, 0 read-only), max depth 1',
+    'Planner-4':'Planner Checklist Item: 15 properties (15 writable, 0 read-only), max depth 1',
+    'Planner-5':'Planner External Reference: 15 properties (15 writable, 0 read-only), max depth 1',
+    'Planner-6':'Planner Assignment: 13 properties (13 writable, 0 read-only), max depth 1',
+    'Planner-7':'Planner Bucket: 7 properties (7 writable, 0 read-only), max depth 1',
+    'Planner-8':'Planner Task Details: 6 properties (6 writable, 0 read-only), max depth 2',
+    'Planner-9':'Planner: 6 properties (6 writable, 0 read-only), max depth 1',
+    'Planner-10':'Planner Assigned To Task Board Task Format: 5 properties (5 writable, 0 read-only), max depth 2',
+    'Planner-11':'Planner Bucket Task Board Task Format: 4 properties (4 writable, 0 read-only), max depth 1',
+    'Planner-12':'Planner Progress Task Board Task Format: 4 properties (4 writable, 0 read-only), max depth 1',
+    'Planner-13':'Planner Plan Container: 3 properties (3 writable, 0 read-only), max depth 1',
+    'Planner-14':'Planner Bucket Collection Response: 3 properties (3 writable, 0 read-only), max depth 1',
+    'Notifications-0':'Subscription: 17 properties (17 writable, 0 read-only), max depth 1'
+};
+
+// ============================================================
+// ENGINE
+// ============================================================
+
+// ============================================================
+// INIT
+// ============================================================
+const canvas = document.getElementById('graph');
+const ctx = canvas.getContext('2d');
+const tooltip = document.getElementById('tooltip');
+const detailPanel = document.getElementById('detail-panel');
+const detailName = document.getElementById('detail-name');
+const detailBody = document.getElementById('detail-body');
+
+let W, H, dpr;
+function resize() {
+    dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    W = rect.width; H = rect.height;
+    canvas.width = W * dpr; canvas.height = H * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+resize();
+window.addEventListener('resize', () => { resize(); draw(); });
+
+const allNodes = [...parentNodes, ...subNodes];
+const nodeMap = new Map();
+allNodes.forEach(n => nodeMap.set(n.id, n));
+const parentMap = new Map();
+parentNodes.forEach(n => parentMap.set(n.id, n));
+
+// Build connection map from crossEdges (for click-to-highlight)
+const connectionMap = new Map();
+crossEdges.forEach(e => {
+    if (!connectionMap.has(e.source)) connectionMap.set(e.source, []);
+    if (!connectionMap.has(e.target)) connectionMap.set(e.target, []);
+    connectionMap.get(e.source).push(e.target);
+    connectionMap.get(e.target).push(e.source);
+});
+
+// Helper: is a sub-feature included at a given tier level?
+function tierIncluded(workload, featureTier, maxTier) {
+    if (featureTier === 'Included' || maxTier === 'Included') return true;
+    const hier = TIER_HIERARCHY[workload];
+    if (!hier) return true; // No hierarchy = always included
+    const featureIdx = hier.indexOf(featureTier);
+    const maxIdx = hier.indexOf(maxTier);
+    if (featureIdx < 0 || maxIdx < 0) return false;
+    return featureIdx <= maxIdx;
+}
+
+// Assign positions — circle layout for parents
+const cx = W / 2, cy = H / 2;
+const layoutRadius = Math.min(W, H) * 0.36;
+parentNodes.forEach((n, i) => {
+    const angle = (i / parentNodes.length) * Math.PI * 2 - Math.PI / 2;
+    n.x = cx + Math.cos(angle) * layoutRadius;
+    n.y = cy + Math.sin(angle) * layoutRadius;
+    n.vx = 0; n.vy = 0;
+    n._idx = i;
+    n.active = true;
+    n.licenseHighlight = false;
+});
+subNodes.forEach((s, i) => {
+    const parent = nodeMap.get(s.parent);
+    if (parent) {
+        const angle = Math.random() * Math.PI * 2;
+        const dist = 50 + Math.random() * 50;
+        s.x = parent.x + Math.cos(angle) * dist;
+        s.y = parent.y + Math.sin(angle) * dist;
+    } else {
+        s.x = cx + Math.random() * 100 - 50;
+        s.y = cy + Math.random() * 100 - 50;
+    }
+    s.vx = 0; s.vy = 0;
+    s._idx = parentNodes.length + i;
+    s.active = true;
+    s.licenseHighlight = false;
+    s.tierIncluded = true;
+});
+
+// Node sizing
+const maxScore = Math.max(...parentNodes.map(n => n.score || 1));
+function nodeRadius(n) {
+    if (n.isParent) {
+        return 28 + Math.sqrt((n.score || 1) / maxScore) * 42;
+    }
+    return 8;
+}
+
+function wrapLabel(text, maxWidth, fontSize) {
+    ctx.font = `600 ${fontSize}px 'Segoe UI', sans-serif`;
+    const words = text.split(/[\s&]+/);
+    const tokens = [];
+    let src = text;
+    for (const w of words) {
+        const idx = src.indexOf(w);
+        if (idx > 0) {
+            const sep = src.substring(0, idx).trim();
+            if (sep === '&') { tokens[tokens.length - 1] += ' &'; }
+        }
+        tokens.push(w);
+        src = src.substring(src.indexOf(w) + w.length);
+    }
+    if (tokens.length <= 1) return [text];
+    const lines = [];
+    let cur = tokens[0];
+    for (let i = 1; i < tokens.length; i++) {
+        const test = cur + ' ' + tokens[i];
+        if (ctx.measureText(test).width > maxWidth) {
+            lines.push(cur);
+            cur = tokens[i];
+        } else {
+            cur = test;
+        }
+    }
+    lines.push(cur);
+    return lines;
+}
+
+// ============================================================
+// STATE
+// ============================================================
+let panX = 0, panY = 0, zoom = 1;
+let dragging = null, dragOffX = 0, dragOffY = 0;
+let isPanning = false, panStartX = 0, panStartY = 0;
+let frozen = false;
+let showSubs = true;
+let selectedNode = null;
+let activeLicense = null;
+const activeCategories = new Set(Object.keys(CATEGORIES));
+
+function screenToWorld(sx, sy) {
+    return [(sx - panX) / zoom, (sy - panY) / zoom];
+}
+function worldToScreen(wx, wy) {
+    return [wx * zoom + panX, wy * zoom + panY];
+}
+
+// ============================================================
+// PHYSICS
+// ============================================================
+const DAMPING = 0.82;
+const DT = 0.8;
+let energyLow = 0;
+
+function simulate() {
+    if (frozen) return;
+    let totalEnergy = 0;
+
+    // Repulsion (parent-parent)
+    for (let i = 0; i < parentNodes.length; i++) {
+        const a = parentNodes[i];
+        if (!a.active) continue;
+        for (let j = i + 1; j < parentNodes.length; j++) {
+            const b = parentNodes[j];
+            if (!b.active) continue;
+            let dx = a.x - b.x, dy = a.y - b.y;
+            let dist = Math.sqrt(dx * dx + dy * dy) || 1;
+            const subPad = showSubs ? 50 : 0;
+            const minDist = nodeRadius(a) + nodeRadius(b) + 50 + subPad;
+            let force = 30000 / (dist * dist);
+            // Hard collision: push apart firmly but not explosively
+            if (dist < minDist) {
+                const overlap = (minDist - dist) / minDist;
+                force += overlap * 35;
+            }
+            force = Math.min(force, 50);
+            const fx = (dx / dist) * force, fy = (dy / dist) * force;
+            a.vx += fx; a.vy += fy;
+            b.vx -= fx; b.vy -= fy;
+        }
+    }
+
+    // Sub-node repulsion (among siblings only)
+    if (showSubs) {
+        const siblingGroups = new Map();
+        subNodes.forEach(s => {
+            if (!s.active) return;
+            if (!siblingGroups.has(s.parent)) siblingGroups.set(s.parent, []);
+            siblingGroups.get(s.parent).push(s);
+        });
+        siblingGroups.forEach(group => {
+            for (let i = 0; i < group.length; i++) {
+                for (let j = i + 1; j < group.length; j++) {
+                    let dx = group[i].x - group[j].x, dy = group[i].y - group[j].y;
+                    let dist = Math.sqrt(dx * dx + dy * dy) || 1;
+                    let force = 1200 / (dist * dist);
+                    force = Math.min(force, 18);
+                    const fx = (dx / dist) * force, fy = (dy / dist) * force;
+                    group[i].vx += fx; group[i].vy += fy;
+                    group[j].vx -= fx; group[j].vy -= fy;
+                }
+            }
+        });
+    }
+
+    // Spring forces for cross edges
+    crossEdges.forEach(e => {
+        const a = nodeMap.get(e.source), b = nodeMap.get(e.target);
+        if (!a || !b || !a.active || !b.active) return;
+        const dx = b.x - a.x, dy = b.y - a.y;
+        const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+        const ideal = 250 + (1 - (e.strength || 0.5)) * 180;
+        const force = (dist - ideal) * 0.004;
+        const fx = (dx / dist) * force, fy = (dy / dist) * force;
+        a.vx += fx; a.vy += fy;
+        b.vx -= fx; b.vy -= fy;
+    });
+
+    // Parent-child springs
+    if (showSubs) {
+        subNodes.forEach(s => {
+            if (!s.active) return;
+            const parent = nodeMap.get(s.parent);
+            if (!parent || !parent.active) return;
+            const dx = parent.x - s.x, dy = parent.y - s.y;
+            const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+            const pr = nodeRadius(parent);
+            const ideal = pr + 60;
+            const force = (dist - ideal) * 0.04;
+            const fx = (dx / dist) * force, fy = (dy / dist) * force;
+            s.vx += fx; s.vy += fy;
+            parent.vx -= fx * 0.02; parent.vy -= fy * 0.02;
+        });
+    }
+
+    // Center gravity
+    allNodes.forEach(n => {
+        if (!n.active) return;
+        const dx = cx - n.x, dy = cy - n.y;
+        const force = n.isParent ? 0.015 : 0.004;
+        n.vx += dx * force; n.vy += dy * force;
+    });
+
+    // Integrate
+    allNodes.forEach(n => {
+        if (!n.active || n === dragging) return;
+        n.vx *= DAMPING; n.vy *= DAMPING;
+        n.x += n.vx * DT; n.y += n.vy * DT;
+        totalEnergy += n.vx * n.vx + n.vy * n.vy;
+    });
+
+    // Auto-freeze
+    if (totalEnergy < 0.5) { energyLow++; } else { energyLow = 0; }
+    if (energyLow > 60) { frozen = true; document.getElementById('btn-freeze').textContent = 'Unfreeze'; }
+}
+
+// ============================================================
+// RENDERING
+// ============================================================
+function draw() {
+    ctx.clearRect(0, 0, W, H);
+    ctx.save();
+    ctx.translate(panX, panY);
+    ctx.scale(zoom, zoom);
+
+    // 1. Parent-child edges (thin lines from parent to feature)
+    if (showSubs) {
+        subNodes.forEach(s => {
+            if (!s.active) return;
+            const parent = nodeMap.get(s.parent);
+            if (!parent || !parent.active) return;
+            const dimParent = activeLicense && !parent.licenseHighlight;
+            const dimFeature = activeLicense && !s.tierIncluded;
+            if (dimParent || dimFeature) {
+                ctx.strokeStyle = 'rgba(167,139,250,0.03)';
+                ctx.lineWidth = 0.3;
+            } else {
+                ctx.strokeStyle = 'rgba(167,139,250,0.15)';
+                ctx.lineWidth = 0.6;
+            }
+            ctx.beginPath(); ctx.moveTo(parent.x, parent.y); ctx.lineTo(s.x, s.y); ctx.stroke();
+        });
+    }
+
+    // 2. Click-to-highlight connections (solid lines to connected workloads)
+    if (selectedNode && selectedNode.isParent) {
+        const conns = connectionMap.get(selectedNode.id) || [];
+        conns.forEach(otherId => {
+            const other = nodeMap.get(otherId);
+            if (!other || !other.active) return;
+            const cat = CATEGORIES[selectedNode.category || 'platform'];
+            ctx.strokeStyle = cat.color + '90';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath(); ctx.moveTo(selectedNode.x, selectedNode.y);
+            ctx.lineTo(other.x, other.y); ctx.stroke();
+        });
+    }
+
+    // 3. Draw sub-nodes (features) with labels
+    if (showSubs) {
+        subNodes.forEach(s => {
+            if (!s.active) return;
+            const parent = nodeMap.get(s.parent);
+            const cat = parent ? CATEGORIES[parent.category || 'platform'] : CATEGORIES.platform;
+            const r = nodeRadius(s);
+            const dimParent = activeLicense && !(parent && parent.licenseHighlight);
+            const dimFeature = activeLicense && !s.tierIncluded;
+            const dimmed = dimParent || dimFeature;
+
+            ctx.beginPath(); ctx.arc(s.x, s.y, r, 0, Math.PI * 2);
+            if (dimmed) {
+                ctx.fillStyle = 'rgba(30,42,66,0.15)';
+                ctx.strokeStyle = 'rgba(30,42,66,0.1)';
+            } else if (activeLicense && s.tierIncluded) {
+                // Bright when included in selected license
+                ctx.fillStyle = cat.color + '90';
+                ctx.strokeStyle = cat.color + 'cc';
+            } else {
+                ctx.fillStyle = cat.color + '50';
+                ctx.strokeStyle = cat.color + '70';
+            }
+            ctx.fill();
+            ctx.lineWidth = 0.8;
+            ctx.stroke();
+
+            // Feature label
+            if (!dimmed) {
+                const labelSize = Math.max(7, Math.min(11 / zoom, 12));
+                ctx.font = `600 ${labelSize}px 'Segoe UI', sans-serif`;
+                ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+                let label = s.label;
+                if (label.length > 32) label = label.substring(0, 30) + '...';
+                ctx.strokeStyle = 'rgba(0,0,0,0.8)';
+                ctx.lineWidth = 3;
+                ctx.lineJoin = 'round';
+                ctx.strokeText(label, s.x + r + 4, s.y);
+                ctx.fillStyle = (activeLicense && s.tierIncluded) ? '#fff' : cat.color + 'dd';
+                ctx.fillText(label, s.x + r + 4, s.y);
+                // Tier badge
+                if (s.tier && s.tier !== 'Included') {
+                    const tw = ctx.measureText(label).width;
+                    const badgeSize = Math.max(6, labelSize - 2);
+                    ctx.font = `500 ${badgeSize}px 'Segoe UI', sans-serif`;
+                    ctx.fillStyle = (activeLicense && s.tierIncluded) ? 'rgba(255,255,255,0.5)' : 'rgba(136,146,168,0.6)';
+                    ctx.fillText(s.tier, s.x + r + 4 + tw + 6, s.y);
+                }
+            }
+        });
+    }
+
+    // 4. Draw parent nodes
+    parentNodes.forEach(n => {
+        if (!n.active) return;
+        const cat = CATEGORIES[n.category || 'platform'];
+        const r = nodeRadius(n);
+        const highlighted = n.licenseHighlight;
+        const dimmed = activeLicense && !highlighted;
+
+        if (highlighted) {
+            ctx.save();
+            ctx.shadowColor = cat.glow;
+            ctx.shadowBlur = 30;
+            ctx.beginPath(); ctx.arc(n.x, n.y, r, 0, Math.PI * 2);
+            ctx.fillStyle = 'transparent'; ctx.fill();
+            ctx.restore();
+        }
+
+        const grad = ctx.createRadialGradient(n.x - r * 0.3, n.y - r * 0.3, r * 0.1, n.x, n.y, r);
+        if (dimmed) {
+            grad.addColorStop(0, 'rgba(30,42,66,0.4)');
+            grad.addColorStop(1, 'rgba(20,27,45,0.3)');
+        } else {
+            grad.addColorStop(0, cat.color + 'a0');
+            grad.addColorStop(1, cat.color + '35');
+        }
+        ctx.beginPath(); ctx.arc(n.x, n.y, r, 0, Math.PI * 2);
+        ctx.fillStyle = grad; ctx.fill();
+
+        ctx.strokeStyle = dimmed ? 'rgba(30,42,66,0.3)' : cat.color + (highlighted ? 'cc' : '80');
+        ctx.lineWidth = highlighted ? 3 : 2;
+        ctx.stroke();
+
+        const fontSize = Math.max(9, Math.min(r * 0.34, 16));
+        ctx.fillStyle = dimmed ? 'rgba(136,146,168,0.15)' : '#fff';
+        if (highlighted) { ctx.shadowColor = cat.glow; ctx.shadowBlur = 10; }
+
+        const maxTextW = r * 1.5;
+        const lines = wrapLabel(n.label, maxTextW, fontSize);
+        const lineH = fontSize * 1.2;
+        const startY = n.y - ((lines.length - 1) * lineH) / 2;
+        ctx.font = `600 ${fontSize}px 'Segoe UI', sans-serif`;
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        lines.forEach((line, i) => ctx.fillText(line, n.x, startY + i * lineH));
+        ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0;
+
+        if (n === selectedNode) {
+            ctx.save();
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([4, 3]);
+            ctx.beginPath(); ctx.arc(n.x, n.y, r + 5, 0, Math.PI * 2); ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.restore();
+        }
+    });
+
+    ctx.restore();
+}
+
+// ============================================================
+// INTERACTION
+// ============================================================
+function nodeAt(sx, sy) {
+    const [wx, wy] = screenToWorld(sx, sy);
+    let best = null, bestDist = Infinity;
+    const check = (list) => {
+        list.forEach(n => {
+            if (!n.active) return;
+            if (!n.isParent && !showSubs) return;
+            const dx = n.x - wx, dy = n.y - wy;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            const r = nodeRadius(n);
+            if (dist < r + 4 && dist < bestDist) { best = n; bestDist = dist; }
+        });
+    };
+    check(parentNodes);
+    if (showSubs) check(subNodes);
+    return best;
+}
+
+let lastMoveTime = 0;
+canvas.addEventListener('mousemove', (e) => {
+    const now = Date.now();
+    if (now - lastMoveTime < 33) return;  // throttle 30Hz
+    lastMoveTime = now;
+
+    const rect = canvas.getBoundingClientRect();
+    const sx = e.clientX - rect.left, sy = e.clientY - rect.top;
+
+    if (dragging) {
+        const [wx, wy] = screenToWorld(sx, sy);
+        dragging.x = wx + dragOffX; dragging.y = wy + dragOffY;
+        dragging.vx = 0; dragging.vy = 0;
+        return;
+    }
+    if (isPanning) {
+        panX += e.clientX - panStartX; panY += e.clientY - panStartY;
+        panStartX = e.clientX; panStartY = e.clientY;
+        return;
+    }
+
+    const node = nodeAt(sx, sy);
+    if (node) {
+        canvas.style.cursor = 'pointer';
+        const cat = node.isParent ? CATEGORIES[node.category || 'platform'] : null;
+        const parentCat = !node.isParent ? CATEGORIES[(nodeMap.get(node.parent) || {}).category || 'platform'] : null;
+        tooltip.innerHTML = `
+            <div class="tooltip-name">${node.label.replace(/\n/g, ' ')}</div>
+            <div class="tooltip-info">${
+                node.isParent
+                    ? `${node.params?.toLocaleString() || 0} properties &middot; ${node.entityTypes || 0} entity types &middot; ${node.operations?.toLocaleString() || 0} ops`
+                    : `${node.parent} &middot; ${node.tier || 'Included'}`
+            }</div>
+        `;
+        tooltip.classList.add('visible');
+        tooltip.style.left = Math.min(e.clientX + 12, window.innerWidth - 320) + 'px';
+        tooltip.style.top = (e.clientY + 12) + 'px';
+    } else {
+        canvas.style.cursor = 'grab';
+        tooltip.classList.remove('visible');
+    }
+});
+
+canvas.addEventListener('mousedown', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const sx = e.clientX - rect.left, sy = e.clientY - rect.top;
+    const node = nodeAt(sx, sy);
+
+    if (node) {
+        dragging = node;
+        const [wx, wy] = screenToWorld(sx, sy);
+        dragOffX = node.x - wx; dragOffY = node.y - wy;
+        frozen = false; energyLow = 0;
+        document.getElementById('btn-freeze').textContent = 'Freeze';
+    } else {
+        isPanning = true;
+        panStartX = e.clientX; panStartY = e.clientY;
+        canvas.style.cursor = 'grabbing';
+    }
+});
+
+canvas.addEventListener('mouseup', (e) => {
+    if (dragging) {
+        // Click detection (didn't move much)
+        const rect = canvas.getBoundingClientRect();
+        const sx = e.clientX - rect.left, sy = e.clientY - rect.top;
+        const [wx, wy] = screenToWorld(sx, sy);
+        const dx = dragging.x - (wx + dragOffX), dy = dragging.y - (wy + dragOffY);
+        if (Math.sqrt(dx*dx + dy*dy) < 3) {
+            selectNode(dragging);
+        }
+        dragging = null;
+    }
+    if (isPanning) { isPanning = false; canvas.style.cursor = 'grab'; }
+});
+
+canvas.addEventListener('mouseleave', () => {
+    tooltip.classList.remove('visible');
+    if (isPanning) { isPanning = false; }
+});
+
+canvas.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    const rect = canvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+    const factor = e.deltaY < 0 ? 1.1 : 0.9;
+    const newZoom = Math.max(0.1, Math.min(zoom * factor, 5));
+    panX = mx - (mx - panX) * (newZoom / zoom);
+    panY = my - (my - panY) * (newZoom / zoom);
+    zoom = newZoom;
+}, {passive: false});
+
+// ============================================================
+// NODE SELECTION & DETAIL PANEL
+// ============================================================
+function selectNode(node) {
+    selectedNode = node;
+    detailName.textContent = node.label.replace(/\n/g, ' ');
+    const cat = CATEGORIES[node.category || (nodeMap.get(node.parent) || {}).category || 'platform'];
+
+    let html = '';
+    html += `<div class="detail-category" style="background:${cat.color}20;color:${cat.color};border:1px solid ${cat.color}40">${cat.label}</div>`;
+
+    if (node.isParent) {
+        html += `<div class="detail-desc">${node.desc || ''}</div>`;
+        html += '<div class="detail-stat-grid">';
+        html += `<div class="detail-stat"><div class="detail-stat-val">${(node.params || 0).toLocaleString()}</div><div class="detail-stat-label">Properties</div></div>`;
+        html += `<div class="detail-stat"><div class="detail-stat-val">${node.entityTypes || 0}</div><div class="detail-stat-label">Entity Types</div></div>`;
+        html += `<div class="detail-stat"><div class="detail-stat-val">${(node.operations || 0).toLocaleString()}</div><div class="detail-stat-label">Operations</div></div>`;
+        html += `<div class="detail-stat"><div class="detail-stat-val">${node.schemas || 0}</div><div class="detail-stat-label">Schemas</div></div>`;
+        html += `<div class="detail-stat"><div class="detail-stat-val">${node.readOps || 0}</div><div class="detail-stat-label">Read (GET)</div></div>`;
+        html += `<div class="detail-stat"><div class="detail-stat-val">${node.writeOps || 0}</div><div class="detail-stat-label">Write</div></div>`;
+        html += `<div class="detail-stat"><div class="detail-stat-val">${node.enums || 0}</div><div class="detail-stat-label">Enum Types</div></div>`;
+        html += `<div class="detail-stat"><div class="detail-stat-val">${(node.score || 0).toLocaleString()}</div><div class="detail-stat-label">Score</div></div>`;
+        html += '</div>';
+
+        // Licensing
+        if (node.licenses && node.licenses.length) {
+            html += '<div class="detail-section-title">Licensing</div>';
+            html += node.licenses.map(l => `<span class="detail-license-tag">${l}</span>`).join(' ');
+        }
+
+        // Connected workloads
+        const connections = crossEdges.filter(e => e.source === node.id || e.target === node.id);
+        if (connections.length) {
+            html += '<div class="detail-section-title">Connected Workloads</div>';
+            connections.forEach(e => {
+                const other = e.source === node.id ? e.target : e.source;
+                const otherNode = nodeMap.get(other);
+                const otherCat = otherNode ? CATEGORIES[otherNode.category || 'platform'] : CATEGORIES.platform;
+                html += `<div class="detail-connection" onclick="selectNode(nodeMap.get('${other}'))">
+                    <div class="detail-conn-dot" style="background:${otherCat.color}"></div>
+                    ${other}
+                    <span class="detail-conn-label">${e.label || ''}</span>
+                </div>`;
+            });
+        }
+
+        // Features
+        const subs = subNodes.filter(s => s.parent === node.id);
+        if (subs.length) {
+            html += '<div class="detail-section-title">Features</div>';
+            subs.forEach(s => {
+                const included = activeLicense ? (s.tierIncluded ? '&#10003;' : '&#10007;') : '';
+                const tierLabel = s.tier && s.tier !== 'Included' ? s.tier : '';
+                html += `<div class="detail-connection" onclick="selectNode(nodeMap.get('${s.id}'))">
+                    <div class="detail-conn-dot" style="background:${cat.color}60"></div>
+                    ${s.label}
+                    <span class="detail-conn-label">${tierLabel} ${included}</span>
+                </div>`;
+            });
+        }
+    } else {
+        // Sub-node (feature)
+        html += `<div class="detail-desc">Licensed feature of ${node.parent}</div>`;
+        html += '<div class="detail-stat-grid">';
+        html += `<div class="detail-stat"><div class="detail-stat-val">${node.tier || 'Included'}</div><div class="detail-stat-label">Min. License Tier</div></div>`;
+        html += `<div class="detail-stat"><div class="detail-stat-val">${activeLicense && node.tierIncluded ? 'Yes' : activeLicense ? 'No' : '—'}</div><div class="detail-stat-label">In Selected License</div></div>`;
+        html += '</div>';
+
+        // Which licenses include this feature?
+        const includedIn = [];
+        Object.entries(LICENSE_TIERS).forEach(([lName, lTier]) => {
+            const maxTier = (lTier.includes || {})[node.parent];
+            if (maxTier && tierIncluded(node.parent, node.tier, maxTier)) {
+                includedIn.push({name: lName, color: lTier.color});
+            }
+        });
+        if (includedIn.length) {
+            html += '<div class="detail-section-title">Included In</div>';
+            html += includedIn.map(l =>
+                `<span class="detail-license-tag" style="color:${l.color};border-color:${l.color}40;background:${l.color}10">${l.name}</span>`
+            ).join(' ');
+        }
+
+        const parent = nodeMap.get(node.parent);
+        if (parent) {
+            html += '<div class="detail-section-title">Workload</div>';
+            const parentCat = CATEGORIES[parent.category || 'platform'];
+            html += `<div class="detail-connection" onclick="selectNode(nodeMap.get('${parent.id}'))">
+                <div class="detail-conn-dot" style="background:${parentCat.color}"></div>
+                ${parent.label.replace(/\n/g, ' ')}
+            </div>`;
+        }
+    }
+
+    detailBody.innerHTML = html;
+    detailPanel.classList.add('open');
+}
+
+document.getElementById('detail-close').addEventListener('click', () => {
+    detailPanel.classList.remove('open');
+    selectedNode = null;
+});
+
+// ============================================================
+// FILTERS
+// ============================================================
+
+// Category filters
+const catFiltersEl = document.getElementById('cat-filters');
+Object.entries(CATEGORIES).forEach(([key, cat]) => {
+    const count = parentNodes.filter(n => n.category === key).length;
+    if (count === 0) return;
+    const item = document.createElement('div');
+    item.className = 'filter-item';
+    item.innerHTML = `<div class="filter-dot" style="background:${cat.color}"></div>
+        <div class="filter-cb checked" data-cat="${key}"></div>
+        <span>${cat.label} (${count})</span>`;
+    item.addEventListener('click', () => {
+        const cb = item.querySelector('.filter-cb');
+        const checked = cb.classList.toggle('checked');
+        if (checked) activeCategories.add(key); else activeCategories.delete(key);
+        updateVisibility();
+    });
+    catFiltersEl.appendChild(item);
+});
+
+function updateVisibility() {
+    parentNodes.forEach(n => {
+        n.active = activeCategories.has(n.category || 'platform');
+    });
+    subNodes.forEach(s => {
+        const parent = nodeMap.get(s.parent);
+        s.active = parent ? parent.active : false;
+    });
+    updateCounts();
+}
+
+function updateCounts() {
+    const activeParents = parentNodes.filter(n => n.active).length;
+    document.getElementById('cat-count').textContent = `(${activeParents}/${parentNodes.length})`;
+    const activeSubs = subNodes.filter(s => s.active).length;
+    document.getElementById('sub-stats').textContent = showSubs ? `${activeSubs} features visible` : '';
+}
+
+// License filters
+const licenseListEl = document.getElementById('license-list');
+Object.entries(LICENSE_TIERS).forEach(([name, tier]) => {
+    const btn = document.createElement('div');
+    btn.className = 'license-btn';
+    btn.textContent = name;
+    btn.style.color = tier.color;
+    btn.style.borderColor = tier.color + '60';
+    btn.style.background = tier.color + '10';
+    btn.style.setProperty('--glow-color', tier.color + '40');
+    btn.dataset.license = name;
+    btn.addEventListener('click', () => {
+        if (activeLicense === name) {
+            // Deselect
+            activeLicense = null;
+            btn.classList.remove('active');
+            parentNodes.forEach(n => { n.licenseHighlight = false; });
+            subNodes.forEach(s => { s.licenseHighlight = false; s.tierIncluded = true; });
+        } else {
+            // Select
+            activeLicense = name;
+            licenseListEl.querySelectorAll('.license-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            parentNodes.forEach(n => { n.licenseHighlight = false; });
+            subNodes.forEach(s => { s.licenseHighlight = false; s.tierIncluded = false; });
+            // Iterate per-workload includes for this license
+            const includes = tier.includes || {};
+            Object.entries(includes).forEach(([wlName, maxTier]) => {
+                const node = nodeMap.get(wlName);
+                if (node) {
+                    node.licenseHighlight = true;
+                    // Check each sub-feature against the max tier for this workload
+                    subNodes.forEach(s => {
+                        if (s.parent === wlName) {
+                            s.tierIncluded = tierIncluded(wlName, s.tier, maxTier);
+                            if (s.tierIncluded) s.licenseHighlight = true;
+                        }
+                    });
+                }
+            });
+        }
+        // Update license count
+        const included = parentNodes.filter(n => n.licenseHighlight).length;
+        document.getElementById('license-count').textContent = activeLicense ? `(${included} workloads)` : '';
+    });
+    licenseListEl.appendChild(btn);
+});
+
+// Toggle: show/hide features
+const toggleSubs = document.getElementById('toggle-subs');
+toggleSubs.classList.add('on');  // default ON
+toggleSubs.addEventListener('click', () => {
+    showSubs = !showSubs;
+    toggleSubs.classList.toggle('on', showSubs);
+    if (!frozen) { energyLow = 0; }
+    updateCounts();
+});
+
+// Buttons
+document.getElementById('btn-freeze').addEventListener('click', () => {
+    frozen = !frozen;
+    if (!frozen) energyLow = 0;
+    document.getElementById('btn-freeze').textContent = frozen ? 'Unfreeze' : 'Freeze';
+});
+
+document.getElementById('btn-reset').addEventListener('click', () => {
+    panX = 0; panY = 0; zoom = 1;
+    frozen = false; energyLow = 0;
+    document.getElementById('btn-freeze').textContent = 'Freeze';
+    // Re-layout
+    parentNodes.forEach((n, i) => {
+        const angle = (i / parentNodes.length) * Math.PI * 2 - Math.PI / 2;
+        n.x = cx + Math.cos(angle) * radius;
+        n.y = cy + Math.sin(angle) * radius;
+        n.vx = 0; n.vy = 0;
+    });
+    subNodes.forEach(s => {
+        const parent = nodeMap.get(s.parent);
+        if (parent) {
+            const angle = Math.random() * Math.PI * 2;
+            const dist = 60 + Math.random() * 70;
+            s.x = parent.x + Math.cos(angle) * dist;
+            s.y = parent.y + Math.sin(angle) * dist;
+        }
+        s.vx = 0; s.vy = 0;
+    });
+});
+
+// Search
+const searchInput = document.getElementById('search-input');
+const searchResults = document.getElementById('search-results');
+searchInput.addEventListener('input', () => {
+    const q = searchInput.value.trim().toLowerCase();
+    if (q.length < 2) { searchResults.classList.remove('active'); return; }
+
+    const results = [];
+    allNodes.forEach(n => {
+        const name = (n.label || '').replace(/\n/g, ' ').toLowerCase();
+        if (name.includes(q)) {
+            results.push(n);
+        }
+    });
+
+    if (results.length === 0) { searchResults.classList.remove('active'); return; }
+
+    searchResults.innerHTML = '';
+    results.slice(0, 15).forEach(n => {
+        const cat = CATEGORIES[n.category || (nodeMap.get(n.parent) || {}).category || 'platform'];
+        const display = (n.label || '').replace(/\n/g, ' ');
+        const div = document.createElement('div');
+        div.className = 'search-result';
+        div.innerHTML = `<div class="search-dot" style="background:${cat.color}"></div>
+            <span>${display}</span>
+            ${!n.isParent ? `<span class="search-parent">${n.parent}</span>` : ''}
+            <span class="search-badge">${n.isParent ? 'workload' : 'feature'}</span>`;
+        div.addEventListener('click', () => {
+            selectNode(n);
+            searchResults.classList.remove('active');
+            searchInput.value = '';
+            // Pan to node
+            const [sx, sy] = worldToScreen(n.x, n.y);
+            const targetX = W / 2 - n.x * zoom;
+            const targetY = H / 2 - n.y * zoom;
+            animatePanTo(targetX, targetY);
+        });
+        searchResults.appendChild(div);
+    });
+    searchResults.classList.add('active');
+});
+
+searchInput.addEventListener('blur', () => {
+    setTimeout(() => searchResults.classList.remove('active'), 200);
+});
+
+function animatePanTo(targetX, targetY) {
+    const startX = panX, startY = panY;
+    const start = performance.now();
+    const duration = 400;
+    function step(now) {
+        const t = Math.min((now - start) / duration, 1);
+        const ease = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+        panX = startX + (targetX - startX) * ease;
+        panY = startY + (targetY - startY) * ease;
+        if (t < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+}
+
+// ============================================================
+// MAIN LOOP
+// ============================================================
+updateVisibility();
+updateCounts();
+
+function loop() {
+    simulate();
+    draw();
+    requestAnimationFrame(loop);
+}
+loop();
+
+</script>
+</body>
+</html>
