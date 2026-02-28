@@ -400,8 +400,24 @@ canvas {
     top: 0; left: var(--panel-width); right: 0; bottom: 0;
     display: block;
     cursor: grab;
+    touch-action: none;
 }
 canvas:active { cursor: grabbing; }
+/* Help modal */
+.help-overlay { position:fixed;inset:0;z-index:100;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.2s; }
+.help-overlay.open { opacity:1;pointer-events:auto; }
+.help-modal { background:var(--bg-card);border:1px solid var(--border-glow);border-radius:12px;max-width:640px;width:92%;max-height:80vh;overflow-y:auto;padding:1.75rem 2rem;position:relative;box-shadow:0 8px 40px rgba(0,0,0,0.5),0 0 20px rgba(59,158,255,0.1); }
+.help-modal h2 { font-size:1.2rem;color:var(--neon-blue);margin-bottom:1rem;text-shadow:0 0 12px rgba(96,165,250,0.3); }
+.help-modal .help-close { position:absolute;top:0.75rem;right:1rem;background:none;border:none;color:var(--text-muted);font-size:1.4rem;cursor:pointer;line-height:1;padding:0.25rem; }
+.help-modal .help-close:hover { color:var(--text); }
+.help-section { margin-bottom:1.25rem; }
+.help-section h3 { font-size:0.85rem;color:var(--neon-cyan);margin-bottom:0.4rem;text-transform:uppercase;letter-spacing:0.04em; }
+.help-section p,.help-section li { font-size:0.8rem;color:var(--text-muted);line-height:1.6; }
+.help-section ul { padding-left:1.2rem; }
+.help-section li { margin-bottom:0.2rem; }
+.help-kbd { display:inline-block;background:var(--bg-elevated);border:1px solid var(--border);border-radius:4px;padding:0.1rem 0.4rem;font-size:0.72rem;font-family:'Segoe UI',monospace;color:var(--text);margin:0 0.1rem; }
+.help-divider { border:none;border-top:1px solid var(--border);margin:1rem 0; }
+#btn-help { font-weight:700;font-size:0.85rem;min-width:30px;text-align:center; }
 
 .tooltip {
     position: fixed;
@@ -557,21 +573,6 @@ canvas:active { cursor: grabbing; }
     background: rgba(30,42,66,0.6); border: 1px solid rgba(30,45,74,0.4);
     color: var(--text-muted);
 }
-/* Help modal */
-.help-overlay { position:fixed;inset:0;z-index:100;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.2s; }
-.help-overlay.open { opacity:1;pointer-events:auto; }
-.help-modal { background:var(--bg-card);border:1px solid var(--border-glow);border-radius:12px;max-width:640px;width:92%;max-height:80vh;overflow-y:auto;padding:1.75rem 2rem;position:relative;box-shadow:0 8px 40px rgba(0,0,0,0.5),0 0 20px rgba(59,158,255,0.1); }
-.help-modal h2 { font-size:1.2rem;color:var(--neon-blue);margin-bottom:1rem;text-shadow:0 0 12px rgba(96,165,250,0.3); }
-.help-modal .help-close { position:absolute;top:0.75rem;right:1rem;background:none;border:none;color:var(--text-muted);font-size:1.4rem;cursor:pointer;line-height:1;padding:0.25rem; }
-.help-modal .help-close:hover { color:var(--text); }
-.help-section { margin-bottom:1.25rem; }
-.help-section h3 { font-size:0.85rem;color:var(--neon-cyan);margin-bottom:0.4rem;text-transform:uppercase;letter-spacing:0.04em; }
-.help-section p,.help-section li { font-size:0.8rem;color:var(--text-muted);line-height:1.6; }
-.help-section ul { padding-left:1.2rem; }
-.help-section li { margin-bottom:0.2rem; }
-.help-kbd { display:inline-block;background:var(--bg-elevated);border:1px solid var(--border);border-radius:4px;padding:0.1rem 0.4rem;font-size:0.72rem;font-family:'Segoe UI',monospace;color:var(--text);margin:0 0.1rem; }
-.help-divider { border:none;border-top:1px solid var(--border);margin:1rem 0; }
-#btn-help { font-weight:700;font-size:0.85rem;min-width:30px;text-align:center; }
 
 /* === ENHANCED FEATURES CSS === */
 
@@ -809,7 +810,7 @@ canvas { top: 96px !important; }
     <button class="help-close" id="help-close">&times;</button>
     <h2>How to Use This Graph</h2>
     <div class="help-section"><h3>What You're Looking At</h3><p>Each <strong>large circle</strong> is an Azure resource provider. <strong>Small circles</strong> are sub-services. Lines show dependencies and relationships.</p></div>
-    <div class="help-section"><h3>Navigation</h3><ul><li><strong>Pan</strong> &mdash; drag the background</li><li><strong>Zoom</strong> &mdash; scroll wheel or pinch</li><li><strong>Inspect</strong> &mdash; click any node</li><li><strong>Move nodes</strong> &mdash; drag a node</li><li><kbd class="help-kbd">Reset View</kbd> &mdash; re-centre</li><li><kbd class="help-kbd">Freeze</kbd> &mdash; pause physics</li></ul></div>
+    <div class="help-section"><h3>Navigation</h3><ul><li><strong>Pan</strong> &mdash; drag or touch-drag the background</li><li><strong>Zoom</strong> &mdash; scroll wheel or pinch</li><li><strong>Inspect</strong> &mdash; click or tap any node</li><li><strong>Move nodes</strong> &mdash; drag or touch-drag a node</li><li><kbd class="help-kbd">Reset View</kbd> &mdash; re-centre</li><li><kbd class="help-kbd">Freeze</kbd> &mdash; pause physics</li></ul></div>
     <div class="help-section"><h3>Sidebar Filters</h3><ul><li><strong>Search</strong> &mdash; find by name</li><li><strong>Categories</strong> &mdash; toggle groups</li><li><strong>Sub-Services</strong> &mdash; show/hide</li><li><strong>Preview APIs</strong> &mdash; highlight preview-only</li><li><strong>Regions</strong> &mdash; filter by availability</li></ul></div>
     <div class="help-section"><h3>Legend</h3><ul><li><strong>Node size</strong> = complexity score</li><li><strong>Colours</strong> = category</li><li><strong>Thick lines</strong> = provider dependency</li><li><strong>Thin lines</strong> = parent-sub link</li><li><strong>Dashed lines</strong> = cross-service</li></ul></div>
     <div id="help-v2-features"><hr class="help-divider"><div class="help-section"><h3>Enhanced Features</h3><ul><li><strong>Stats Bar</strong> &mdash; live counts</li><li><strong>Heatmap</strong> &mdash; colour by metric</li><li><strong>Human Cost</strong> &mdash; time-to-learn overlay</li><li><strong>Licensing</strong> &mdash; filter by tier</li><li><strong>Centrality</strong> &mdash; most connected</li><li><strong>Comparison</strong> &mdash; side-by-side</li></ul></div></div>
@@ -4481,6 +4482,99 @@ function loop() {
     requestAnimationFrame(loop);
 }
 loop();
+
+// Touch support — single-finger pan/drag, two-finger pinch-to-zoom, tap to select
+let _touchDragging = null;
+let _touchPanning = false;
+let _touchStart = null;
+let _lastTouch = null;
+let _pinchStartDist = null;
+let _pinchStartZoom = 1;
+let _pinchMid = null;
+
+function _touchDist(t) {
+    const dx = t[0].clientX - t[1].clientX;
+    const dy = t[0].clientY - t[1].clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+}
+function _touchMid(t) {
+    return { x: (t[0].clientX + t[1].clientX) / 2, y: (t[0].clientY + t[1].clientY) / 2 };
+}
+
+canvas.addEventListener('touchstart', e => {
+    e.preventDefault();
+    const t = e.touches;
+    if (t.length === 2) {
+        _touchDragging = null; _touchPanning = false;
+        _pinchStartDist = _touchDist(t);
+        _pinchStartZoom = zoom;
+        _pinchMid = _touchMid(t);
+        _lastTouch = _pinchMid;
+    } else if (t.length === 1) {
+        const cx = t[0].clientX, cy = t[0].clientY;
+        _touchStart = { x: cx, y: cy };
+        _lastTouch = { x: cx, y: cy };
+        const n = nodeAt(cx, cy);
+        if (n) { _touchDragging = n; }
+        else { _touchPanning = true; }
+    }
+}, { passive: false });
+
+canvas.addEventListener('touchmove', e => {
+    e.preventDefault();
+    const t = e.touches;
+    if (t.length === 2 && _pinchStartDist) {
+        const dist = _touchDist(t);
+        const mid = _touchMid(t);
+        const newZoom = Math.max(0.15, Math.min(8, _pinchStartZoom * (dist / _pinchStartDist)));
+        const wx = (mid.x - panelWidth - panX) / zoom;
+        const wy = (mid.y - panY) / zoom;
+        panX += (mid.x - _lastTouch.x);
+        panY += (mid.y - _lastTouch.y);
+        const wx2 = (mid.x - panelWidth - panX) / zoom;
+        const wy2 = (mid.y - panY) / zoom;
+        zoom = newZoom;
+        panX = mid.x - panelWidth - wx2 * zoom;
+        panY = mid.y - wy2 * zoom;
+        _lastTouch = mid;
+    } else if (t.length === 1) {
+        const cx = t[0].clientX, cy = t[0].clientY;
+        if (_touchDragging) {
+            const {x, y} = screenToWorld(cx, cy);
+            _touchDragging.x = x; _touchDragging.y = y;
+            _touchDragging.vx = 0; _touchDragging.vy = 0;
+            if (frozen) { frozen = false; _settledFrames = 0; document.getElementById('btn-freeze').textContent = 'Freeze'; }
+        } else if (_touchPanning) {
+            panX += cx - _lastTouch.x;
+            panY += cy - _lastTouch.y;
+        }
+        _lastTouch = { x: cx, y: cy };
+    }
+}, { passive: false });
+
+canvas.addEventListener('touchend', e => {
+    e.preventDefault();
+    if (_touchStart && e.changedTouches.length === 1) {
+        const cx = e.changedTouches[0].clientX, cy = e.changedTouches[0].clientY;
+        const dx = Math.abs(cx - _touchStart.x), dy = Math.abs(cy - _touchStart.y);
+        if (dx < CLICK_THRESHOLD * 2 && dy < CLICK_THRESHOLD * 2) {
+            const n = nodeAt(cx, cy);
+            if (n) {
+                if (selected === n) closeDetail();
+                else { openDetail(n); if (n.isParent && showSubs) zoomToCluster(n); }
+            } else if (selected) closeDetail();
+        }
+    }
+    _touchDragging = null; _touchPanning = false;
+    _touchStart = null; _pinchStartDist = null;
+    tooltip.style.display = 'none';
+}, { passive: false });
+
+canvas.addEventListener('touchcancel', () => {
+    _touchDragging = null; _touchPanning = false;
+    _touchStart = null; _pinchStartDist = null;
+    tooltip.style.display = 'none';
+});
 
 // Help modal
 (function(){var o=document.getElementById('help-overlay'),b=document.getElementById('btn-help'),c=document.getElementById('help-close');if(!o||!b)return;b.addEventListener('click',()=>o.classList.toggle('open'));c.addEventListener('click',()=>o.classList.remove('open'));o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open')});document.addEventListener('keydown',e=>{if(e.key==='Escape')o.classList.remove('open')})})();
