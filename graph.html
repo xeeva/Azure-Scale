@@ -720,6 +720,124 @@ canvas { top: 96px !important; }
     color: var(--neon-cyan); font-weight: 700;
 }
 
+
+/* === ENHANCED FEATURES CSS === */
+
+/* Live Stats Bar */
+.stats-bar {
+    position: fixed;
+    top: 62px; left: var(--panel-width); right: 0;
+    z-index: 10;
+    background: rgba(10, 14, 26, 0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0.4rem 1.5rem;
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+}
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 0;
+}
+.stat-value {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--neon-cyan);
+    text-shadow: 0 0 8px rgba(34,211,238,0.2);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+.stat-label {
+    font-size: 0.62rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+}
+canvas { top: 96px !important; }
+.header + .stats-bar + canvas { top: 96px; }
+
+
+/* Heatmap Color Mode Switcher */
+.colorby-group { margin-bottom: 1.25rem; }
+.colorby-group h3 {
+    font-size: 0.72rem; font-weight: 600; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.5rem;
+}
+.colorby-btns {
+    display: flex; flex-wrap: wrap; gap: 0.3rem;
+}
+.colorby-btn {
+    font-size: 0.68rem; padding: 0.2rem 0.5rem; border-radius: 4px;
+    background: rgba(30,42,66,0.5); border: 1px solid var(--border);
+    color: var(--text-muted); cursor: pointer; font-family: inherit;
+    transition: all 0.15s;
+}
+.colorby-btn:hover { border-color: var(--azure-blue); color: var(--text); }
+.colorby-btn.active {
+    background: rgba(59,158,255,0.15); border-color: var(--neon-cyan);
+    color: var(--neon-cyan); text-shadow: 0 0 6px rgba(34,211,238,0.2);
+}
+.heatmap-legend {
+    margin-top: 0.4rem; display: none; align-items: center; gap: 0.4rem;
+    font-size: 0.62rem; color: var(--text-muted);
+}
+.heatmap-legend.visible { display: flex; }
+.heatmap-gradient {
+    height: 8px; flex: 1; border-radius: 4px;
+    background: linear-gradient(to right, #3b9eff, #fbbf24, #f87171);
+}
+
+
+/* Licensing Filter */
+.license-btns { display: flex; flex-wrap: wrap; gap: 0.3rem; }
+.license-btn {
+    font-size: 0.65rem; padding: 0.2rem 0.45rem; border-radius: 4px;
+    border: 1px solid var(--border); cursor: pointer; font-family: inherit;
+    transition: all 0.15s; background: rgba(30,42,66,0.5); color: var(--text-muted);
+}
+.license-btn:hover { border-color: var(--azure-blue); color: var(--text); }
+.license-btn.active { color: #fff; text-shadow: 0 0 6px currentColor; }
+.license-btn[data-lic="Reserved Instances"].active { background: rgba(59,158,255,0.25); border-color: #3b9eff; color: #3b9eff; }
+.license-btn[data-lic="AHUB"].active { background: rgba(167,139,250,0.25); border-color: #a78bfa; color: #a78bfa; }
+.license-btn[data-lic="Savings Plans"].active { background: rgba(52,211,153,0.25); border-color: #34d399; color: #34d399; }
+.license-btn[data-lic="Spot"].active { background: rgba(251,146,60,0.25); border-color: #fb923c; color: #fb923c; }
+.license-btn[data-lic="Dev/Test"].active { background: rgba(34,211,238,0.25); border-color: #22d3ee; color: #22d3ee; }
+
+/* Licensing Detail in Detail Panel */
+.lic-model { margin-bottom: 0.6rem; }
+.lic-model-name { font-size: 0.72rem; font-weight: 700; text-shadow: 0 0 6px currentColor; }
+.lic-product { font-size: 0.72rem; color: var(--text-muted); padding: 0.1rem 0 0.1rem 0.75rem; border-left: 2px solid rgba(30,45,74,0.5); }
+.lic-product-name { color: var(--text); }
+.lic-terms { color: var(--text-muted); font-size: 0.65rem; }
+
+
+/* Comparison Mode */
+.compare-hint {
+    font-size: 0.62rem; color: var(--text-muted); padding: 0.5rem 1.25rem;
+    border-bottom: 1px solid var(--border); display: none;
+}
+.compare-hint.visible { display: block; }
+.compare-table {
+    width: 100%; font-size: 0.78rem; border-collapse: collapse;
+    margin-top: 0.5rem;
+}
+.compare-table th {
+    text-align: left; color: var(--text-muted); font-weight: 600;
+    padding: 0.3rem 0.5rem; border-bottom: 1px solid var(--border);
+    font-size: 0.68rem; text-transform: uppercase;
+}
+.compare-table td {
+    padding: 0.3rem 0.5rem; border-bottom: 1px solid rgba(30,45,74,0.3);
+    color: var(--text);
+}
+.compare-table td.highlight {
+    color: var(--neon-cyan); font-weight: 700;
+}
+
 </style>
 </head>
 <body>
@@ -740,6 +858,33 @@ canvas { top: 96px !important; }
         </div>
         <div class="filter-group" id="cat-filters">
             <h3>Categories <span class="count" id="cat-count"></span></h3>
+        </div>
+
+        <div class="filter-group">
+            <h3>Commercial Models</h3>
+            <div class="license-btns" id="license-btns">
+                <button class="license-btn" data-lic="Reserved Instances">Reserved Instances</button>
+                <button class="license-btn" data-lic="AHUB">AHUB</button>
+                <button class="license-btn" data-lic="Savings Plans">Savings Plans</button>
+                <button class="license-btn" data-lic="Spot">Spot Pricing</button>
+                <button class="license-btn" data-lic="Dev/Test">Dev/Test</button>
+            </div>
+        </div>
+
+        <div class="filter-group colorby-group">
+            <h3>Color By</h3>
+            <div class="colorby-btns" id="colorby-btns">
+                <button class="colorby-btn active" data-mode="category">Category</button>
+                <button class="colorby-btn" data-mode="params">Params</button>
+                <button class="colorby-btn" data-mode="skus">SKUs</button>
+                <button class="colorby-btn" data-mode="operations">Operations</button>
+                <button class="colorby-btn" data-mode="maturity">API Maturity</button>
+            </div>
+            <div class="heatmap-legend" id="heatmap-legend">
+                <span id="heatmap-min">0</span>
+                <div class="heatmap-gradient"></div>
+                <span id="heatmap-max">max</span>
+            </div>
         </div>
 
         <div class="filter-group">
@@ -822,6 +967,13 @@ canvas { top: 96px !important; }
         <button class="btn" id="btn-freeze">Freeze</button>
         <a href="index.html" class="back-link">&larr; Back to Report</a>
     </div>
+</div>
+<div class="stats-bar" id="stats-bar">
+    <div class="stat-item"><span class="stat-value" id="stat-providers">—</span><span class="stat-label">Providers</span></div>
+    <div class="stat-item"><span class="stat-value" id="stat-params">—</span><span class="stat-label">Config Params</span></div>
+    <div class="stat-item"><span class="stat-value" id="stat-skus">—</span><span class="stat-label">SKU Variants</span></div>
+    <div class="stat-item"><span class="stat-value" id="stat-ops">—</span><span class="stat-label">API Operations</span></div>
+    <div class="stat-item"><span class="stat-value" id="stat-humancost">—</span><span class="stat-label">Human Cost</span></div>
 </div>
 <div class="stats-bar" id="stats-bar">
     <div class="stat-item"><span class="stat-value" id="stat-providers">—</span><span class="stat-label">Providers</span></div>
@@ -3067,196 +3219,7 @@ const PARENT_EDGES = [
     ['StreamAnalytics','EventHub',0.5],
     ['StreamAnalytics','Storage',0.4],
     ['DevCenter','Compute',0.5],
-    ['DevCenter','Network',0.3],
-    ['ProviderHub','Migrate',0.2],
-    ['ManagedNetworkFabric','Network',0.2],
-    ['DeviceRegistry','IoTOperations',0.2],
-    ['DataBoxEdge','Sql',0.2],
-    ['Edge','Migrate',0.2],
-    ['DataShare','Sql',0.2],
-    ['EdgeOrder','Migrate',0.2],
-    ['DataBox','Sql',0.2],
-    ['SCVMM','Migrate',0.2],
-    ['HybridNetwork','Network',0.2],
-    ['AzureFleet','Compute',0.2],
-    ['Confluent','Migrate',0.2],
-    ['AppComplianceAutomation','Web',0.2],
-    ['StorageMover','Sql',0.2],
-    ['DataMigration','Sql',0.2],
-    ['Datadog','Sql',0.2],
-    ['Quota','Migrate',0.2],
-    ['ADHybridHealthService','AzureStackHCI',0.2],
-    ['Elastic','Migrate',0.2],
-    ['Solutions','Migrate',0.2],
-    ['DeviceUpdate','IoTOperations',0.2],
-    ['AnalysisServices','Sql',0.2],
-    ['BillingBenefits','Migrate',0.2],
-    ['ServiceLinker','Migrate',0.2],
-    ['AzureDataTransfer','Sql',0.2],
-    ['DatabaseWatcher','Sql',0.2],
-    ['AzureStack','AzureStackHCI',0.2],
-    ['ManagedServices','Migrate',0.2],
-    ['StandbyPool','Sql',0.2],
-    ['StorageActions','Sql',0.2],
-    ['BareMetalInfrastructure','Compute',0.2],
-    ['EdgeMarketplace','Migrate',0.2],
-    ['ApiCenter','Web',0.2],
-    ['HardwareSecurityModules','SecurityInsights',0.2],
-    ['RedHatOpenShift','Migrate',0.2],
-    ['Help','Migrate',0.2],
-    ['HealthBot','CognitiveServices',0.2],
-    ['DevOpsInfrastructure','Automation',0.2],
-    ['DBforMariaDB','Sql',0.2],
-    ['KubernetesRuntime','Migrate',0.2],
-    ['ClassicStorage','Sql',0.2],
-    ['CodeSigning','SecurityInsights',0.2],
-    ['Automanage','Migrate',0.2],
-    ['IoTFirmwareDefense','IoTOperations',0.2],
-    ['ClassicNetwork','Network',0.2],
-    ['ComputeSchedule','Migrate',0.2],
-    ['MarketplaceOrdering','Migrate',0.2],
-    ['DataReplication','Sql',0.2],
-    ['AzureSphere','SecurityInsights',0.2],
-    ['ResourceHealth','Migrate',0.2],
-    ['DurableTask','Migrate',0.2],
-    ['RecommendationsService','Migrate',0.2],
-    ['Bing','Migrate',0.2],
-    ['IoTCentral','IoTOperations',0.2],
-    ['ServiceNetworking','Network',0.2],
-    ['StorageDiscovery','Sql',0.2],
-    ['ApplicationMigration','Web',0.2],
-    ['ClassicCompute','Migrate',0.2],
-    ['DataLakeStore','Sql',0.2],
-    ['BareMetal','Migrate',0.2],
-    ['PowerBI','Migrate',0.2],
-    ['IoTSecurity','SecurityInsights',0.2],
-    ['OpenEnergyPlatform','Migrate',0.2],
-    ['HealthDataAIServices','Sql',0.2],
-    ['SecurityDetonation','SecurityInsights',0.2],
-    ['AzureResilienceManagement','Migrate',0.2],
-    ['Singularity','Migrate',0.2],
-    ['AzurePlaywrightService','CognitiveServices',0.2],
-    ['ComputeLimit','Migrate',0.2],
-    ['ChangeSafety','Migrate',0.2],
-    ['SoftwarePlan','Migrate',0.2],
-    ['AAD','SecurityInsights',0.2],
-    ['SerialConsole','Migrate',0.2],
-    ['AzureActiveDirectory','SecurityInsights',0.2],
-    ['DataLakeAnalytics','Sql',0.2],
-    ['SaaS','Migrate',0.2],
-    ['VirtualMachineImages','Compute',0.2],
-    ['AzureLargeInstance','Compute',0.2],
-    ['Features','Migrate',0.2],
-    ['PortalServices','Migrate',0.2],
-    ['ServiceFabricMesh','Compute',0.2],
-    ['FileShares','Migrate',0.2],
-    ['GraphServices','Migrate',0.2],
-    ['SaaSHub','Migrate',0.2],
-    ['GCPConnector','Migrate',0.2],
-    ['Community','Migrate',0.2],
-    ['CloudHealth','Migrate',0.2],
-    ['DevHub','Automation',0.2],
-    ['IntegrationSpaces','Migrate',0.2],
-    ['MySQLDiscovery','Sql',0.2],
-    ['Blueprint','Automation',0.2],
-    ['CloudTest','Automation',0.2],
-    ['CustomProviders','Migrate',0.2],
-    ['Diagnostics','Migrate',0.2],
-    ['OffAzureSpringBoot','Migrate',0.2],
-    ['Carbon','Migrate',0.2],
-    ['IoTOperationsDataProcessor','Sql',0.2],
-    ['Scom','Migrate',0.2],
-    ['ServicesHub','Migrate',0.2],
-    ['WeightsAndBiases','Sql',0.2],
-    ['AzureScan','Migrate',0.2],
-    ['ConnectedVehicle','Migrate',0.2],
-    ['CustomerLockbox','Migrate',0.2],
-    ['DependencyMap','Migrate',0.2],
-    ['HanaOnAzure','Migrate',0.2],
-    ['Impact','Migrate',0.2],
-    ['Kubernetes','Migrate',0.2],
-    ['NexusIdentity','SecurityInsights',0.2],
-    ['Nutanix','Migrate',0.2],
-    ['ProfessionalService','Migrate',0.2],
-    ['Relationships','Migrate',0.2],
-    ['ResourceBuilder','Migrate',0.2],
-    ['SecretSyncController','Migrate',0.2],
-    ['Syntex','Migrate',0.2],
-    ['AppAssessment','Web',0.2],
-    ['BackupSolutions','Migrate',0.2],
-    ['ConnectedCredentials','Migrate',0.2],
-    ['Discovery','Migrate',0.2],
-    ['Easm','Migrate',0.2],
-    ['EnterpriseSupport','Migrate',0.2],
-    ['Genome','Migrate',0.2],
-    ['Hardware','Migrate',0.2],
-    ['ManagedOps','Migrate',0.2],
-    ['Mission','Migrate',0.2],
-    ['OperatorVoicemail','Migrate',0.2],
-    ['PartnerManagedConsumerRecurrence','Migrate',0.2],
-    ['SecurityCopilot','SecurityInsights',0.2],
-    ['VMware','Migrate',0.2],
-    ['AadCustomSecurityAttributesDiagnosticSettings','SecurityInsights',0.2],
-    ['Addons','Migrate',0.2],
-    ['AppLink','Web',0.2],
-    ['AzureBusinessContinuity','Migrate',0.2],
-    ['AzureTerraform','Migrate',0.2],
-    ['CleanRoom','Migrate',0.2],
-    ['Commerce','Migrate',0.2],
-    ['ComputeBulkActions','Migrate',0.2],
-    ['DirectoryStore','Migrate',0.2],
-    ['EntraIDGovernance','Migrate',0.2],
-    ['OperationsManagement','Migrate',0.2],
-    ['PowerPlatform','Migrate',0.2],
-    ['SecurityPlatform','SecurityInsights',0.2],
-    ['SentinelPlatformServices','Migrate',0.2],
-    ['SupercomputerInfrastructure','Migrate',0.2],
-    ['WorkloadBuilder','Sql',0.2],
-    ['OnlineExperimentation','Migrate',0.2],
-    ['AgriculturePlatform','Migrate',0.2],
-    ['Approvals','Web',0.2],
-    ['ArcContainerStorage','Sql',0.2],
-    ['CostManagementExports','Migrate',0.2],
-    ['EdgeManagement','Migrate',0.2],
-    ['EdgeZones','Migrate',0.2],
-    ['HybridCloud','AzureStackHCI',0.2],
-    ['MessagingConnectors','Migrate',0.2],
-    ['Notebooks','Migrate',0.2],
-    ['Premonition','Migrate',0.2],
-    ['ResourceIntelligence','Migrate',0.2],
-    ['ResourceNotifications','EventGrid',0.2],
-    ['SustainabilityServices','Migrate',0.2],
-    ['UpdateManager','Migrate',0.2],
-    ['Validate','Migrate',0.2],
-    ['ZeroTrustSegmentation','Migrate',0.2],
-    ['Experimentation','Migrate',0.2],
-    ['AzureImageTestingForLinux','Automation',0.2],
-    ['BlockchainTokens','Migrate',0.2],
-    ['ClassicInfrastructureMigrate','Migrate',0.2],
-    ['ClassicSubscription','Migrate',0.2],
-    ['CloudDevicePlatform','IoTOperations',0.2],
-    ['CloudShell','Migrate',0.2],
-    ['D365CustomerInsights','OperationalInsights',0.2],
-    ['DatabaseFleetManager','Sql',0.2],
-    ['DevelopmentWindows365','Automation',0.2],
-    ['DeviceOnboarding','IoTOperations',0.2],
-    ['EdgeOrderPartner','Migrate',0.2],
-    ['EntitlementManagement','Migrate',0.2],
-    ['EntraIdGovernanceAccelerator','Migrate',0.2],
-    ['ErrorAtlas','Migrate',0.2],
-    ['HealthModel','Migrate',0.2],
-    ['HealthPlatform','Migrate',0.2],
-    ['HealthcareInterop','Migrate',0.2],
-    ['Hypernet','Migrate',0.2],
-    ['MessagingCatalog','Migrate',0.2],
-    ['ObjectStore','Migrate',0.2],
-    ['Pki','Migrate',0.2],
-    ['StorageTasks','Sql',0.2],
-    ['ToolchainOrchestrator','Migrate',0.2],
-    ['UsageBilling','Migrate',0.2],
-    ['VerifiedId','Migrate',0.2],
-    ['Windows365','Migrate',0.2],
-    ['WindowsPushNotificationServices','EventGrid',0.2]
+    ['DevCenter','Network',0.3]
 ];
 
 
@@ -4754,6 +4717,592 @@ loop();
         if (e.key === 'Escape') overlay.classList.remove('open');
     });
 })();
+
+// === ENHANCED FEATURES JS ===
+
+// ---- Live Stats Bar ----
+const _statsEls = {
+    providers: document.getElementById('stat-providers'),
+    params: document.getElementById('stat-params'),
+    skus: document.getElementById('stat-skus'),
+    ops: document.getElementById('stat-ops'),
+    humancost: document.getElementById('stat-humancost'),
+};
+const _statsTweens = {};
+
+function _animateValue(el, key, target) {
+    const current = _statsTweens[key]?.target ?? 0;
+    if (current === target) return;
+    const start = _statsTweens[key]?.current ?? 0;
+    const startTime = performance.now();
+    const duration = 300;
+    _statsTweens[key] = { current: start, target };
+    function tick(now) {
+        const t = Math.min(1, (now - startTime) / duration);
+        const ease = t < 0.5 ? 2*t*t : -1+(4-2*t)*t;
+        const val = Math.round(start + (target - start) * ease);
+        _statsTweens[key].current = val;
+        if (key === 'humancost') {
+            const yrs = val * 5 / 60 / 8 / 260;
+            el.textContent = yrs >= 1 ? yrs.toFixed(1) + ' yr' : (val * 5 / 60 / 8).toFixed(0) + ' days';
+        } else if (key === 'providers') {
+            el.textContent = val + ' / ' + parentNodes.length;
+        } else {
+            el.textContent = val.toLocaleString();
+        }
+        if (t < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+}
+
+function updateStatsBar() {
+    const active = parentNodes.filter(n => n.active);
+    _animateValue(_statsEls.providers, 'providers', active.length);
+    _animateValue(_statsEls.params, 'params', active.reduce((s,n) => s + n.params, 0));
+    _animateValue(_statsEls.skus, 'skus', active.reduce((s,n) => s + n.skus, 0));
+    _animateValue(_statsEls.ops, 'ops', active.reduce((s,n) => s + n.operations, 0));
+    _animateValue(_statsEls.humancost, 'humancost', active.reduce((s,n) => s + n.params, 0));
+}
+
+// Patch updateVisibility to also update stats
+const _origUpdateVisibility = updateVisibility;
+updateVisibility = function() {
+    _origUpdateVisibility();
+    updateStatsBar();
+};
+// Adjust canvas top and height for stats bar
+function _adjustCanvasForStats() {
+    const bar = document.getElementById('stats-bar');
+    if (bar) {
+        const h = bar.offsetHeight;
+        const headerH = document.querySelector('.header').offsetHeight;
+        const canvasTop = headerH + h;
+        canvas.style.top = canvasTop + 'px';
+        // Fix canvas height and coordinate mapping
+        const detailW = detailOpen ? 340 : 0;
+        H = window.innerHeight - canvasTop;
+        canvas.height = H * dpr;
+        canvas.style.height = H + 'px';
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+}
+// Patch screenToWorld to account for canvas offset
+const _origScreenToWorld = screenToWorld;
+screenToWorld = function(sx, sy) {
+    const rect = canvas.getBoundingClientRect();
+    return { x: (sx - rect.left - panX) / zoom, y: (sy - rect.top - panY) / zoom };
+};
+_adjustCanvasForStats();
+const _origResize = resize;
+resize = function() { _origResize(); _adjustCanvasForStats(); };
+window.addEventListener('resize', _adjustCanvasForStats);
+updateStatsBar();
+
+
+// ---- Heatmap Color Modes ----
+let heatmapMode = 'category';
+
+function heatmapColor(t) {
+    // 3-stop gradient: #3b9eff (blue) → #fbbf24 (amber) → #f87171 (red)
+    let r, g, b;
+    if (t <= 0.5) {
+        const u = t * 2;
+        r = Math.round(59 + (251-59)*u);
+        g = Math.round(158 + (191-158)*u);
+        b = Math.round(255 + (36-255)*u);
+    } else {
+        const u = (t - 0.5) * 2;
+        r = Math.round(251 + (248-251)*u);
+        g = Math.round(191 + (113-191)*u);
+        b = Math.round(36 + (113-36)*u);
+    }
+    return '#' + r.toString(16).padStart(2,'0') + g.toString(16).padStart(2,'0') + b.toString(16).padStart(2,'0');
+}
+
+function getHeatmapValue(n) {
+    if (!n.isParent) {
+        const p = parentMap[n.parentId];
+        return p ? getHeatmapValue(p) : 0;
+    }
+    switch (heatmapMode) {
+        case 'params': return n.params;
+        case 'skus': return n.skus;
+        case 'operations': return n.operations;
+        case 'maturity': {
+            const total = (n.gaApis||0) + (n.previewApis||0);
+            return total > 0 ? (n.gaApis||0) / total : 0.5;
+        }
+        default: return 0;
+    }
+}
+
+function computeHeatmapColors() {
+    if (heatmapMode === 'category') {
+        parentNodes.forEach(n => { delete n._heatColor; });
+        subNodes.forEach(n => { delete n._heatColor; });
+        document.getElementById('heatmap-legend').classList.remove('visible');
+        return;
+    }
+    const active = parentNodes.filter(n => n.active);
+    let maxVal;
+    if (heatmapMode === 'maturity') {
+        maxVal = 1;
+    } else {
+        maxVal = Math.max(1, ...active.map(n => getHeatmapValue(n)));
+    }
+    const minLabel = heatmapMode === 'maturity' ? '0% GA' : '0';
+    const maxLabel = heatmapMode === 'maturity' ? '100% GA' : maxVal.toLocaleString();
+    document.getElementById('heatmap-min').textContent = minLabel;
+    document.getElementById('heatmap-max').textContent = maxLabel;
+    document.getElementById('heatmap-legend').classList.add('visible');
+
+    parentNodes.forEach(n => {
+        const raw = getHeatmapValue(n);
+        const t = heatmapMode === 'maturity' ? raw : (raw / maxVal);
+        n._heatColor = heatmapColor(t);
+    });
+    subNodes.forEach(n => {
+        const p = parentMap[n.parentId];
+        n._heatColor = p ? p._heatColor : null;
+    });
+}
+
+document.getElementById('colorby-btns').addEventListener('click', e => {
+    const btn = e.target.closest('.colorby-btn');
+    if (!btn) return;
+    document.querySelectorAll('.colorby-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    heatmapMode = btn.dataset.mode;
+    computeHeatmapColors();
+});
+
+// Patch updateVisibility to recompute heatmap
+const _origUpdateVisibility2 = updateVisibility;
+updateVisibility = function() {
+    _origUpdateVisibility2();
+    computeHeatmapColors();
+};
+
+// Patch the draw function to use heatmap colors
+const _origAdjustAlpha = adjustAlpha;
+const _origLighten = lighten;
+
+// Override CATEGORIES color lookup in draw — monkey-patch the node color getter
+// We do this by replacing the draw's category color references
+const _origDraw = draw;
+draw = function() {
+    if (heatmapMode !== 'category') {
+        // Temporarily override each node's category color
+        const saved = new Map();
+        const allN = showSubs ? allNodes : parentNodes;
+        allN.forEach(n => {
+            if (n._heatColor) {
+                const cat = CATEGORIES[n.category];
+                if (!saved.has(n.category)) {
+                    saved.set(n.category, { color: cat.color, glow: cat.glow });
+                }
+            }
+        });
+        // For heatmap mode, we need per-node colors — override via a temp approach
+        // Store original colors and replace per-node in a frame-safe way
+        allN.forEach(n => {
+            if (n._heatColor) {
+                n._origCategory = n.category;
+                // Create a temp category key for this node
+                const tempKey = '_heat_' + n.id;
+                if (!CATEGORIES[tempKey]) {
+                    CATEGORIES[tempKey] = { color: n._heatColor, glow: n._heatColor.replace('#', 'rgba(') + ',0.5)', label: '' };
+                } else {
+                    CATEGORIES[tempKey].color = n._heatColor;
+                    CATEGORIES[tempKey].glow = adjustAlpha(n._heatColor, 0.5);
+                }
+                n.category = tempKey;
+            }
+        });
+        _origDraw();
+        // Restore
+        allN.forEach(n => {
+            if (n._origCategory) {
+                // Clean up temp category
+                delete CATEGORIES['_heat_' + n.id];
+                n.category = n._origCategory;
+                delete n._origCategory;
+            }
+        });
+    } else {
+        _origDraw();
+    }
+};
+computeHeatmapColors();
+
+
+// ---- Human Cost Labels ----
+let showHumanCost = false;
+
+document.getElementById('toggle-row-humancost').addEventListener('click', () => {
+    showHumanCost = !showHumanCost;
+    document.getElementById('toggle-humancost').classList.toggle('on', showHumanCost);
+    const totalParams = parentNodes.filter(n=>n.active).reduce((s,n)=>s+n.params,0);
+    const totalDays = totalParams * 5 / 60 / 8;
+    document.getElementById('humancost-stats').textContent = showHumanCost
+        ? `${Math.round(totalDays).toLocaleString()} working days across visible providers`
+        : '';
+    if (selected) populateDetail(selected);
+});
+
+// Inject human cost into detail panel
+const _origPopulateDetail = populateDetail;
+populateDetail = function(n) {
+    _origPopulateDetail(n);
+    if (n.isParent) {
+        const hours = n.params * 5 / 60;
+        const days = hours / 8;
+        const costHtml = `<div class="detail-section"><h3>Human Cost</h3>` +
+            `<div style="font-size:0.82rem;color:var(--text);padding:0.2rem 0">` +
+            `<span style="font-weight:700;color:${days > 260 ? '#f87171' : days > 20 ? '#fbbf24' : '#34d399'}">${Math.round(hours).toLocaleString()} hours</span>` +
+            ` / <span style="font-weight:700">${Math.round(days).toLocaleString()} days</span> at 5 min per parameter</div></div>`;
+        // Insert before regions section
+        const body = document.getElementById('detail-body');
+        const regionsDiv = body.querySelector('.detail-regions');
+        if (regionsDiv) regionsDiv.insertAdjacentHTML('beforebegin', costHtml);
+    }
+};
+
+// Draw human cost labels on canvas
+const _origDraw2 = draw;
+draw = function() {
+    _origDraw2();
+    if (!showHumanCost) return;
+    ctx.save();
+    ctx.translate(panX, panY);
+    ctx.scale(zoom, zoom);
+    const fontSize = Math.max(8, Math.min(14, 10 / zoom));
+    ctx.font = `700 ${fontSize}px 'Segoe UI', sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    parentNodes.forEach(n => {
+        if (!n.active) return;
+        const days = n.params * 5 / 60 / 8;
+        if (days < 1) return;
+        let label, color;
+        if (days > 260) {
+            label = (days / 260).toFixed(1) + ' yr';
+            color = '#f87171';
+        } else if (days > 20) {
+            label = Math.round(days) + ' days';
+            color = '#fbbf24';
+        } else {
+            label = Math.round(days) + ' days';
+            color = '#34d399';
+        }
+        const y = n.y + n.radius + 4 + fontSize + 2;
+        ctx.strokeStyle = 'rgba(0,0,0,0.85)';
+        ctx.lineWidth = 3;
+        ctx.lineJoin = 'round';
+        ctx.strokeText(label, n.x, y);
+        ctx.fillStyle = color;
+        ctx.fillText(label, n.x, y);
+    });
+    ctx.restore();
+};
+
+
+// ---- Licensing Model Filter ----
+let activeLicense = null;
+
+document.getElementById('license-btns').addEventListener('click', e => {
+    const btn = e.target.closest('.license-btn');
+    if (!btn) return;
+    const lic = btn.dataset.lic;
+    if (activeLicense === lic) {
+        activeLicense = null;
+        btn.classList.remove('active');
+    } else {
+        document.querySelectorAll('.license-btn').forEach(b => b.classList.remove('active'));
+        activeLicense = lic;
+        btn.classList.add('active');
+    }
+    updateVisibility();
+});
+
+// Patch isNodeActive to respect licensing filter
+const _origIsNodeActive = isNodeActive;
+isNodeActive = function(n) {
+    if (!_origIsNodeActive(n)) return false;
+    if (!activeLicense) return true;
+    // For sub-nodes, check parent
+    const p = n.isParent ? n : parentMap[n.parentId];
+    if (!p || !p.licensing) return false;
+    return p.licensing.includes(activeLicense);
+};
+updateVisibility();
+
+// ---- Licensing Detail in Detail Panel ----
+const _LIC_COLORS = {
+    'Reserved Instances': '#3b9eff',
+    'Savings Plans': '#34d399',
+    'Spot': '#fb923c',
+    'Dev/Test': '#22d3ee',
+    'AHUB': '#a78bfa'
+};
+
+const _origPopulateDetailLicensing = populateDetail;
+populateDetail = function(n) {
+    _origPopulateDetailLicensing(n);
+    if (!n.isParent) return;
+    const detail = LICENSING_DETAIL[n.id];
+    if (!detail) return;
+    const types = Object.keys(detail).sort();
+    if (types.length === 0) return;
+    let html = '<div class="detail-section"><h3>Discount Models</h3>';
+    types.forEach(dtype => {
+        const color = _LIC_COLORS[dtype] || 'var(--text)';
+        const products = detail[dtype];
+        html += `<div class="lic-model">`;
+        html += `<div class="lic-model-name" style="color:${color}">${dtype}</div>`;
+        products.forEach(p => {
+            const terms = p.terms && p.terms.length ? ` <span class="lic-terms">(${p.terms.join(', ')})</span>` : '';
+            html += `<div class="lic-product"><span class="lic-product-name">${p.product}</span>${terms}</div>`;
+        });
+        html += '</div>';
+    });
+    html += '</div>';
+    const body = document.getElementById('detail-body');
+    const regionsDiv = body.querySelector('.detail-regions');
+    if (regionsDiv) regionsDiv.insertAdjacentHTML('beforebegin', html);
+    else body.insertAdjacentHTML('beforeend', html);
+};
+
+
+// ---- Hub Centrality Badges ----
+const _inDegree = {};
+parentNodes.forEach(n => { _inDegree[n.id] = 0; });
+parentEdgeData.forEach(e => {
+    if (e.source.isParent) _inDegree[e.source.id] = (_inDegree[e.source.id]||0) + 1;
+    if (e.target.isParent) _inDegree[e.target.id] = (_inDegree[e.target.id]||0) + 1;
+});
+// Find 90th percentile threshold
+const _degreeValues = Object.values(_inDegree).sort((a,b) => a-b);
+const _p90idx = Math.floor(_degreeValues.length * 0.90);
+const _centralityThreshold = _degreeValues[_p90idx] || 1;
+
+parentNodes.forEach(n => {
+    n._inDegree = _inDegree[n.id] || 0;
+    n._isHub = n._inDegree >= _centralityThreshold && n._inDegree > 0;
+});
+
+// Inject hub info into detail panel
+const _origPopulateDetailCentrality = populateDetail;
+populateDetail = function(n) {
+    _origPopulateDetailCentrality(n);
+    if (n.isParent && n._inDegree > 0) {
+        const pct = Math.round((1 - (_degreeValues.indexOf(n._inDegree) / _degreeValues.length)) * 100);
+        const hubHtml = `<div class="detail-section"><h3>Centrality</h3>` +
+            `<div style="font-size:0.82rem;color:var(--text);padding:0.2rem 0">` +
+            `Depended on by <span style="font-weight:700;color:var(--neon-cyan)">${n._inDegree} providers</span>` +
+            (n._isHub ? ` <span style="color:#fbbf24">(top ${pct}%)</span>` : '') +
+            `</div></div>`;
+        const body = document.getElementById('detail-body');
+        const regionsDiv = body.querySelector('.detail-regions');
+        if (regionsDiv) regionsDiv.insertAdjacentHTML('beforebegin', hubHtml);
+    }
+};
+
+// Draw badges on canvas
+const _origDraw3 = draw;
+draw = function() {
+    _origDraw3();
+    ctx.save();
+    ctx.translate(panX, panY);
+    ctx.scale(zoom, zoom);
+    parentNodes.forEach(n => {
+        if (!n._isHub || !n.active) return;
+        const badgeR = Math.max(8, n.radius * 0.22);
+        const bx = n.x + n.radius * 0.7;
+        const by = n.y - n.radius * 0.7;
+        // Badge circle
+        ctx.beginPath(); ctx.arc(bx, by, badgeR, 0, Math.PI*2);
+        ctx.fillStyle = 'rgba(10,14,26,0.85)';
+        ctx.fill();
+        ctx.strokeStyle = '#22d3ee';
+        ctx.lineWidth = 1.5;
+        ctx.shadowColor = 'rgba(34,211,238,0.5)'; ctx.shadowBlur = 6;
+        ctx.stroke(); ctx.shadowBlur = 0;
+        // Badge number
+        ctx.fillStyle = '#22d3ee';
+        ctx.font = `700 ${badgeR * 1.1}px 'Segoe UI', sans-serif`;
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(String(n._inDegree), bx, by);
+    });
+    ctx.restore();
+};
+
+
+// ---- Provider Comparison Mode ----
+let compareNode = null;
+
+// Add hint div to detail panel
+const _compareHint = document.createElement('div');
+_compareHint.className = 'compare-hint';
+_compareHint.textContent = 'Hold Shift + click another provider to compare';
+document.getElementById('detail-body').parentElement.insertBefore(
+    _compareHint, document.getElementById('detail-body')
+);
+
+// Patch mouseup for shift+click comparison
+const _origMouseUpHandler = canvas.onmouseup;
+canvas.addEventListener('mouseup', function(e) {
+    if (!e.shiftKey || !selected) return;
+    const wasDrag = mouseDownPos && (
+        Math.abs(e.clientX - mouseDownPos.x) > CLICK_THRESHOLD ||
+        Math.abs(e.clientY - mouseDownPos.y) > CLICK_THRESHOLD
+    );
+    if (wasDrag) return;
+    const n = nodeAt(e.clientX, e.clientY);
+    if (n && n.isParent && n !== selected && selected.isParent) {
+        e.stopImmediatePropagation();
+        compareNode = n;
+        showComparison(selected, compareNode);
+    }
+}, true); // capture phase to intercept before normal handler
+
+function showComparison(a, b) {
+    const nameA = a.label.replace(/\n/g, ' ');
+    const nameB = b.label.replace(/\n/g, ' ');
+    const catA = CATEGORIES[a.category];
+    const catB = CATEGORIES[b.category];
+    detailName.innerHTML = `${nameA} <span style="color:var(--text-muted);font-size:0.7em">vs</span> ${nameB}`;
+    _compareHint.classList.remove('visible');
+
+    // Radar chart data
+    const metrics = [
+        { label: 'Config Params', a: a.params, b: b.params },
+        { label: 'Resource Types', a: a.resourceTypes, b: b.resourceTypes },
+        { label: 'SKU Variants', a: a.skus, b: b.skus },
+        { label: 'API Operations', a: a.operations, b: b.operations },
+        { label: 'Preview APIs', a: a.previewApis||0, b: b.previewApis||0 },
+        { label: 'Human Cost (days)', a: Math.round(a.params*5/60/8), b: Math.round(b.params*5/60/8) },
+    ];
+
+    let html = '';
+    // Draw radar chart on a small canvas
+    html += `<div class="detail-section" style="text-align:center">`;
+    html += `<canvas id="radar-canvas" width="280" height="260" style="max-width:100%"></canvas>`;
+    html += `</div>`;
+
+    // Comparison table
+    html += `<div class="detail-section"><h3>Comparison</h3>`;
+    html += `<table class="compare-table"><thead><tr><th>Metric</th>`;
+    html += `<th style="color:${catA.color}">${nameA}</th>`;
+    html += `<th style="color:${catB.color}">${nameB}</th></tr></thead><tbody>`;
+    metrics.forEach(m => {
+        const aWins = m.a >= m.b;
+        html += `<tr><td>${m.label}</td>`;
+        html += `<td class="${aWins ? 'highlight' : ''}">${m.a.toLocaleString()}</td>`;
+        html += `<td class="${!aWins ? 'highlight' : ''}">${m.b.toLocaleString()}</td></tr>`;
+    });
+    html += `</tbody></table></div>`;
+
+    detailBody.innerHTML = html;
+    detailBody.scrollTop = 0;
+
+    // Draw radar chart
+    setTimeout(() => {
+        const rc = document.getElementById('radar-canvas');
+        if (!rc) return;
+        const rctx = rc.getContext('2d');
+        const cx = 140, cy = 125, maxR = 95;
+        const n = metrics.length;
+
+        // Find max per axis
+        const maxes = metrics.map(m => Math.max(m.a, m.b, 1));
+
+        // Draw grid
+        [0.25, 0.5, 0.75, 1].forEach(f => {
+            rctx.beginPath();
+            for (let i = 0; i <= n; i++) {
+                const angle = (i % n) / n * Math.PI * 2 - Math.PI/2;
+                const x = cx + Math.cos(angle) * maxR * f;
+                const y = cy + Math.sin(angle) * maxR * f;
+                i === 0 ? rctx.moveTo(x, y) : rctx.lineTo(x, y);
+            }
+            rctx.closePath();
+            rctx.strokeStyle = 'rgba(30,45,74,0.6)';
+            rctx.lineWidth = 1;
+            rctx.stroke();
+        });
+
+        // Axis lines & labels
+        rctx.font = '600 9px Segoe UI, sans-serif';
+        rctx.textAlign = 'center'; rctx.textBaseline = 'middle';
+        metrics.forEach((m, i) => {
+            const angle = i / n * Math.PI * 2 - Math.PI/2;
+            const lx = cx + Math.cos(angle) * (maxR + 20);
+            const ly = cy + Math.sin(angle) * (maxR + 20);
+            rctx.beginPath();
+            rctx.moveTo(cx, cy);
+            rctx.lineTo(cx + Math.cos(angle) * maxR, cy + Math.sin(angle) * maxR);
+            rctx.strokeStyle = 'rgba(30,45,74,0.4)';
+            rctx.stroke();
+            rctx.fillStyle = '#8892a8';
+            // Wrap label
+            const words = m.label.split(' ');
+            if (words.length > 1 && m.label.length > 10) {
+                rctx.fillText(words.slice(0, Math.ceil(words.length/2)).join(' '), lx, ly - 6);
+                rctx.fillText(words.slice(Math.ceil(words.length/2)).join(' '), lx, ly + 6);
+            } else {
+                rctx.fillText(m.label, lx, ly);
+            }
+        });
+
+        // Draw polygon A
+        function drawPoly(values, color, alpha) {
+            rctx.beginPath();
+            values.forEach((v, i) => {
+                const angle = i / n * Math.PI * 2 - Math.PI/2;
+                const r = (v / maxes[i]) * maxR;
+                const x = cx + Math.cos(angle) * r;
+                const y = cy + Math.sin(angle) * r;
+                i === 0 ? rctx.moveTo(x, y) : rctx.lineTo(x, y);
+            });
+            rctx.closePath();
+            rctx.fillStyle = color.replace(')', `,${alpha})`).replace('rgb', 'rgba');
+            rctx.fill();
+            rctx.strokeStyle = color;
+            rctx.lineWidth = 2;
+            rctx.stroke();
+        }
+
+        drawPoly(metrics.map(m => m.a), catA.color, 0.15);
+        drawPoly(metrics.map(m => m.b), catB.color, 0.15);
+
+        // Legend
+        rctx.font = '600 10px Segoe UI, sans-serif';
+        rctx.fillStyle = catA.color;
+        rctx.fillRect(20, 240, 10, 10);
+        rctx.fillText(nameA, 35 + rctx.measureText(nameA).width/2, 246);
+        const offX = 45 + rctx.measureText(nameA).width + 10;
+        rctx.fillStyle = catB.color;
+        rctx.fillRect(offX, 240, 10, 10);
+        rctx.fillText(nameB, offX + 15 + rctx.measureText(nameB).width/2, 246);
+    }, 50);
+}
+
+// Show hint when a parent is selected
+const _origOpenDetailComp = openDetail;
+openDetail = function(node) {
+    compareNode = null;
+    _origOpenDetailComp(node);
+    if (node.isParent) _compareHint.classList.add('visible');
+    else _compareHint.classList.remove('visible');
+};
+const _origCloseDetailComp = closeDetail;
+closeDetail = function() {
+    compareNode = null;
+    _compareHint.classList.remove('visible');
+    _origCloseDetailComp();
+};
+
 
 // === ENHANCED FEATURES JS ===
 
