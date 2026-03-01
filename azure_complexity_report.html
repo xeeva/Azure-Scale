@@ -564,19 +564,19 @@ body {
 <header class="hero">
     <h1>Azure Complexity Report</h1>
     <p class="subtitle">Every knob, switch, and dropdown that a single Azure Lead must understand</p>
-    <p class="mode-badge">Full sweep &mdash; 188 resource providers</p>
+    <p class="mode-badge">Full sweep &mdash; 190 resource providers</p>
 
     <div class="stat-grid">
         <div class="stat-card">
-            <div class="stat-number">188</div>
+            <div class="stat-number">190</div>
             <div class="stat-label">Resource Providers</div>
         </div>
         <div class="stat-card">
-            <div class="stat-number">819</div>
-            <div class="stat-label">Distinct Products Inside 108 Umbrella Providers</div>
+            <div class="stat-number">847</div>
+            <div class="stat-label">Distinct Products Inside 119 Umbrella Providers</div>
         </div>
         <div class="stat-card">
-            <div class="stat-number">3,581</div>
+            <div class="stat-number">3,594</div>
             <div class="stat-label">Resource Types</div>
         </div>
         <div class="stat-card accent">
@@ -592,11 +592,11 @@ body {
             <div class="stat-label">API Operations</div>
         </div>
         <div class="stat-card accent-orange">
-            <div class="stat-number">19,899</div>
+            <div class="stat-number">19,918</div>
             <div class="stat-label">Preview API Versions (46.8% of all)</div>
         </div>
         <div class="stat-card accent-orange">
-            <div class="stat-number">576</div>
+            <div class="stat-number">581</div>
             <div class="stat-label">Preview-Only Resource Types (no GA version)</div>
         </div>
     </div>
@@ -606,7 +606,7 @@ body {
 <section class="section human-cost" id="human-cost">
     <h2>The Human Cost of Azure</h2>
     <div class="narrative">
-        <p>Microsoft Azure is not one product. It is <strong>188 resource providers</strong>,
+        <p>Microsoft Azure is not one product. It is <strong>190 resource providers</strong>,
         each its own domain of expertise. Every provider ships a set of resource types, and every resource type
         exposes a tree of configuration parameters: networking rules nested inside security profiles nested inside
         deployment definitions nested inside orchestration templates. When you recurse through every branch of
@@ -618,10 +618,10 @@ body {
         the read-only status fields, the deprecated properties, or the preview-only features hidden behind
         feature flags. It is the <strong>minimum</strong> an Azure team needs to be aware of.</p>
 
-        <p>But the numbers above only tell part of the story. Azure's 188 resource providers
-        are not 188 products. Many are <strong>umbrella namespaces that bundle multiple
+        <p>But the numbers above only tell part of the story. Azure's 190 resource providers
+        are not 190 products. Many are <strong>umbrella namespaces that bundle multiple
         distinct, separately-marketed products</strong> under a single resource provider.
-        108 of these providers collectively contain <strong>819 distinct products</strong>,
+        119 of these providers collectively contain <strong>847 distinct products</strong>,
         each with its own concepts, documentation, pricing model, and failure modes. The most densely packed is <strong>Network</strong>, which alone contains <strong>49 separately-marketed products</strong> behind what Azure counts as a single resource provider.</p>
 
         <p>To put this in human terms:</p>
@@ -642,29 +642,29 @@ body {
                 options (Reserved Instances, Savings Plans, Hybrid Use Benefit, Spot pricing,
                 Dev/Test discounts), each with its own eligibility rules, commitment terms,
                 and cost implications</li>
-            <li>Those 188 resource providers actually contain <strong>819
+            <li>Those 190 resource providers actually contain <strong>847
                 individually marketed products and features</strong>, each requiring its own learning
                 path, architecture patterns, operational runbooks, and cost management strategy</li>
-            <li>Of the 42,540 total
-                API versions published, <strong>19,899
+            <li>Of the 42,573 total
+                API versions published, <strong>19,918
                 are still in preview</strong>,
                 46.8%
                 of Azure's published surface area comes with no SLA and may change without notice.
-                <strong>576 resource types have never
+                <strong>581 resource types have never
                 shipped a GA version at all</strong></li>
         </ul>
 
         <p>The most complex providers by parameter count are Network (8,549), Web (2,746), SQL (1,458).
         But complexity is not just depth, it is also breadth: the sheer number of services
         that interact, the cross-cutting concerns of networking, identity, monitoring, and compliance
-        that span every one of these 188 providers. A single deployment may touch
+        that span every one of these 190 providers. A single deployment may touch
         Compute, Network, Storage, KeyVault, Insights, Security, and Authorization simultaneously,
         each with its own parameter tree, SKU selection, and RBAC surface.</p>
 
         <p class="callout">In many organisations, a small team or sometimes a single person is expected
         to understand all of this. Not superficially, but well enough to architect solutions, review
         pull requests on Bicep templates, advise on cost optimisation, and answer security audit
-        questions. The 819 distinct products, 38,274 configurable parameters,
+        questions. The 847 distinct products, 38,274 configurable parameters,
         46,809 SKU variants, and
         15,376 API operations are not static.
         They grow with every Azure release, every Generally Available announcement, every new region
@@ -702,7 +702,7 @@ body {
         </div>
         <div class="method-card">
             <h3>Sub-Service Breakdown</h3>
-            <p>Many providers are umbrella namespaces containing multiple separately-marketed products. For 108 providers, we enumerate every distinct product bundled within &mdash; <strong>819 products</strong> total. For example, CognitiveServices alone contains 21 distinct AI services (from <code>az cognitiveservices account list-kinds</code>). These are listed in full per provider below.</p>
+            <p>Many providers are umbrella namespaces containing multiple separately-marketed products. For 119 providers, we enumerate every distinct product bundled within &mdash; <strong>847 products</strong> total. For example, CognitiveServices alone contains 21 distinct AI services (from <code>az cognitiveservices account list-kinds</code>). These are listed in full per provider below.</p>
         </div>
     </div>
 </section>
@@ -712,7 +712,7 @@ body {
     <h2>Providers Ranked by Complexity</h2>
 
     <div class="section-intro">
-        <p>The table below ranks all <strong>188 Azure resource providers</strong> by a weighted complexity score. This score is not a subjective assessment &mdash; it is a <strong>computed composite</strong> derived from five measurable dimensions of each provider's management surface area: the number of configuration parameters (weighted &times;2.0), resource types (&times;1.0), API operations (&times;0.5), SKU variants (&times;0.1), and licensing options (&times;3.0).</p>
+        <p>The table below ranks all <strong>190 Azure resource providers</strong> by a weighted complexity score. This score is not a subjective assessment &mdash; it is a <strong>computed composite</strong> derived from five measurable dimensions of each provider's management surface area: the number of configuration parameters (weighted &times;2.0), resource types (&times;1.0), API operations (&times;0.5), SKU variants (&times;0.1), and licensing options (&times;3.0).</p>
         <p>Configuration parameters carry the heaviest weight because they represent the deepest layer of domain knowledge &mdash; the individual fields, nested objects, enums, and conditional properties that an administrator must understand to correctly deploy and operate a resource. A single misconfigured parameter (an NSG rule, a TLS version, a replication setting) can cause outages, security breaches, or unexpected costs.</p>
         <p>Click any column header to re-sort. The <strong>Products</strong> column shows how many distinct, separately-marketed services are bundled inside each provider namespace &mdash; a measure of conceptual breadth that no single metric captures. Providers without a products count are single-purpose namespaces (one provider, one service). The <strong>Score</strong> bar visualises each provider's complexity relative to the most complex provider in the dataset.</p>
     </div>
@@ -1156,7 +1156,7 @@ body {
             <tr>
                 <td>36</td>
                 <td><a href="#detail-Microsoft.DataShare">Data Share</a><br><span class="provider-desc">Data Share for data collaboration</span></td>
-                <td></td>
+                <td>3</td>
                 <td>18</td>
                 <td>265</td>
                 <td>0</td>
@@ -1528,7 +1528,7 @@ body {
             <tr>
                 <td>67</td>
                 <td><a href="#detail-Microsoft.AppComplianceAutomation">App Compliance Automation</a><br><span class="provider-desc">App Compliance Automation for Microsoft 365</span></td>
-                <td></td>
+                <td>2</td>
                 <td>15</td>
                 <td>115</td>
                 <td>0</td>
@@ -1540,7 +1540,7 @@ body {
             <tr>
                 <td>68</td>
                 <td><a href="#detail-Microsoft.StorageMover">Storage Mover</a><br><span class="provider-desc">Storage Mover for data migration</span></td>
-                <td></td>
+                <td>3</td>
                 <td>10</td>
                 <td>105</td>
                 <td>0</td>
@@ -1576,7 +1576,7 @@ body {
             <tr>
                 <td>71</td>
                 <td><a href="#detail-Microsoft.DataMigration">Data Migration</a><br><span class="provider-desc">Database Migration Service</span></td>
-                <td></td>
+                <td>3</td>
                 <td>13</td>
                 <td>75</td>
                 <td>640</td>
@@ -1756,7 +1756,7 @@ body {
             <tr>
                 <td>86</td>
                 <td><a href="#detail-Microsoft.AnalysisServices">Analysis Services</a><br><span class="provider-desc">Azure Analysis Services (tabular models)</span></td>
-                <td></td>
+                <td>3</td>
                 <td>6</td>
                 <td>41</td>
                 <td>840</td>
@@ -1852,7 +1852,7 @@ body {
             <tr>
                 <td>94</td>
                 <td><a href="#detail-Microsoft.DatabaseWatcher">Database Watcher</a><br><span class="provider-desc">Database performance watcher</span></td>
-                <td></td>
+                <td>3</td>
                 <td>8</td>
                 <td>59</td>
                 <td>0</td>
@@ -2632,7 +2632,7 @@ body {
             <tr>
                 <td>159</td>
                 <td><a href="#detail-Microsoft.PowerBI">Power BI</a><br><span class="provider-desc">Power BI Embedded workspace collections</span></td>
-                <td></td>
+                <td>1</td>
                 <td>6</td>
                 <td>0</td>
                 <td>0</td>
@@ -2692,7 +2692,7 @@ body {
             <tr>
                 <td>164</td>
                 <td><a href="#detail-Microsoft.AzurePlaywrightService">Azure Playwright Service</a><br><span class="provider-desc">Azure Playwright Testing service</span></td>
-                <td></td>
+                <td>3</td>
                 <td>8</td>
                 <td>0</td>
                 <td>0</td>
@@ -2860,7 +2860,7 @@ body {
             <tr>
                 <td>178</td>
                 <td><a href="#detail-Microsoft.GraphServices">Graph Services</a><br><span class="provider-desc">Microsoft Graph metered services</span></td>
-                <td></td>
+                <td>2</td>
                 <td>5</td>
                 <td>0</td>
                 <td>0</td>
@@ -2907,6 +2907,18 @@ body {
             </tr>
             <tr>
                 <td>182</td>
+                <td><a href="#detail-Microsoft.Blueprint">Blueprint</a><br><span class="provider-desc">Azure Blueprints for environment governance</span></td>
+                <td>2</td>
+                <td>8</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                <td><span class="badge badge-none">None</span></td>
+                <td>8.0</td>
+                <td><div class="bar-container"><div class="bar" style="width: 0.0%"></div></div></td>
+            </tr>
+            <tr>
+                <td>183</td>
                 <td><a href="#detail-Microsoft.DevTestLab">Dev/Test Labs</a><br><span class="provider-desc">DevTest Labs for dev/test environments</span></td>
                 <td>7</td>
                 <td>8</td>
@@ -2918,7 +2930,7 @@ body {
                 <td><div class="bar-container"><div class="bar" style="width: 0.0%"></div></div></td>
             </tr>
             <tr>
-                <td>183</td>
+                <td>184</td>
                 <td><a href="#detail-Microsoft.Quantum">Quantum</a><br><span class="provider-desc">Azure Quantum computing</span></td>
                 <td>5</td>
                 <td>7</td>
@@ -2930,7 +2942,7 @@ body {
                 <td><div class="bar-container"><div class="bar" style="width: 0.0%"></div></div></td>
             </tr>
             <tr>
-                <td>184</td>
+                <td>185</td>
                 <td><a href="#detail-Microsoft.Carbon">Carbon</a><br><span class="provider-desc">Carbon emissions reporting</span></td>
                 <td></td>
                 <td>3</td>
@@ -2942,7 +2954,19 @@ body {
                 <td><div class="bar-container"><div class="bar" style="width: 0.0%"></div></div></td>
             </tr>
             <tr>
-                <td>185</td>
+                <td>186</td>
+                <td><a href="#detail-Microsoft.HanaOnAzure">Hana On Azure</a><br><span class="provider-desc">SAP HANA on Azure instances</span></td>
+                <td>3</td>
+                <td>5</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                <td><span class="badge badge-none">None</span></td>
+                <td>5.0</td>
+                <td><div class="bar-container"><div class="bar" style="width: 0.0%"></div></div></td>
+            </tr>
+            <tr>
+                <td>187</td>
                 <td><a href="#detail-Microsoft.Sovereign">Sovereign</a></td>
                 <td>2</td>
                 <td>5</td>
@@ -2954,7 +2978,7 @@ body {
                 <td><div class="bar-container"><div class="bar" style="width: 0.0%"></div></div></td>
             </tr>
             <tr>
-                <td>186</td>
+                <td>188</td>
                 <td><a href="#detail-Microsoft.OnlineExperimentation">Online Experimentation</a></td>
                 <td></td>
                 <td>2</td>
@@ -2966,7 +2990,7 @@ body {
                 <td><div class="bar-container"><div class="bar" style="width: 0.0%"></div></div></td>
             </tr>
             <tr>
-                <td>187</td>
+                <td>189</td>
                 <td><a href="#detail-Microsoft.CostManagementExports">Cost Management Exports</a></td>
                 <td></td>
                 <td>1</td>
@@ -2978,7 +3002,7 @@ body {
                 <td><div class="bar-container"><div class="bar" style="width: 0.0%"></div></div></td>
             </tr>
             <tr>
-                <td>188</td>
+                <td>190</td>
                 <td><a href="#detail-Microsoft.Experimentation">Experimentation</a></td>
                 <td></td>
                 <td>1</td>
@@ -3006,7 +3030,7 @@ body {
 
         <p>For each provider you will find:</p>
         <ul>
-            <li><strong>Distinct Products</strong> &mdash; where a single provider namespace is an umbrella for multiple separately-marketed services (e.g.&nbsp;Cognitive Services bundles 21 distinct AI services; Network spans firewalls, load balancers, VPN gateways, DNS, and dozens more), we enumerate every product individually. 108 of the 188 providers are umbrella namespaces, collectively housing <strong>819 distinct products</strong>.</li>
+            <li><strong>Distinct Products</strong> &mdash; where a single provider namespace is an umbrella for multiple separately-marketed services (e.g.&nbsp;Cognitive Services bundles 21 distinct AI services; Network spans firewalls, load balancers, VPN gateways, DNS, and dozens more), we enumerate every product individually. 119 of the 190 providers are umbrella namespaces, collectively housing <strong>847 distinct products</strong>.</li>
             <li><strong>Resource Types</strong> &mdash; every ARM resource type the provider exposes. These are the building blocks you create, configure, and manage &mdash; from virtual machines and databases to policy assignments and diagnostic settings. Each resource type has its own lifecycle, RBAC actions, and API surface.</li>
             <li><strong>Configuration Parameters</strong> &mdash; the total number of individual settings (strings, integers, booleans, enums, nested objects) found by recursively walking the Azure OpenAPI specification for each resource type's PUT body. This is the true measure of the "knob count" &mdash; every field a practitioner could conceivably need to understand or configure.</li>
             <li><strong>SKU Variants</strong> &mdash; the number of distinct SKU/size/tier options available in <strong>eastus</strong> (Azure's most feature-complete region). SKU selection is one of the highest-impact decisions, governing performance, availability, cost, and feature set.</li>
@@ -14206,13 +14230,17 @@ body {
         <summary>
             <span class="provider-name">Data Share</span>
             <span class="provider-score">Score: 573.0</span>
-            <span class="provider-sub-count"></span>
+            <span class="provider-sub-count">3 products</span>
             <div class="bar-container summary-bar"><div class="bar" style="width: 3.2%"></div></div>
         </summary>
 
         <div class="detail-content">
             <p class="provider-desc-detail">Data Share for data collaboration</p>
             <div class="detail-stats">
+                <div class="mini-stat">
+                    <span class="mini-number">3</span>
+                    <span class="mini-label">Distinct Products</span>
+                </div>
                 <div class="mini-stat">
                     <span class="mini-number">18</span>
                     <span class="mini-label">Resource Types</span>
@@ -14235,6 +14263,12 @@ body {
                 </div>
             </div>
 
+            <h4>Distinct Products &amp; Features (3)</h4>
+            <ul class="sub-services-list">
+                <li>Accounts (data sharing accounts, identity, encryption)</li>
+                <li>Sent Shares (snapshot and in-place sharing to external tenants)</li>
+                <li>Received Shares (consumer-side mapping, triggers, acceptance)</li>
+            </ul>
             <h4>Licensing &amp; Pricing Options</h4>
             <div class="license-badges"><span class="badge badge-none">No special licensing</span></div>
 
@@ -19518,13 +19552,17 @@ body {
         <summary>
             <span class="provider-name">App Compliance Automation</span>
             <span class="provider-score">Score: 245.0</span>
-            <span class="provider-sub-count"></span>
+            <span class="provider-sub-count">2 products</span>
             <div class="bar-container summary-bar"><div class="bar" style="width: 1.4%"></div></div>
         </summary>
 
         <div class="detail-content">
             <p class="provider-desc-detail">App Compliance Automation for Microsoft 365</p>
             <div class="detail-stats">
+                <div class="mini-stat">
+                    <span class="mini-number">2</span>
+                    <span class="mini-label">Distinct Products</span>
+                </div>
                 <div class="mini-stat">
                     <span class="mini-number">15</span>
                     <span class="mini-label">Resource Types</span>
@@ -19547,6 +19585,11 @@ body {
                 </div>
             </div>
 
+            <h4>Distinct Products &amp; Features (2)</h4>
+            <ul class="sub-services-list">
+                <li>Compliance Reports (M365 certification reports, evidence collection)</li>
+                <li>Controls and Assessments (compliance control mapping, assessment status)</li>
+            </ul>
             <h4>Licensing &amp; Pricing Options</h4>
             <div class="license-badges"><span class="badge badge-none">No special licensing</span></div>
 
@@ -19658,13 +19701,17 @@ body {
         <summary>
             <span class="provider-name">Storage Mover</span>
             <span class="provider-score">Score: 239.5</span>
-            <span class="provider-sub-count"></span>
+            <span class="provider-sub-count">3 products</span>
             <div class="bar-container summary-bar"><div class="bar" style="width: 1.3%"></div></div>
         </summary>
 
         <div class="detail-content">
             <p class="provider-desc-detail">Storage Mover for data migration</p>
             <div class="detail-stats">
+                <div class="mini-stat">
+                    <span class="mini-number">3</span>
+                    <span class="mini-label">Distinct Products</span>
+                </div>
                 <div class="mini-stat">
                     <span class="mini-number">10</span>
                     <span class="mini-label">Resource Types</span>
@@ -19687,6 +19734,12 @@ body {
                 </div>
             </div>
 
+            <h4>Distinct Products &amp; Features (3)</h4>
+            <ul class="sub-services-list">
+                <li>Agents (on-premises migration agents, registration, health)</li>
+                <li>Migration Projects (source/target endpoint pairs, job definitions)</li>
+                <li>Job Runs (transfer execution, progress tracking, error handling)</li>
+            </ul>
             <h4>Licensing &amp; Pricing Options</h4>
             <div class="license-badges"><span class="badge badge-none">No special licensing</span></div>
 
@@ -19986,13 +20039,17 @@ body {
         <summary>
             <span class="provider-name">Data Migration</span>
             <span class="provider-score">Score: 227.0</span>
-            <span class="provider-sub-count"></span>
+            <span class="provider-sub-count">3 products</span>
             <div class="bar-container summary-bar"><div class="bar" style="width: 1.3%"></div></div>
         </summary>
 
         <div class="detail-content">
             <p class="provider-desc-detail">Database Migration Service</p>
             <div class="detail-stats">
+                <div class="mini-stat">
+                    <span class="mini-number">3</span>
+                    <span class="mini-label">Distinct Products</span>
+                </div>
                 <div class="mini-stat">
                     <span class="mini-number">13</span>
                     <span class="mini-label">Resource Types</span>
@@ -20015,6 +20072,12 @@ body {
                 </div>
             </div>
 
+            <h4>Distinct Products &amp; Features (3)</h4>
+            <ul class="sub-services-list">
+                <li>DMS Online Migrations (continuous replication with minimal downtime)</li>
+                <li>DMS Offline Migrations (one-time full database migration)</li>
+                <li>Migration Projects (SQL Server, PostgreSQL, MySQL, MongoDB migration projects)</li>
+            </ul>
             <h4>Licensing &amp; Pricing Options</h4>
             <div class="license-badges"><span class="badge badge-none">No special licensing</span></div>
 
@@ -22032,13 +22095,17 @@ body {
         <summary>
             <span class="provider-name">Analysis Services</span>
             <span class="provider-score">Score: 180.5</span>
-            <span class="provider-sub-count"></span>
+            <span class="provider-sub-count">3 products</span>
             <div class="bar-container summary-bar"><div class="bar" style="width: 1.0%"></div></div>
         </summary>
 
         <div class="detail-content">
             <p class="provider-desc-detail">Azure Analysis Services (tabular models)</p>
             <div class="detail-stats">
+                <div class="mini-stat">
+                    <span class="mini-number">3</span>
+                    <span class="mini-label">Distinct Products</span>
+                </div>
                 <div class="mini-stat">
                     <span class="mini-number">6</span>
                     <span class="mini-label">Resource Types</span>
@@ -22061,6 +22128,12 @@ body {
                 </div>
             </div>
 
+            <h4>Distinct Products &amp; Features (3)</h4>
+            <ul class="sub-services-list">
+                <li>Servers (tabular model hosting, S/B/D tiers, scale-out replicas)</li>
+                <li>Models (DAX queries, partitions, processing, refresh management)</li>
+                <li>Management (server firewall, diagnostics, backup/restore)</li>
+            </ul>
             <h4>Licensing &amp; Pricing Options</h4>
             <div class="license-badges"><span class="badge badge-none">No special licensing</span></div>
 
@@ -23254,13 +23327,17 @@ body {
         <summary>
             <span class="provider-name">Database Watcher</span>
             <span class="provider-score">Score: 141.0</span>
-            <span class="provider-sub-count"></span>
+            <span class="provider-sub-count">3 products</span>
             <div class="bar-container summary-bar"><div class="bar" style="width: 0.8%"></div></div>
         </summary>
 
         <div class="detail-content">
             <p class="provider-desc-detail">Database performance watcher</p>
             <div class="detail-stats">
+                <div class="mini-stat">
+                    <span class="mini-number">3</span>
+                    <span class="mini-label">Distinct Products</span>
+                </div>
                 <div class="mini-stat">
                     <span class="mini-number">8</span>
                     <span class="mini-label">Resource Types</span>
@@ -23283,6 +23360,12 @@ body {
                 </div>
             </div>
 
+            <h4>Distinct Products &amp; Features (3)</h4>
+            <ul class="sub-services-list">
+                <li>Watchers (SQL monitoring agents, target configuration, data stores)</li>
+                <li>Targets (SQL Database, Managed Instance, SQL Server on VMs)</li>
+                <li>Alerting (health alerts, performance thresholds, integration with Action Groups)</li>
+            </ul>
             <h4>Licensing &amp; Pricing Options</h4>
             <div class="license-badges"><span class="badge badge-none">No special licensing</span></div>
 
@@ -31415,13 +31498,17 @@ body {
         <summary>
             <span class="provider-name">Power BI</span>
             <span class="provider-score">Score: 23.0</span>
-            <span class="provider-sub-count"></span>
+            <span class="provider-sub-count">1 products</span>
             <div class="bar-container summary-bar"><div class="bar" style="width: 0.1%"></div></div>
         </summary>
 
         <div class="detail-content">
             <p class="provider-desc-detail">Power BI Embedded workspace collections</p>
             <div class="detail-stats">
+                <div class="mini-stat">
+                    <span class="mini-number">1</span>
+                    <span class="mini-label">Distinct Products</span>
+                </div>
                 <div class="mini-stat">
                     <span class="mini-number">6</span>
                     <span class="mini-label">Resource Types</span>
@@ -31444,6 +31531,10 @@ body {
                 </div>
             </div>
 
+            <h4>Distinct Products &amp; Features (1)</h4>
+            <ul class="sub-services-list">
+                <li>Workspace Collections (Power BI Embedded v1, report embedding, API access)</li>
+            </ul>
             <h4>Licensing &amp; Pricing Options</h4>
             <div class="license-badges"><span class="badge badge-none">No special licensing</span></div>
 
@@ -31885,13 +31976,17 @@ body {
         <summary>
             <span class="provider-name">Azure Playwright Service</span>
             <span class="provider-score">Score: 16.5</span>
-            <span class="provider-sub-count"></span>
+            <span class="provider-sub-count">3 products</span>
             <div class="bar-container summary-bar"><div class="bar" style="width: 0.1%"></div></div>
         </summary>
 
         <div class="detail-content">
             <p class="provider-desc-detail">Azure Playwright Testing service</p>
             <div class="detail-stats">
+                <div class="mini-stat">
+                    <span class="mini-number">3</span>
+                    <span class="mini-label">Distinct Products</span>
+                </div>
                 <div class="mini-stat">
                     <span class="mini-number">8</span>
                     <span class="mini-label">Resource Types</span>
@@ -31914,6 +32009,12 @@ body {
                 </div>
             </div>
 
+            <h4>Distinct Products &amp; Features (3)</h4>
+            <ul class="sub-services-list">
+                <li>Testing Service (scalable Playwright browser testing, cloud-hosted browsers)</li>
+                <li>Test Runs (test execution management, parallelization, results)</li>
+                <li>Reporting (test analytics, pass/fail dashboards, CI integration)</li>
+            </ul>
             <h4>Licensing &amp; Pricing Options</h4>
             <div class="license-badges"><span class="badge badge-none">No special licensing</span></div>
 
@@ -33297,13 +33398,17 @@ body {
         <summary>
             <span class="provider-name">Graph Services</span>
             <span class="provider-score">Score: 11.0</span>
-            <span class="provider-sub-count"></span>
+            <span class="provider-sub-count">2 products</span>
             <div class="bar-container summary-bar"><div class="bar" style="width: 0.1%"></div></div>
         </summary>
 
         <div class="detail-content">
             <p class="provider-desc-detail">Microsoft Graph metered services</p>
             <div class="detail-stats">
+                <div class="mini-stat">
+                    <span class="mini-number">2</span>
+                    <span class="mini-label">Distinct Products</span>
+                </div>
                 <div class="mini-stat">
                     <span class="mini-number">5</span>
                     <span class="mini-label">Resource Types</span>
@@ -33326,6 +33431,11 @@ body {
                 </div>
             </div>
 
+            <h4>Distinct Products &amp; Features (2)</h4>
+            <ul class="sub-services-list">
+                <li>Graph Data Connect (bulk export of M365 data to Azure storage)</li>
+                <li>Billing Meters (metered API billing for Graph workloads)</li>
+            </ul>
             <h4>Licensing &amp; Pricing Options</h4>
             <div class="license-badges"><span class="badge badge-none">No special licensing</span></div>
 
@@ -33660,6 +33770,112 @@ body {
             </table>
         </div>
     </details>
+    <details class="provider-detail" id="detail-Microsoft.Blueprint">
+        <summary>
+            <span class="provider-name">Blueprint</span>
+            <span class="provider-score">Score: 8.0</span>
+            <span class="provider-sub-count">2 products</span>
+            <div class="bar-container summary-bar"><div class="bar" style="width: 0.0%"></div></div>
+        </summary>
+
+        <div class="detail-content">
+            <p class="provider-desc-detail">Azure Blueprints for environment governance</p>
+            <div class="detail-stats">
+                <div class="mini-stat">
+                    <span class="mini-number">2</span>
+                    <span class="mini-label">Distinct Products</span>
+                </div>
+                <div class="mini-stat">
+                    <span class="mini-number">8</span>
+                    <span class="mini-label">Resource Types</span>
+                </div>
+                <div class="mini-stat">
+                    <span class="mini-number">0</span>
+                    <span class="mini-label">Config Params</span>
+                </div>
+                <div class="mini-stat">
+                    <span class="mini-number">0</span>
+                    <span class="mini-label">SKUs</span>
+                </div>
+                <div class="mini-stat">
+                    <span class="mini-number">0</span>
+                    <span class="mini-label">Operations</span>
+                </div>
+                <div class="mini-stat" style="border-color:rgba(251,146,60,0.3)">
+                    <span class="mini-number" style="color:#fb923c">14</span>
+                    <span class="mini-label">Preview APIs</span>
+                </div>
+            </div>
+
+            <h4>Distinct Products &amp; Features (2)</h4>
+            <ul class="sub-services-list">
+                <li>Definitions (blueprint templates, artifact groups, versioning)</li>
+                <li>Assignments (blueprint deployment to subscriptions, parameter binding)</li>
+            </ul>
+            <h4>Licensing &amp; Pricing Options</h4>
+            <div class="license-badges"><span class="badge badge-none">No special licensing</span></div>
+
+            <h4>Resource Types (8)</h4>
+            <div class="table-scroll">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Resource Type</th>
+                        <th>Flat Params</th>
+                        <th>Recursive Params</th>
+                        <th>Max Depth</th>
+                        <th>Writable</th>
+                        <th>Read-Only</th>
+                    </tr>
+                </thead>
+                <tbody>
+                <tr class="zero-param-row">
+                    <td>Blueprint Assignments</td>
+                    <td>0</td><td>0</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td>
+                </tr>
+                <tr class="zero-param-row">
+                    <td>Blueprint Assignments / Assignment Operations</td>
+                    <td>0</td><td>0</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td>
+                </tr>
+                <tr class="zero-param-row">
+                    <td>Blueprint Assignments / Operations</td>
+                    <td>0</td><td>0</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td>
+                </tr>
+                <tr class="zero-param-row">
+                    <td>Blueprints</td>
+                    <td>0</td><td>0</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td>
+                </tr>
+                <tr class="zero-param-row">
+                    <td>Blueprints / Artifacts</td>
+                    <td>0</td><td>0</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td>
+                </tr>
+                <tr class="zero-param-row">
+                    <td>Blueprints / Versions</td>
+                    <td>0</td><td>0</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td>
+                </tr>
+                <tr class="zero-param-row">
+                    <td>Blueprints / Versions / Artifacts</td>
+                    <td>0</td><td>0</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td>
+                </tr>
+                <tr class="zero-param-row">
+                    <td>Operations</td>
+                    <td>0</td><td>0</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td>
+                </tr>
+                </tbody>
+            </table>
+            </div>
+
+            <h4>SKU Breakdown</h4>
+            <table class="data-table sku-table">
+                <thead>
+                    <tr><th>Resource Type</th><th>SKU Count</th></tr>
+                </thead>
+                <tbody>
+<tr><td colspan="2">No SKU data available</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </details>
     <details class="provider-detail" id="detail-Microsoft.DevTestLab">
         <summary>
             <span class="provider-name">Dev/Test Labs</span>
@@ -33936,6 +34152,101 @@ body {
                 </tr>
                 <tr class="zero-param-row">
                     <td>Query Carbon Emission Data Available Date Range</td>
+                    <td>0</td><td>0</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td>
+                </tr>
+                </tbody>
+            </table>
+            </div>
+
+            <h4>SKU Breakdown</h4>
+            <table class="data-table sku-table">
+                <thead>
+                    <tr><th>Resource Type</th><th>SKU Count</th></tr>
+                </thead>
+                <tbody>
+<tr><td colspan="2">No SKU data available</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </details>
+    <details class="provider-detail" id="detail-Microsoft.HanaOnAzure">
+        <summary>
+            <span class="provider-name">Hana On Azure</span>
+            <span class="provider-score">Score: 5.0</span>
+            <span class="provider-sub-count">3 products</span>
+            <div class="bar-container summary-bar"><div class="bar" style="width: 0.0%"></div></div>
+        </summary>
+
+        <div class="detail-content">
+            <p class="provider-desc-detail">SAP HANA on Azure instances</p>
+            <div class="detail-stats">
+                <div class="mini-stat">
+                    <span class="mini-number">3</span>
+                    <span class="mini-label">Distinct Products</span>
+                </div>
+                <div class="mini-stat">
+                    <span class="mini-number">5</span>
+                    <span class="mini-label">Resource Types</span>
+                </div>
+                <div class="mini-stat">
+                    <span class="mini-number">0</span>
+                    <span class="mini-label">Config Params</span>
+                </div>
+                <div class="mini-stat">
+                    <span class="mini-number">0</span>
+                    <span class="mini-label">SKUs</span>
+                </div>
+                <div class="mini-stat">
+                    <span class="mini-number">0</span>
+                    <span class="mini-label">Operations</span>
+                </div>
+                <div class="mini-stat" style="border-color:rgba(251,146,60,0.3)">
+                    <span class="mini-number" style="color:#fb923c">5</span>
+                    <span class="mini-label">Preview APIs</span>
+                </div>
+            </div>
+
+            <h4>Distinct Products &amp; Features (3)</h4>
+            <ul class="sub-services-list">
+                <li>Large Instances (SAP HANA bare-metal servers, S/M/L SKUs)</li>
+                <li>System Replication (HSR high-availability, disaster recovery)</li>
+                <li>Storage and Snapshots (persistent storage volumes, backup snapshots)</li>
+            </ul>
+            <h4>Licensing &amp; Pricing Options</h4>
+            <div class="license-badges"><span class="badge badge-none">No special licensing</span></div>
+
+            <h4>Resource Types (5)</h4>
+            <div class="table-scroll">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Resource Type</th>
+                        <th>Flat Params</th>
+                        <th>Recursive Params</th>
+                        <th>Max Depth</th>
+                        <th>Writable</th>
+                        <th>Read-Only</th>
+                    </tr>
+                </thead>
+                <tbody>
+                <tr class="zero-param-row">
+                    <td>Hana Instances</td>
+                    <td>0</td><td>0</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td>
+                </tr>
+                <tr class="zero-param-row">
+                    <td>Locations</td>
+                    <td>0</td><td>0</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td>
+                </tr>
+                <tr class="zero-param-row">
+                    <td>Locations / Operations</td>
+                    <td>0</td><td>0</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td>
+                </tr>
+                <tr class="zero-param-row">
+                    <td>Locations / Operations Status</td>
+                    <td>0</td><td>0</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td>
+                </tr>
+                <tr class="zero-param-row">
+                    <td>Operations</td>
                     <td>0</td><td>0</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td>
                 </tr>
                 </tbody>
@@ -34279,7 +34590,7 @@ body {
             <tr><th>Provider</th><th>AHUB</th><th>Dev/Test</th><th>Reserved Instances</th><th>Savings Plans</th><th>Spot</th></tr>
         </thead>
         <tbody>
-        <tr><td>Network</td><td class="matrix-no">&mdash;</td><td class="matrix-yes">&#10003;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Web</td><td class="matrix-no">&mdash;</td><td class="matrix-yes">&#10003;</td><td class="matrix-yes">&#10003;</td><td class="matrix-yes">&#10003;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>SQL</td><td class="matrix-yes">&#10003;</td><td class="matrix-yes">&#10003;</td><td class="matrix-yes">&#10003;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Compute</td><td class="matrix-yes">&#10003;</td><td class="matrix-yes">&#10003;</td><td class="matrix-yes">&#10003;</td><td class="matrix-yes">&#10003;</td><td class="matrix-yes">&#10003;</td></tr>        <tr><td>API Management</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Cognitive Services</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-yes">&#10003;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Migrate</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Machine Learning</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-yes">&#10003;</td><td class="matrix-yes">&#10003;</td></tr>        <tr><td>Storage</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-yes">&#10003;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Logic</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Kubernetes Service (AKS)</td><td class="matrix-yes">&#10003;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-yes">&#10003;</td><td class="matrix-yes">&#10003;</td></tr>        <tr><td>Billing</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Spring Apps</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-yes">&#10003;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Azure Local</td><td class="matrix-yes">&#10003;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Provider Hub</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Synapse</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-yes">&#10003;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Network Cloud</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>App</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-yes">&#10003;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Automation</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Azure Arc Data</td><td class="matrix-yes">&#10003;</td><td class="matrix-yes">&#10003;</td><td class="matrix-yes">&#10003;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>NetApp</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-yes">&#10003;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Consumption</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Managed Network Fabric</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Kusto</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-yes">&#10003;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Log Analytics</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Device Registry</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Event Grid</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>HDInsight</td><td class="matrix-no">&mdash;</td><td class="matrix-yes">&#10003;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Azure Virtual Desktop</td><td class="matrix-yes">&#10003;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-yes">&#10003;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Microsoft Sentinel</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-yes">&#10003;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Azure Arc Servers</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Data Box Edge</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Resources</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Container Registry</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Edge</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Data Share</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>IoT Operations</td><td class="matrix-no">&mdash;</td><td class="matrix-yes">&#10003;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Container Instances</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-yes">&#10003;</td><td class="matrix-yes">&#10003;</td></tr>        <tr><td>Edge Order</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>CDN</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Lab Services</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Bot Service</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Cache</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-yes">&#10003;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Stream Analytics</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Storage Cache</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Service Bus</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Batch</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-yes">&#10003;</td></tr>        <tr><td>Workloads</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Key Vault</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Healthcare APIs</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Service Fabric</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Data Box</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>SCVMM</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Fabric</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-yes">&#10003;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Notification Hubs</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Hybrid Network</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Azure Compute Fleet</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Dev Center</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Data Factory</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-yes">&#10003;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>AVS</td><td class="matrix-yes">&#10003;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Confluent</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Kubernetes Configuration</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Recovery Services</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-yes">&#10003;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Marketplace</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Cosmos DB (DocumentDB)</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-yes">&#10003;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Power BI Dedicated</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>App Compliance Automation</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Storage Mover</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Elastic San</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Certificate Registration</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Data Migration</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Digital Twins</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>SQL Virtual Machine</td><td class="matrix-yes">&#10003;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Peering</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Datadog</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Quota</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>App Configuration</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Databricks</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-yes">&#10003;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>AD Hybrid Health Service</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Elastic</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Event Hubs</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Domain Registration</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Solutions</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Storage Sync</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Device Update</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Analysis Services</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Data Protection</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Alerts Management</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Purview</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Billing Benefits</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Service Linker</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Azure Data Transfer</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Authorization</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Database Watcher</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Relay</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Azure Stack</td><td class="matrix-no">&mdash;</td><td class="matrix-yes">&#10003;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Database for MySQL</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-yes">&#10003;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Management</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Orbital</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Managed Services</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Guest Configuration</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Chaos</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Search</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Communication</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Dashboard</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Policy Insights</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Database for PostgreSQL</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-yes">&#10003;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Off Azure</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Maintenance</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Security</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-yes">&#10003;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Standby Pool</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Subscription</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Advisor</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Storage Actions</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Bare Metal Infrastructure</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Edge Marketplace</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>API Center</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Hybrid Connectivity</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Hardware Security Modules</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Red Hat Open Shift</td><td class="matrix-yes">&#10003;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-yes">&#10003;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Help</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Maps</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Load Testing</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Health Bot</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Dev Ops Infrastructure</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Cost Management</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Database for MariaDB</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Voice Services</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Fluid Relay</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Kubernetes Runtime</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Capacity</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Attestation</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Classic Storage</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Code Signing</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Automanage</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Io T Firmware Defense</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Connected VMware vSphere</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Classic Network</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Compute Schedule</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Marketplace Ordering</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Hybrid Container Service</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Resource Graph</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Data Replication</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Extended Location</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Azure Sphere</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Connected Cache</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Resource Connector</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Resource Health</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Durable Task</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Confidential Ledger</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Network Function</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Recommendations Service</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Bing</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Io T Central</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Service Networking</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Storage Discovery</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Data Lake Store</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Bare Metal</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Power BI</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Video Indexer</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Open Energy Platform</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Health Data AI Services</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Security Detonation</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Azure Playwright Service</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Compute Limit</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Monitor</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Software Plan</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>AAD</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Devices</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Serial Console</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Azure Active Directory</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>SignalR Service</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Saa S</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>VM Image Builder</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Azure Large Instance</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Features</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Portal Services</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Graph Services</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Managed Identity</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Community</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Portal</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Dev/Test Labs</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Quantum</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Carbon</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Sovereign</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Online Experimentation</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Cost Management Exports</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Experimentation</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>
+        <tr><td>Network</td><td class="matrix-no">&mdash;</td><td class="matrix-yes">&#10003;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Web</td><td class="matrix-no">&mdash;</td><td class="matrix-yes">&#10003;</td><td class="matrix-yes">&#10003;</td><td class="matrix-yes">&#10003;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>SQL</td><td class="matrix-yes">&#10003;</td><td class="matrix-yes">&#10003;</td><td class="matrix-yes">&#10003;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Compute</td><td class="matrix-yes">&#10003;</td><td class="matrix-yes">&#10003;</td><td class="matrix-yes">&#10003;</td><td class="matrix-yes">&#10003;</td><td class="matrix-yes">&#10003;</td></tr>        <tr><td>API Management</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Cognitive Services</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-yes">&#10003;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Migrate</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Machine Learning</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-yes">&#10003;</td><td class="matrix-yes">&#10003;</td></tr>        <tr><td>Storage</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-yes">&#10003;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Logic</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Kubernetes Service (AKS)</td><td class="matrix-yes">&#10003;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-yes">&#10003;</td><td class="matrix-yes">&#10003;</td></tr>        <tr><td>Billing</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Spring Apps</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-yes">&#10003;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Azure Local</td><td class="matrix-yes">&#10003;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Provider Hub</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Synapse</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-yes">&#10003;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Network Cloud</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>App</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-yes">&#10003;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Automation</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Azure Arc Data</td><td class="matrix-yes">&#10003;</td><td class="matrix-yes">&#10003;</td><td class="matrix-yes">&#10003;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>NetApp</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-yes">&#10003;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Consumption</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Managed Network Fabric</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Kusto</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-yes">&#10003;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Log Analytics</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Device Registry</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Event Grid</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>HDInsight</td><td class="matrix-no">&mdash;</td><td class="matrix-yes">&#10003;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Azure Virtual Desktop</td><td class="matrix-yes">&#10003;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-yes">&#10003;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Microsoft Sentinel</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-yes">&#10003;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Azure Arc Servers</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Data Box Edge</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Resources</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Container Registry</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Edge</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Data Share</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>IoT Operations</td><td class="matrix-no">&mdash;</td><td class="matrix-yes">&#10003;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Container Instances</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-yes">&#10003;</td><td class="matrix-yes">&#10003;</td></tr>        <tr><td>Edge Order</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>CDN</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Lab Services</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Bot Service</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Cache</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-yes">&#10003;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Stream Analytics</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Storage Cache</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Service Bus</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Batch</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-yes">&#10003;</td></tr>        <tr><td>Workloads</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Key Vault</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Healthcare APIs</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Service Fabric</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Data Box</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>SCVMM</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Fabric</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-yes">&#10003;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Notification Hubs</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Hybrid Network</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Azure Compute Fleet</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Dev Center</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Data Factory</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-yes">&#10003;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>AVS</td><td class="matrix-yes">&#10003;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Confluent</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Kubernetes Configuration</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Recovery Services</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-yes">&#10003;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Marketplace</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Cosmos DB (DocumentDB)</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-yes">&#10003;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Power BI Dedicated</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>App Compliance Automation</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Storage Mover</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Elastic San</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Certificate Registration</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Data Migration</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Digital Twins</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>SQL Virtual Machine</td><td class="matrix-yes">&#10003;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Peering</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Datadog</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Quota</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>App Configuration</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Databricks</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-yes">&#10003;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>AD Hybrid Health Service</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Elastic</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Event Hubs</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Domain Registration</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Solutions</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Storage Sync</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Device Update</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Analysis Services</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Data Protection</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Alerts Management</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Purview</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Billing Benefits</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Service Linker</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Azure Data Transfer</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Authorization</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Database Watcher</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Relay</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Azure Stack</td><td class="matrix-no">&mdash;</td><td class="matrix-yes">&#10003;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Database for MySQL</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-yes">&#10003;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Management</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Orbital</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Managed Services</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Guest Configuration</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Chaos</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Search</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Communication</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Dashboard</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Policy Insights</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Database for PostgreSQL</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-yes">&#10003;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Off Azure</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Maintenance</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Security</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-yes">&#10003;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Standby Pool</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Subscription</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Advisor</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Storage Actions</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Bare Metal Infrastructure</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Edge Marketplace</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>API Center</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Hybrid Connectivity</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Hardware Security Modules</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Red Hat Open Shift</td><td class="matrix-yes">&#10003;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-yes">&#10003;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Help</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Maps</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Load Testing</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Health Bot</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Dev Ops Infrastructure</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Cost Management</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Database for MariaDB</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Voice Services</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Fluid Relay</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Kubernetes Runtime</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Capacity</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Attestation</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Classic Storage</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Code Signing</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Automanage</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Io T Firmware Defense</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Connected VMware vSphere</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Classic Network</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Compute Schedule</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Marketplace Ordering</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Hybrid Container Service</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Resource Graph</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Data Replication</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Extended Location</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Azure Sphere</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Connected Cache</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Resource Connector</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Resource Health</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Durable Task</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Confidential Ledger</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Network Function</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Recommendations Service</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Bing</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Io T Central</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Service Networking</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Storage Discovery</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Data Lake Store</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Bare Metal</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Power BI</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Video Indexer</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Open Energy Platform</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Health Data AI Services</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Security Detonation</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Azure Playwright Service</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Compute Limit</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Monitor</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Software Plan</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>AAD</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Devices</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Serial Console</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Azure Active Directory</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>SignalR Service</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Saa S</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>VM Image Builder</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Azure Large Instance</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Features</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Portal Services</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Graph Services</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Managed Identity</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Community</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Portal</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Blueprint</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Dev/Test Labs</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Quantum</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Carbon</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Hana On Azure</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Sovereign</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Online Experimentation</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Cost Management Exports</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>        <tr><td>Experimentation</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td><td class="matrix-no">&mdash;</td></tr>
         </tbody>
     </table>
     </div>
@@ -34288,7 +34599,7 @@ body {
 <!-- Footer -->
 <footer class="footer">
     <p><a href="graph.html" style="color:var(--neon-cyan);text-decoration:none;text-shadow:0 0 8px rgba(34,211,238,0.3)">View Resource Relationship Graph &rarr;</a></p>
-    <p>Generated on 2026-02-28 22:06 UTC | Mode: full | Data sources: Azure CLI, Azure REST API, Azure OpenAPI specs (GitHub)</p>
+    <p>Generated on 2026-03-01 00:09 UTC | Mode: full | Data sources: Azure CLI, Azure REST API, Azure OpenAPI specs (GitHub)</p>
     <p>Azure Complexity Measurement Tool &mdash; quantifying the knowledge burden of Azure administration</p>
 </footer>
 
