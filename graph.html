@@ -163,9 +163,14 @@ body {
     font-family: inherit;
     transition: all 0.2s;
 }
+a.btn { text-decoration: none; }
 .btn:hover {
     background: rgba(59,158,255,0.25);
     box-shadow: 0 0 12px rgba(34,211,238,0.2);
+}
+a.btn[href*="sponsors"]:hover {
+    background: rgba(219,39,119,0.25);
+    box-shadow: 0 0 12px rgba(219,39,119,0.3);
 }
 .btn.active {
     background: rgba(34,211,238,0.2);
@@ -788,6 +793,8 @@ canvas:active { cursor: grabbing; }
         <div class="subtitle">Force-directed visualisation of service and sub-service interdependencies</div>
     </div>
     <div class="header-right">
+        <a class="btn" href="https://github.com/xeeva/Azure-Scale/issues" target="_blank" rel="noopener">Report Issue</a>
+        <a class="btn" href="https://github.com/sponsors/xeeva" target="_blank" rel="noopener" style="border-color:rgba(219,39,119,0.4);color:#db2777;background:rgba(219,39,119,0.1)">&#9829; Sponsor</a>
         <button class="btn" id="btn-reset">Reset View</button>
         <button class="btn" id="btn-freeze">Freeze</button>
         <button class="btn" id="btn-help">?</button>
