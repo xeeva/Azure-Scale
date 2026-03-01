@@ -611,7 +611,6 @@ canvas:active { cursor: grabbing; }
     letter-spacing: 0.04em;
     white-space: nowrap;
 }
-canvas { top: 96px !important; }
 .header + .stats-bar + canvas { top: 96px; }
 
 
@@ -796,16 +795,6 @@ canvas { top: 96px !important; }
     </div>
 </div>
 
-<div class="help-overlay" id="help-overlay">
-<div class="help-modal">
-    <button class="help-close" id="help-close">&times;</button>
-    <h2>Azure Complexity Graph — Help</h2>
-    <div class="help-section"><h3>Navigation</h3><ul><li><strong>Pan</strong> &mdash; click + drag on empty space</li><li><strong>Zoom</strong> &mdash; scroll wheel or pinch</li><li><strong>Select</strong> &mdash; click a node to view details</li><li><strong>Drag</strong> &mdash; click + drag a node to reposition</li><li><strong>Double-click</strong> &mdash; centre + zoom on node</li></ul></div>
-    <div class="help-section"><h3>Keyboard Shortcuts</h3><ul><li><span class="help-kbd">Esc</span> close detail panel / deselect</li><li><span class="help-kbd">R</span> reset view</li><li><span class="help-kbd">F</span> freeze / unfreeze simulation</li><li><span class="help-kbd">?</span> toggle this help</li></ul></div>
-    <div class="help-section"><h3>Sidebar Filters</h3><ul><li><strong>Search</strong> &mdash; find by name</li><li><strong>Categories</strong> &mdash; toggle groups</li><li><strong>Sub-Services</strong> &mdash; show/hide</li><li><strong>Portal Preview</strong> &mdash; highlight services marked Preview in Azure Portal</li><li><strong>Regions</strong> &mdash; filter by availability</li></ul></div>
-    <div id="help-v2-features"><hr class="help-divider"><div class="help-section"><h3>Enhanced Features</h3><ul><li><strong>Stats Bar</strong> &mdash; live counts</li><li><strong>Heatmap</strong> &mdash; colour by metric</li><li><strong>Human Cost</strong> &mdash; time-to-learn overlay</li><li><strong>Licensing</strong> &mdash; filter by tier</li><li><strong>Centrality</strong> &mdash; most connected</li><li><strong>Comparison</strong> &mdash; side-by-side</li></ul></div></div>
-</div>
-</div>
 <div class="stats-bar" id="stats-bar">
     <div class="stat-item"><span class="stat-value" id="stat-providers">—</span><span class="stat-label">Providers</span></div>
     <div class="stat-item"><span class="stat-value" id="stat-params">—</span><span class="stat-label">Config Params</span></div>
@@ -823,6 +812,17 @@ canvas { top: 96px !important; }
         <button class="detail-close" id="detail-close">&times;</button>
     </div>
     <div class="detail-body" id="detail-body"></div>
+</div>
+
+<div class="help-overlay" id="help-overlay">
+<div class="help-modal">
+    <button class="help-close" id="help-close">&times;</button>
+    <h2>Azure Complexity Graph — Help</h2>
+    <div class="help-section"><h3>Navigation</h3><ul><li><strong>Pan</strong> &mdash; click + drag on empty space</li><li><strong>Zoom</strong> &mdash; scroll wheel or pinch</li><li><strong>Select</strong> &mdash; click a node to view details</li><li><strong>Drag</strong> &mdash; click + drag a node to reposition</li><li><strong>Double-click</strong> &mdash; centre + zoom on node</li></ul></div>
+    <div class="help-section"><h3>Keyboard Shortcuts</h3><ul><li><span class="help-kbd">Esc</span> close detail panel / deselect</li><li><span class="help-kbd">R</span> reset view</li><li><span class="help-kbd">F</span> freeze / unfreeze simulation</li><li><span class="help-kbd">?</span> toggle this help</li></ul></div>
+    <div class="help-section"><h3>Sidebar Filters</h3><ul><li><strong>Search</strong> &mdash; find by name</li><li><strong>Categories</strong> &mdash; toggle groups</li><li><strong>Sub-Services</strong> &mdash; show/hide</li><li><strong>Portal Preview</strong> &mdash; highlight services marked Preview in Azure Portal</li><li><strong>Regions</strong> &mdash; filter by availability</li></ul></div>
+    <div id="help-v2-features"><hr class="help-divider"><div class="help-section"><h3>Enhanced Features</h3><ul><li><strong>Stats Bar</strong> &mdash; live counts</li><li><strong>Heatmap</strong> &mdash; colour by metric</li><li><strong>Human Cost</strong> &mdash; time-to-learn overlay</li><li><strong>Licensing</strong> &mdash; filter by tier</li><li><strong>Centrality</strong> &mdash; most connected</li><li><strong>Comparison</strong> &mdash; side-by-side</li></ul></div></div>
+</div>
 </div>
 
 <script>
@@ -4403,6 +4403,7 @@ function openDetail(node) {
     tooltip.style.display = 'none';
     resize();
     populateDetail(node);
+    if (typeof updateStatsBar === 'function') updateStatsBar();
 }
 
 function closeDetail() {
@@ -4410,6 +4411,7 @@ function closeDetail() {
     detailOpen = false;
     detailPanel.classList.remove('open');
     resize();
+    if (typeof updateStatsBar === 'function') updateStatsBar();
 }
 
 document.getElementById('detail-close').addEventListener('click', closeDetail);
@@ -4684,12 +4686,30 @@ function _animateValue(el, key, target) {
 }
 
 function updateStatsBar() {
-    const active = parentNodes.filter(n => n.active);
-    _animateValue(_statsEls.providers, 'providers', active.length);
-    _animateValue(_statsEls.params, 'params', active.reduce((s,n) => s + n.params, 0));
-    _animateValue(_statsEls.skus, 'skus', active.reduce((s,n) => s + n.skus, 0));
-    _animateValue(_statsEls.ops, 'ops', active.reduce((s,n) => s + n.operations, 0));
-    _animateValue(_statsEls.humancost, 'humancost', active.reduce((s,n) => s + n.params, 0));
+    if (selected && selected.isParent) {
+        const n = selected;
+        _animateValue(_statsEls.providers, 'providers', 1);
+        _animateValue(_statsEls.params, 'params', n.params);
+        _animateValue(_statsEls.skus, 'skus', n.skus);
+        _animateValue(_statsEls.ops, 'ops', n.operations);
+        _animateValue(_statsEls.humancost, 'humancost', n.params);
+    } else if (selected && !selected.isParent) {
+        const parent = parentMap[selected.parentId];
+        if (parent) {
+            _animateValue(_statsEls.providers, 'providers', 1);
+            _animateValue(_statsEls.params, 'params', parent.params);
+            _animateValue(_statsEls.skus, 'skus', parent.skus);
+            _animateValue(_statsEls.ops, 'ops', parent.operations);
+            _animateValue(_statsEls.humancost, 'humancost', parent.params);
+        }
+    } else {
+        const active = parentNodes.filter(n => n.active);
+        _animateValue(_statsEls.providers, 'providers', active.length);
+        _animateValue(_statsEls.params, 'params', active.reduce((s,n) => s + n.params, 0));
+        _animateValue(_statsEls.skus, 'skus', active.reduce((s,n) => s + n.skus, 0));
+        _animateValue(_statsEls.ops, 'ops', active.reduce((s,n) => s + n.operations, 0));
+        _animateValue(_statsEls.humancost, 'humancost', active.reduce((s,n) => s + n.params, 0));
+    }
 }
 
 // Patch updateVisibility to also update stats
