@@ -3345,6 +3345,36 @@ const subNodes = SUB_DEFS.map(([id, label, parentId, preview]) => {
 
 const allNodes = [...parentNodes, ...subNodes];
 
+// Pre-compute children lookup (avoids repeated filter on hot paths)
+const _childrenOf = new Map();
+parentNodes.forEach(p => { _childrenOf.set(p.id, []); });
+subNodes.forEach(s => { const arr = _childrenOf.get(s.parentId); if (arr) arr.push(s); });
+
+// Pre-compute label font sizes (avoids measureText in draw loop)
+(function() {
+    const offCtx = document.createElement('canvas').getContext('2d');
+    allNodes.forEach(n => {
+        const lines = n.label.split('\n');
+        let fs = n.isParent
+            ? Math.max(10, Math.min(17, n.radius * 0.40))
+            : Math.max(6, Math.min(11, n.radius * 0.60));
+        for (let a = 0; a < 10; a++) {
+            offCtx.font = `700 ${fs}px 'Segoe UI', sans-serif`;
+            const lh = fs * 1.25, th = lines.length * lh, sy = -(th / 2) + lh / 2;
+            let fits = true;
+            for (let li = 0; li < lines.length; li++) {
+                const ly = sy + li * lh, r2 = n.radius - 3;
+                const ch = Math.sqrt(Math.max(0, r2 * r2 - ly * ly));
+                if (offCtx.measureText(lines[li]).width > ch * 2 - 4) { fits = false; break; }
+            }
+            if (fits) break;
+            fs -= 0.5;
+        }
+        n._labelLines = lines;
+        n._labelFontSize = fs;
+    });
+})();
+
 // Build edge data objects
 const parentEdgeData = PARENT_EDGES
     .map(([s,t,str]) => ({source: nodeMap[s], target: nodeMap[t], strength: str, type:'parent'}))
@@ -3467,6 +3497,7 @@ function updateVisibility() {
     allNodes.forEach(n => { n.active = isNodeActive(n); });
     updateCatCount();
     updateRegionCount();
+    markDirty();
 }
 
 // Sub-service toggle
@@ -3475,6 +3506,7 @@ document.getElementById('toggle-row-subs').addEventListener('click', () => {
     const sw = document.getElementById('toggle-subs');
     sw.classList.toggle('on', showSubs);
     if (showSubs) repositionSubs();
+    markDirty();
 });
 
 // Portal Preview toggle
@@ -3491,6 +3523,7 @@ document.getElementById('toggle-row-preview').addEventListener('click', () => {
         : '';
     // Re-populate detail panel if open
     if (selectedNode) populateDetail(selectedNode);
+    markDirty();
 });
 
 
@@ -3640,6 +3673,8 @@ const panelWidth = 280;
 
 let W, H, dpr;
 let frozen = false;
+let _dirty = true;
+function markDirty() { _dirty = true; }
 let dragging = null;
 let hovering = null;
 let selected = null;   // click-pinned node
@@ -3651,7 +3686,7 @@ let mouseDownPos = null; // for click vs drag detection
 const CLICK_THRESHOLD = 5;
 
 function resize() {
-    dpr = window.devicePixelRatio || 1;
+    dpr = Math.min(window.devicePixelRatio || 1, 1.25);
     const detailW = detailOpen ? 340 : 0;
     W = window.innerWidth - panelWidth - detailW;
     H = window.innerHeight;
@@ -3662,6 +3697,7 @@ function resize() {
     canvas.style.right = detailW + 'px';
     document.querySelector('.header').style.right = detailW + 'px';
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    markDirty();
 }
 window.addEventListener('resize', resize);
 resize();
@@ -3676,7 +3712,7 @@ parentNodes.forEach((n, i) => {
 
 function repositionSubs() {
     parentNodes.forEach(parent => {
-        const children = subNodes.filter(s => s.parentId === parent.id);
+        const children = _childrenOf.get(parent.id) || [];
         children.forEach((child, i) => {
             const angle = (i / children.length) * Math.PI * 2;
             const dist = parent.radius + 40 + Math.random() * 20;
@@ -3721,11 +3757,9 @@ function _gridRepulse(active, dt) {
 
     _grid = _buildGrid(active);
 
-    // Track processed pairs to avoid double-counting
-    const processed = new Set();
-
     for (let i = 0; i < active.length; i++) {
         const a = active[i];
+        const aIdx = a._idx;
         const cx = (a.x / cs) | 0;
         const cy = (a.y / cs) | 0;
 
@@ -3737,11 +3771,7 @@ function _gridRepulse(active, dt) {
                 if (!bucket) continue;
                 for (let k = 0; k < bucket.length; k++) {
                     const b = bucket[k];
-                    if (b === a) continue;
-                    // Deduplicate: only process each pair once (lower index first)
-                    const pairKey = a._idx < b._idx ? a._idx * 65536 + b._idx : b._idx * 65536 + a._idx;
-                    if (processed.has(pairKey)) continue;
-                    processed.add(pairKey);
+                    if (b._idx <= aIdx) continue; // dedup: only process pairs where b > a
 
                     const ddx = b.x - a.x, ddy = b.y - a.y;
                     const dist2 = ddx * ddx + ddy * ddy;
@@ -3849,6 +3879,10 @@ function draw() {
     ctx.translate(panX, panY);
     ctx.scale(zoom, zoom);
 
+    // Viewport culling bounds (world coords with margin for glow/badges)
+    const vpL = -panX / zoom - 80, vpR = vpL + W / zoom + 160;
+    const vpT = -panY / zoom - 80, vpB = vpT + H / zoom + 160;
+
     const visNodes = showSubs ? allNodes : parentNodes;
     const anyFilter = visNodes.some(n => !n.active);
     const highlight = hovering || selected;
@@ -3858,7 +3892,7 @@ function draw() {
     let clusterSet = null;
     if (selected && showSubs) {
         const selParent = selected.isParent ? selected : parentMap[selected.parentId];
-        clusterSet = new Set(subNodes.filter(s => s.parentId === selParent.id));
+        clusterSet = new Set(_childrenOf.get(selParent.id) || []);
         clusterSet.add(selParent);
         // Add specific sub-nodes from other providers that cross-edge to this parent
         crossEdgeData.forEach(e => {
@@ -3875,6 +3909,8 @@ function draw() {
     // Cross edges (behind everything)
     if (showSubs) {
         crossEdgeData.forEach(e => {
+            if (Math.max(e.source.x, e.target.x) < vpL || Math.min(e.source.x, e.target.x) > vpR ||
+                Math.max(e.source.y, e.target.y) < vpT || Math.min(e.source.y, e.target.y) > vpB) return;
             const bothActive = e.source.active && e.target.active;
             const isHov = highlight && (e.source === highlight || e.target === highlight);
             const isRelated = clusterSet && (clusterSet.has(e.source) || clusterSet.has(e.target));
@@ -3904,6 +3940,8 @@ function draw() {
     // Child edges (parent ↔ sub-service)
     if (showSubs) {
         childEdgeData.forEach(e => {
+            if (Math.max(e.source.x, e.target.x) < vpL || Math.min(e.source.x, e.target.x) > vpR ||
+                Math.max(e.source.y, e.target.y) < vpT || Math.min(e.source.y, e.target.y) > vpB) return;
             const bothActive = e.source.active && e.target.active;
             const isHov = highlight && (e.source === highlight || e.target === highlight);
             const isCluster = clusterSet && clusterSet.has(e.source) && clusterSet.has(e.target);
@@ -3932,6 +3970,8 @@ function draw() {
 
     // Parent-parent edges
     parentEdgeData.forEach(e => {
+        if (Math.max(e.source.x, e.target.x) < vpL || Math.min(e.source.x, e.target.x) > vpR ||
+            Math.max(e.source.y, e.target.y) < vpT || Math.min(e.source.y, e.target.y) > vpB) return;
         const bothActive = e.source.active && e.target.active;
         const isHov = highlight && (e.source === highlight || e.target === highlight);
         const filterDim = anyFilter && !bothActive;
@@ -3962,6 +4002,8 @@ function draw() {
     });
 
     sorted.forEach(n => {
+        if (n.x + n.radius < vpL || n.x - n.radius > vpR ||
+            n.y + n.radius < vpT || n.y - n.radius > vpB) return;
         const cat = CATEGORIES[n.category];
         const isHighlighted = n === highlight;
         const isConnected = connSet && connSet.has(n);
@@ -4002,7 +4044,7 @@ function draw() {
         // Glow for highlighted active nodes
         if (isHighlighted && !filterInactive) {
             ctx.save();
-            ctx.shadowColor = cat.glow; ctx.shadowBlur = n.isParent ? 35 : 20;
+            ctx.shadowColor = cat.glow; ctx.shadowBlur = n.isParent ? 18 : 12;
             ctx.beginPath(); ctx.arc(n.x, n.y, n.radius + 4, 0, Math.PI * 2);
             ctx.fillStyle = 'rgba(0,0,0,0)'; ctx.fill();
             ctx.restore();
@@ -4054,28 +4096,8 @@ function draw() {
         ctx.beginPath(); ctx.arc(n.x, n.y, n.radius - 2, 0, Math.PI * 2); ctx.clip();
         ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
 
-        const lines = n.label.split('\n');
-        let fontSize = n.isParent
-            ? Math.max(10, Math.min(17, n.radius * 0.40))
-            : Math.max(6, Math.min(11, n.radius * 0.60));
-
-        const calcFit = (fs) => {
-            ctx.font = `700 ${fs}px 'Segoe UI', sans-serif`;
-            const lh = fs * 1.25;
-            const th = lines.length * lh;
-            const sy = -(th / 2) + lh / 2;
-            for (let li = 0; li < lines.length; li++) {
-                const ly = sy + li * lh;
-                const r2 = n.radius - 3;
-                const chordHalf = Math.sqrt(Math.max(0, r2 * r2 - ly * ly));
-                if (ctx.measureText(lines[li]).width > chordHalf * 2 - 4) return false;
-            }
-            return true;
-        };
-        for (let attempt = 0; attempt < 10; attempt++) {
-            if (calcFit(fontSize)) break;
-            fontSize -= 0.5;
-        }
+        const lines = n._labelLines;
+        const fontSize = n._labelFontSize;
         ctx.font = `700 ${fontSize}px 'Segoe UI', sans-serif`;
 
         const lh = fontSize * 1.25;
@@ -4083,7 +4105,7 @@ function draw() {
         const sy = n.y - (th / 2) + lh / 2;
         const textAlpha = filterInactive ? 0.1 : (highlightDimmed ? 0.12 : nodeOpacity);
 
-        if (textAlpha > 0.15) {
+        if (textAlpha > 0.15 && (isHighlighted || isSelected)) {
             ctx.strokeStyle = `rgba(0,0,0,${textAlpha * 0.9})`;
             ctx.lineWidth = n.isParent ? 3.5 : 2.5;
             ctx.lineJoin = 'round';
@@ -4095,7 +4117,7 @@ function draw() {
         ctx.fillStyle = `rgba(255,255,255,${textAlpha})`;
         if (isHighlighted && !filterInactive) {
             ctx.shadowColor = 'rgba(255,255,255,0.5)';
-            ctx.shadowBlur = 8;
+            ctx.shadowBlur = 4;
         }
         lines.forEach((line, li) => {
             ctx.fillText(line, n.x, sy + li * lh);
@@ -4179,6 +4201,7 @@ function animateViewTo(targetPanX, targetPanY, targetZoom, duration = 400) {
         panX = startPanX + (targetPanX - startPanX) * ease;
         panY = startPanY + (targetPanY - startPanY) * ease;
         zoom = startZoom + (targetZoom - startZoom) * ease;
+        markDirty();
         if (t < 1) requestAnimationFrame(step);
         else _animating = false;
     }
@@ -4186,7 +4209,7 @@ function animateViewTo(targetPanX, targetPanY, targetZoom, duration = 400) {
 }
 
 function zoomToCluster(parentNode) {
-    const children = subNodes.filter(s => s.parentId === parentNode.id);
+    const children = _childrenOf.get(parentNode.id) || [];
     const nodes = [parentNode, ...children];
     if (nodes.length === 0) return;
 
@@ -4287,11 +4310,13 @@ canvas.addEventListener('mousemove', e => {
     if (dragging) {
         const {x, y} = screenToWorld(e.clientX, e.clientY);
         dragging.x = x; dragging.y = y; dragging.vx = 0; dragging.vy = 0;
+        markDirty();
         // Wake physics when dragging
         if (frozen) { frozen = false; _settledFrames = 0; document.getElementById('btn-freeze').textContent = 'Freeze'; }
     } else if (isPanning) {
         panX += e.clientX - lastMouse.x; panY += e.clientY - lastMouse.y;
         lastMouse = {x: e.clientX, y: e.clientY};
+        markDirty();
     } else {
         // Throttle hover detection to every 33ms (~30Hz)
         const now = performance.now();
@@ -4299,7 +4324,7 @@ canvas.addEventListener('mousemove', e => {
         _lastMoveTime = now;
 
         const n = nodeAt(e.clientX, e.clientY);
-        hovering = n;
+        if (hovering !== n) { hovering = n; markDirty(); }
         canvas.style.cursor = n ? 'pointer' : 'grab';
         // Tooltip on hover (brief summary)
         if (n) {
@@ -4308,7 +4333,7 @@ canvas.addEventListener('mousemove', e => {
             if (n.isParent) {
                 html += `<div class="tt-type">${n.desc}</div>`;
                 html += `<div class="tt-stat"><span class="tt-label">Config Params</span><span class="tt-value">${n.params.toLocaleString()}</span></div>`;
-                html += `<div class="tt-stat"><span class="tt-label">Sub-Services</span><span class="tt-value">${subNodes.filter(s=>s.parentId===n.id).length}</span></div>`;
+                html += `<div class="tt-stat"><span class="tt-label">Sub-Services</span><span class="tt-value">${(_childrenOf.get(n.id) || []).length}</span></div>`;
             } else {
                 html += `<div class="tt-type">Part of <strong style="color:var(--neon-blue)">${parentMap[n.parentId].label.replace(/\n/g,' ')}</strong></div>`;
             }
@@ -4348,10 +4373,12 @@ canvas.addEventListener('mouseup', e => {
     }
     dragging = null; isPanning = false; mouseDownPos = null;
     canvas.style.cursor = 'grab';
+    markDirty();
 });
 canvas.addEventListener('mouseleave', () => {
     dragging = null; isPanning = false; hovering = null;
     mouseDownPos = null; tooltip.style.display = 'none';
+    markDirty();
 });
 canvas.addEventListener('wheel', e => {
     e.preventDefault();
@@ -4361,6 +4388,7 @@ canvas.addEventListener('wheel', e => {
     zoom = Math.max(0.15, Math.min(8, zoom * f));
     panX = e.clientX - panelWidth - wx * zoom;
     panY = e.clientY - wy * zoom;
+    markDirty();
 }, { passive: false });
 
 document.getElementById('btn-reset').addEventListener('click', () => {
@@ -4374,12 +4402,14 @@ document.getElementById('btn-reset').addEventListener('click', () => {
     repositionSubs();
     frozen = false;
     document.getElementById('btn-freeze').textContent = 'Freeze';
+    markDirty();
 });
 
 document.getElementById('btn-freeze').addEventListener('click', () => {
     frozen = !frozen;
     _settledFrames = 0; // reset auto-settle counter
     document.getElementById('btn-freeze').textContent = frozen ? 'Unfreeze' : 'Freeze';
+    markDirty();
 });
 
 // ============================================================
@@ -4449,7 +4479,7 @@ function populateDetail(n) {
         }
         html += `</div></div>`;
         // Sub-services
-        const children = subNodes.filter(s => s.parentId === n.id);
+        const children = _childrenOf.get(n.id) || [];
         html += `<div class="detail-section"><h3>Sub-Services <span class="ds-count">${children.length}</span></h3>`;
         children.forEach(child => {
             const cname = child.label.replace(/\n/g, ' ');
@@ -4515,7 +4545,7 @@ function populateDetail(n) {
             html += `</div>`;
         }
         // Siblings
-        const siblings = subNodes.filter(s => s.parentId === n.parentId && s !== n);
+        const siblings = (_childrenOf.get(n.parentId) || []).filter(s => s !== n);
         if (siblings.length > 0) {
             html += `<div class="detail-section"><h3>Sibling Services <span class="ds-count">${siblings.length}</span></h3>`;
             siblings.forEach(sib => {
@@ -4595,16 +4625,19 @@ canvas.addEventListener('touchmove', e => {
         panX = mid.x - panelWidth - wx2 * zoom;
         panY = mid.y - wy2 * zoom;
         _lastTouch = mid;
+        markDirty();
     } else if (t.length === 1) {
         const cx = t[0].clientX, cy = t[0].clientY;
         if (_touchDragging) {
             const {x, y} = screenToWorld(cx, cy);
             _touchDragging.x = x; _touchDragging.y = y;
             _touchDragging.vx = 0; _touchDragging.vy = 0;
+            markDirty();
             if (frozen) { frozen = false; _settledFrames = 0; document.getElementById('btn-freeze').textContent = 'Freeze'; }
         } else if (_touchPanning) {
             panX += cx - _lastTouch.x;
             panY += cy - _lastTouch.y;
+            markDirty();
         }
         _lastTouch = { x: cx, y: cy };
     }
@@ -4642,8 +4675,11 @@ let _frameCount = 0;
 function loop() {
     _frameCount++;
     const doPhysics = !_isLargeGraph || _frameCount % 2 === 0;
-    if (doPhysics) simulate();
-    draw();
+    if (doPhysics) {
+        simulate();
+        if (!frozen) _dirty = true;
+    }
+    if (_dirty) { _dirty = false; draw(); }
     requestAnimationFrame(loop);
 }
 loop();
