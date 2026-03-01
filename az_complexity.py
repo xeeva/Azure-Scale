@@ -4741,8 +4741,8 @@ class GraphHtmlGenerator:
             css_block = "\n/* === ENHANCED FEATURES CSS === */\n" + "\n".join(extra_css)
             html = html.replace("</style>", css_block + "\n</style>", 1)
 
-        # Inject stats bar HTML after the header div
-        if extra_header_html:
+        # Inject stats bar HTML after the header div (idempotent)
+        if extra_header_html and 'id="stats-bar"' not in html:
             header_block = "\n".join(extra_header_html)
             html = html.replace(
                 '</div>\n\n<canvas id="graph">',
@@ -4750,8 +4750,14 @@ class GraphHtmlGenerator:
                 1
             )
 
-        # Inject sidebar HTML sections (order: after_categories first, then before_display)
+        # Inject sidebar HTML sections (idempotent — check for marker IDs)
         for placement, block in sorted(extra_sidebar_html, key=lambda x: 0 if x[0] == "after_categories" else 1):
+            # Skip if this block's content is already in the HTML
+            if 'id="' in block:
+                # Extract first id from block to use as idempotency check
+                id_match = re.search(r'id="([^"]+)"', block)
+                if id_match and f'id="{id_match.group(1)}"' in html:
+                    continue
             if placement == "after_categories":
                 html = html.replace(
                     '\n        <div class="filter-group">\n            <h3>Display</h3>',
@@ -4765,8 +4771,8 @@ class GraphHtmlGenerator:
                     1
                 )
 
-        # Inject human cost toggle into Display section (before region filters)
-        if "humancost" in self.features:
+        # Inject human cost toggle into Display section (idempotent)
+        if "humancost" in self.features and 'id="toggle-row-humancost"' not in html:
             html = html.replace(
                 '            <div class="sub-stats" id="preview-stats"></div>\n        </div>\n\n        <div class="filter-group" id="region-filters">',
                 '            <div class="sub-stats" id="preview-stats"></div>\n\n            <div class="toggle-row" id="toggle-row-humancost" style="margin-top:0.3rem">\n                <span class="toggle-label">Human Cost</span>\n                <div class="toggle-switch" id="toggle-humancost"></div>\n            </div>\n            <div class="sub-stats" id="humancost-stats"></div>\n        </div>\n\n        <div class="filter-group" id="region-filters">',
