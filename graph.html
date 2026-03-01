@@ -4105,9 +4105,9 @@ function draw() {
         const sy = n.y - (th / 2) + lh / 2;
         const textAlpha = filterInactive ? 0.1 : (highlightDimmed ? 0.12 : nodeOpacity);
 
-        if (textAlpha > 0.15 && (isHighlighted || isSelected)) {
+        if (textAlpha > 0.05) {
             ctx.strokeStyle = `rgba(0,0,0,${textAlpha * 0.9})`;
-            ctx.lineWidth = n.isParent ? 3.5 : 2.5;
+            ctx.lineWidth = n.isParent ? 2 : 1.5;
             ctx.lineJoin = 'round';
             lines.forEach((line, li) => {
                 ctx.strokeText(line, n.x, sy + li * lh);
