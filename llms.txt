@@ -6,7 +6,7 @@ Azure Scale quantifies the knowledge burden that Microsoft Azure places on the t
 
 ## Key Statistics
 
-- 299 resource providers analysed
+- 298 resource providers analysed
 - 4,228 resource types
 - 43,589 recursive configuration parameters
 - 46,809 SKU variants
@@ -20,7 +20,11 @@ Data is collected from a live Azure subscription using `az provider list`, `az p
 ## Pages
 
 - [Complexity Report](https://xeeva.github.io/Azure-Scale/azure_complexity_report.html): Full breakdown of every resource provider — resource types, configuration parameters, SKU variants, API operations, and licensing options.
-- [Relationship Graph](https://xeeva.github.io/Azure-Scale/graph.html): Interactive force-directed graph mapping all 299 providers, their sub-services, and cross-provider relationships.
+- [Relationship Graph](https://xeeva.github.io/Azure-Scale/graph.html): Interactive force-directed graph mapping all 298 providers, their sub-services, and cross-provider relationships.
+
+## Optional
+
+- [Full LLM Context](https://xeeva.github.io/Azure-Scale/llms-full.txt): Extended version with provider rankings, category breakdowns, licensing matrix, and top provider details.
 
 ## Links
 

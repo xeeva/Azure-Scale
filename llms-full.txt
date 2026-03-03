@@ -1,0 +1,140 @@
+# Azure Scale
+
+> Measuring the total configuration surface area of Microsoft Azure.
+
+Azure Scale quantifies the knowledge burden that Microsoft Azure places on the teams responsible for managing it. The project crawls every Azure resource provider, enumerates every resource type, counts every configuration parameter, SKU variant, API operation, and licensing option — then presents the results in human terms.
+
+## Key Statistics
+
+- 298 resource providers analysed (AWSConnector excluded as non-Azure-native)
+- 4,228 resource types
+- 43,589 recursive configuration parameters
+- 46,809 SKU variants
+- 16,090 API operations
+- Estimated human cost: 3,632 hours (1.7 years) at 5 minutes per parameter
+
+## Methodology
+
+Data is collected from a live Azure subscription using the Azure CLI:
+
+1. **Resource providers**: `az provider list` and `az provider show` enumerate every registered provider and its resource types with API versions.
+2. **API operations**: `az rest` calls the provider operations endpoint using each provider's own stable API version.
+3. **SKU variants**: Compute SKUs via the Compute Resource SKUs API; other providers use curated SKU counts.
+4. **Configuration parameters**: OpenAPI specifications are parsed from a local sparse checkout of the [azure-rest-api-specs](https://github.com/Azure/azure-rest-api-specs) repository. Each resource type's PUT definition is recursively walked to count every configurable property (PATCH definitions are excluded as they have fewer properties).
+5. **Licensing options**: A curated map of commercial models (Reserved Instances, AHUB, Savings Plans, Spot, Dev/Test) per provider.
+
+**Scoring formula**: `Score = (params × 2) + (resourceTypes × 1) + (skus × 0.05) + (operations × 0.5)`
+
+All API responses are cached locally (SHA256-keyed file cache) for reproducibility.
+
+## Top 30 Providers by Complexity
+
+| Rank | Provider | Params | Resource Types | SKUs | Operations | Score |
+|------|----------|--------|----------------|------|------------|-------|
+| 1 | Network | 8,549 | 194 | 0 | 1,084 | 17,837.0 |
+| 2 | Web | 2,746 | 78 | 24 | 666 | 5,914.4 |
+| 3 | Sql | 1,458 | 249 | 0 | 606 | 3,477.0 |
+| 4 | Compute | 1,407 | 80 | 1,225 | 301 | 3,182.0 |
+| 5 | ApiManagement | 1,288 | 15 | 3,440 | 417 | 3,143.5 |
+| 6 | CognitiveServices | 431 | 36 | 5,490 | 1,924 | 2,412.0 |
+| 7 | Migrate | 1,105 | 19 | 0 | 318 | 2,388.0 |
+| 8 | MachineLearningServices | 875 | 69 | 215 | 324 | 2,008.5 |
+| 9 | Storage | 483 | 26 | 7,370 | 240 | 1,852.0 |
+| 10 | Logic | 858 | 12 | 0 | 126 | 1,791.0 |
+| 11 | ContainerService | 536 | 29 | 0 | 1,178 | 1,699.0 |
+| 12 | Billing | 643 | 194 | 0 | 236 | 1,598.0 |
+| 13 | AppPlatform | 733 | 24 | 1,005 | 0 | 1,593.5 |
+| 14 | AzureStackHCI | 719 | 43 | 0 | 142 | 1,555.0 |
+| 15 | ProviderHub | 750 | 12 | 0 | 0 | 1,512.0 |
+| 16 | Synapse | 594 | 25 | 1,130 | 192 | 1,425.0 |
+| 17 | NetworkCloud | 614 | 23 | 0 | 155 | 1,328.5 |
+| 18 | App | 522 | 45 | 0 | 207 | 1,195.5 |
+| 19 | Automation | 511 | 18 | 0 | 167 | 1,123.5 |
+| 20 | AzureArcData | 535 | 13 | 0 | 0 | 1,092.0 |
+| 21 | NetApp | 490 | 30 | 0 | 49 | 1,037.5 |
+| 22 | Consumption | 486 | 25 | 0 | 28 | 1,011.0 |
+| 23 | ManagedNetworkFabric | 375 | 28 | 0 | 379 | 967.5 |
+| 24 | Kusto | 0 | 15 | 8,715 | 88 | 933.5 |
+| 25 | OperationalInsights | 203 | 26 | 0 | 980 | 922.0 |
+| 26 | DeviceRegistry | 451 | 19 | 0 | 0 | 921.0 |
+| 27 | EventGrid | 418 | 27 | 0 | 0 | 863.0 |
+| 28 | HDInsight | 394 | 13 | 0 | 0 | 804.0 |
+| 29 | DesktopVirtualization | 380 | 16 | 0 | 0 | 782.0 |
+| 30 | SecurityInsights | 291 | 43 | 0 | 151 | 703.5 |
+
+## Categories
+
+Azure's 298 resource providers are grouped into 12 functional categories:
+
+- **Compute** (14 providers): Compute, ContainerService, DesktopVirtualization, ContainerInstance, Batch, ServiceFabric, AzureFleet, StandbyPool, BareMetalInfrastructure, RedHatOpenShift, ComputeSchedule, BareMetal, VirtualMachineImages, AzureLargeInstance
+- **Networking** (13 providers): Network, NetworkCloud, ManagedNetworkFabric, Cdn, HybridNetwork, Peering, Communication, VoiceServices, ClassicNetwork, ConnectedCache, NetworkFunction, ServiceNetworking, SignalRService
+- **Data & Storage** (36 providers): Sql, Storage, Synapse, NetApp, Kusto, HDInsight, DataBoxEdge, DataShare, Cache, StreamAnalytics, StorageCache, DataBox, Fabric, DataFactory, DocumentDB, StorageMover, ElasticSan, DataMigration, SqlVirtualMachine, Databricks, StorageSync, AnalysisServices, Purview, AzureDataTransfer, DatabaseWatcher, DBforMySQL, DBforPostgreSQL, StorageActions, DBforMariaDB, ClassicStorage, DataReplication, ConfidentialLedger, StorageDiscovery, DataLakeStore, PowerBI, HealthDataAIServices
+- **Security & Identity** (14 providers): SecurityInsights, KeyVault, Authorization, GuestConfiguration, Security, HardwareSecurityModules, Attestation, CodeSigning, AzureSphere, SecurityDetonation, AAD, AzureActiveDirectory, ManagedIdentity, Sovereign
+- **App Platform** (13 providers): Web, ApiManagement, Logic, AppPlatform, App, ContainerRegistry, HealthcareApis, Marketplace, AppComplianceAutomation, CertificateRegistration, DomainRegistration, ApiCenter, Maps
+- **Monitoring & Management** (9 providers): OperationalInsights, Datadog, Elastic, AlertsManagement, Chaos, Dashboard, LoadTestService, ResourceHealth, Monitor
+- **AI & ML** (8 providers): CognitiveServices, MachineLearningServices, BotService, Search, HealthBot, VideoIndexer, AzurePlaywrightService, Quantum
+- **Integration** (8 providers): EventGrid, ServiceBus, NotificationHubs, Confluent, EventHub, Relay, FluidRelay, DurableTask
+- **IoT & Edge** (8 providers): DeviceRegistry, IoTOperations, DigitalTwins, DeviceUpdate, Orbital, IoTFirmwareDefense, IoTCentral, Devices
+- **Developer Tools** (7 providers): Automation, LabServices, DevCenter, AppConfiguration, DevOpsInfrastructure, Blueprint, DevTestLab
+- **Hybrid & Arc** (17 providers): AzureStackHCI, AzureArcData, HybridCompute, Workloads, SCVMM, AVS, KubernetesConfiguration, ADHybridHealthService, AzureStack, OffAzure, HybridConnectivity, KubernetesRuntime, ConnectedVMwarevSphere, HybridContainerService, ExtendedLocation, ResourceConnector, HanaOnAzure
+- **Governance** (43 providers): Migrate, Billing, ProviderHub, Consumption, Resources, Edge, EdgeOrder, RecoveryServices, PowerBIDedicated, Quota, Solutions, DataProtection, BillingBenefits, ServiceLinker, Management, ManagedServices, PolicyInsights, Maintenance, Subscription, Advisor, EdgeMarketplace, Help, CostManagement, Capacity, Automanage, MarketplaceOrdering, ResourceGraph, RecommendationsService, Bing, OpenEnergyPlatform, ComputeLimit, SoftwarePlan, SerialConsole, SaaS, Features, PortalServices, GraphServices, Community, Portal, Carbon, OnlineExperimentation, CostManagementExports, Experimentation
+
+Note: The graph visualization covers 190 providers with the richest data; the remaining 108 are smaller providers with minimal configuration surface area.
+
+## Licensing Matrix
+
+Commercial licensing models available per provider:
+
+- **Reserved Instances** (19 providers): Web, Sql, Compute, CognitiveServices, Storage, Synapse, AzureArcData, NetApp, Kusto, SecurityInsights, Cache, Fabric, DataFactory, RecoveryServices, DocumentDB, Databricks, DBforMySQL, DBforPostgreSQL, Security
+- **Savings Plans** (9 providers): Web, Compute, MachineLearningServices, ContainerService, AppPlatform, App, DesktopVirtualization, ContainerInstance, RedHatOpenShift
+- **AHUB (Azure Hybrid Benefit)** (9 providers): Sql, Compute, ContainerService, AzureStackHCI, AzureArcData, DesktopVirtualization, AVS, SqlVirtualMachine, RedHatOpenShift
+- **Dev/Test** (8 providers): Network, Web, Sql, Compute, AzureArcData, HDInsight, IoTOperations, AzureStack
+- **Spot** (5 providers): Compute, MachineLearningServices, ContainerService, ContainerInstance, Batch
+
+## Cross-Provider Dependencies
+
+The top relationships by coupling strength (1.0 = strongest):
+
+- Compute ↔ Network (0.9)
+- AzureFleet ↔ Compute (0.9)
+- SecurityInsights ↔ OperationalInsights (0.9)
+- Monitor ↔ OperationalInsights (0.9)
+- AzureActiveDirectory ↔ AAD (0.9)
+- StorageActions ↔ Storage (0.9)
+- StorageSync ↔ Storage (0.9)
+- CostManagementExports ↔ CostManagement (0.9)
+- ContainerService ↔ Network (0.8)
+- ContainerService ↔ ContainerRegistry (0.8)
+- Synapse ↔ Storage (0.8)
+- Authorization ↔ PolicyInsights (0.8)
+- ExtendedLocation ↔ ResourceConnector (0.8)
+- AlertsManagement ↔ Monitor (0.8)
+- DeviceUpdate ↔ Devices (0.8)
+- VirtualMachineImages ↔ Compute (0.8)
+- StandbyPool ↔ Compute (0.8)
+- ComputeSchedule ↔ Compute (0.8)
+- VideoIndexer ↔ CognitiveServices (0.8)
+- CertificateRegistration ↔ Web (0.8)
+- ClassicNetwork ↔ Network (0.8)
+- HardwareSecurityModules ↔ KeyVault (0.8)
+- ClassicStorage ↔ Storage (0.8)
+- DataBox ↔ Storage (0.8)
+- ResourceGraph ↔ Resources (0.8)
+- StorageCache ↔ Storage (0.8)
+- StorageDiscovery ↔ Storage (0.8)
+- StorageMover ↔ Storage (0.8)
+- OffAzure ↔ Migrate (0.8)
+- BillingBenefits ↔ Billing (0.8)
+- ServiceNetworking ↔ Network (0.8)
+
+## Pages
+
+- [Complexity Report](https://xeeva.github.io/Azure-Scale/azure_complexity_report.html): Full breakdown of every resource provider — resource types, configuration parameters, SKU variants, API operations, and licensing options.
+- [Relationship Graph](https://xeeva.github.io/Azure-Scale/graph.html): Interactive force-directed graph mapping all 298 providers, their sub-services, and cross-provider relationships.
+- [Concise LLM Summary](https://xeeva.github.io/Azure-Scale/llms.txt): Shorter version of this document for quick consumption.
+
+## Links
+
+- Source code: https://github.com/xeeva/Azure-Scale
+- Issues: https://github.com/xeeva/Azure-Scale/issues
+- Sponsor: https://github.com/sponsors/xeeva

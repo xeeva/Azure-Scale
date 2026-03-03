@@ -1,4 +1,6 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://xeeva.github.io/Azure-Scale/llms.txt
+# LLM-optimized content — see https://llmstxt.org
+# /llms.txt       — concise project summary
+# /llms-full.txt  — detailed data & provider rankings
